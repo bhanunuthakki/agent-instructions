@@ -1,0 +1,39 @@
+#!/bin/sh
+# Shared pre-commit hook — blocks credential leaks.
+# Enforces AGENTS.md Universal Safety Rules 1 & 3 deterministically (not "the model remembers").
+# Installed per-repo via: git config core.hooksPath C:/Users/Bhanu/.gemini/githooks  (done by sync_agent_stubs.py)
+# Bypass a confirmed false positive with: git commit --no-verify
+
+fail=0
+
+# 1. Block credential FILES from being committed (added/copied/modified), excluding *.example/*.sample/*.template.
+cred_files=$(git diff --cached --name-only --diff-filter=ACM \
+  | grep -iE '(^|/)(\.env|credentials.*\.json|token.*\.json|.*secret.*|.*\.(pem|key|p12|pfx|keystore))$' \
+  | grep -ivE '\.(example|sample|template)(\.|$)|\.env\.(example|sample|template)' \
+  || true)
+if [ -n "$cred_files" ]; then
+  echo "BLOCKED (pre-commit): credential file(s) staged:" >&2
+  echo "$cred_files" | sed 's/^/  - /' >&2
+  fail=1
+fi
+
+# 2. Scan ADDED diff lines for an inline secret: a credential param assigned a QUOTED
+#    literal of >=8 chars. Requiring the quoted value avoids flagging type annotations
+#    (password: str) and env lookups (api_key = os.getenv("X")). Placeholders excluded.
+secret_hits=$(git diff --cached --no-color -U0 \
+  | grep -E '^\+' | grep -vE '^\+\+\+' \
+  | grep -iE '(api[_-]?key|access[_-]?token|auth[_-]?token|client[_-]?secret|password|[^a-z]secret)["'"'"' ]*[:=][[:space:]]*["'"'"'][^"'"'"']{8,}["'"'"']' \
+  | grep -ivE 'example|placeholder|changeme|your[_-]|xxxx|dummy|redacted|<[^>]+>' \
+  || true)
+if [ -n "$secret_hits" ]; then
+  echo "BLOCKED (pre-commit): possible inline secret in staged diff:" >&2
+  echo "$secret_hits" | head -20 | sed 's/^/  /' >&2
+  fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo "" >&2
+  echo "If genuinely safe, re-run with --no-verify after confirming." >&2
+  exit 1
+fi
+exit 0

@@ -1,0 +1,19 @@
+# Allowlist: this repo tracks the agent-instruction system only.
+# Everything else in ~/.gemini (runtime state, OAuth creds, browser profiles,
+# tool homes, scratch projects) must never be committed.
+/*
+!/.gitignore
+!/AGENTS.md
+!/CLAUDE.md
+!/GEMINI.md
+!/AGENTS_GUIDE.md
+!/AGENT_SYSTEM_ADVERSARIAL_REVIEW_2026-07-21.md
+!/procedures/
+!/snippets/
+!/githooks/
+
+# Caches inside tracked dirs
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
