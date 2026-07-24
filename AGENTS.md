@@ -68,10 +68,6 @@ Apply to Python, TypeScript, Go, etc.
 - Fail loudly with clear exceptions.
 - Direct attribute access over defensive fallbacks.
 
-### Type & Classification Discipline
-- ❌ `def resolve(data: dict[str, Any]) -> dict[str, Any]` → ✅ `def resolve(data: TicketInput) -> TicketResolution` with Pydantic models.
-- ❌ `if "password" in subject.lower(): category = ...` → ✅ structured outputs, enums, model-driven classification.
-
 ## Architectural Constraints — Deep Modules
 
 **Principle.** Depth = functionality ÷ interface complexity. Prefer few large modules whose interface is dramatically simpler than their implementation. Reject classitis. (Ousterhout, *A Philosophy of Software Design*.)

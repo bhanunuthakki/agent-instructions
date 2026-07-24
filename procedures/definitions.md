@@ -9,12 +9,10 @@ Maintain a `DEFINITIONS.md` at the repo root that fixes the canonical terminolog
 
 ## Workflow when invoked
 
-1. **Scan** the codebase for recurring domain nouns and verbs — entity names, state-machine labels, lifecycle terms, units of measurement, table/column names, type names. Use Grep/Glob; for typed languages, prioritize exported types and public function names.
-2. **Group** synonyms and near-synonyms. Flag conflicts: two terms for the same thing (need canonical choice), one term for two different things (need disambiguation).
-3. **Propose** the canonical term for each cluster. Name the alternatives being subsumed and where they currently appear.
-4. **Get user confirmation** on each canonical choice and on conflict resolutions before writing the file. Use the Grill-Me approach — propose with tradeoff, don't ask blank.
-5. **Write/update `DEFINITIONS.md`** in the format below.
-6. **Propose** a rename PR for code that drifts from the canonical names. Do NOT execute renames without separate user approval — list them, count occurrences, and wait.
+1. **Survey and propose.** Scan the codebase for recurring domain terms (exported types, public functions, tables, state labels), cluster synonyms and conflicts — two terms for one thing, one term for two things — and propose the canonical term for each cluster, naming the alternatives subsumed and where they appear. Grill-Me style: propose with tradeoffs, don't ask blank.
+2. **Get user confirmation** on each canonical choice and on conflict resolutions before writing the file.
+3. **Write/update `DEFINITIONS.md`** in the format below.
+4. **Propose** a rename PR for code that drifts from the canonical names. Do NOT execute renames without separate user approval — list them, count occurrences, and wait.
 
 ## File format
 
