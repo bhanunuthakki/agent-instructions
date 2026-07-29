@@ -154,6 +154,23 @@ def test_artifacts_only_mode_skips_project_wiring() -> None:
     assert not s.includes_project_wiring(["sync_agent_stubs.py", "--artifacts-only"])
 
 
+def test_generated_project_wrappers_are_import_only() -> None:
+    assert s.claude_stub("AGENTS.md") == "# Claude Code\n\n@./AGENTS.md\n"
+    assert s.GEMINI_STUB == "# Gemini\n\n@./AGENTS.md\n"
+
+
+def test_legacy_generated_wrapper_is_refreshable(tmp_path: Path) -> None:
+    wrapper = tmp_path / "CLAUDE.md"
+    wrapper.write_text(
+        "# Claude Code\n\n@./AGENTS.md\n\n"
+        "Claude Code: this imports the repo rulebook.\n",
+        encoding="utf-8",
+    )
+    assert s.generated_wrapper_needs_update(
+        wrapper, s.claude_stub("AGENTS.md")
+    )
+
+
 # ----- Inverted graph: procedures/ is canonical; Claude artifacts are generated FROM it -----
 
 
@@ -218,6 +235,63 @@ def test_codex_skill_artifacts_are_identity_copies_of_procedures() -> None:
         assert arts[target] == ref.read_text(encoding="utf-8", errors="replace")
 
 
+def test_progressive_disclosure_skills_are_generated_for_both_runtimes() -> None:
+    names = {
+        "agent-operations",
+        "code-change",
+        "context-engineering",
+        "external-practice",
+    }
+    assert names <= set(s.OUR_SKILLS)
+    claude = s.build_claude_artifacts()
+    codex = s.build_codex_skill_artifacts()
+    for name in names:
+        source = s.PROCEDURES_DIR / f"{name}.md"
+        assert source.exists()
+        assert s.SKILLS_DIR / name / "SKILL.md" in claude
+        assert s.CODEX_SKILLS_DIR / name / "SKILL.md" in codex
+
+
+def test_codex_gets_harden_as_a_skill_without_duplicating_claude_command() -> None:
+    source = s.PROCEDURES_DIR / "harden.md"
+    codex_target = s.CODEX_SKILLS_DIR / "harden" / "SKILL.md"
+    assert codex_target in s.build_codex_skill_artifacts()
+    assert s.SKILLS_DIR / "harden" / "SKILL.md" not in s.build_claude_artifacts()
+    assert s.COMMANDS_DIR / "harden.md" in s.build_claude_artifacts()
+    assert s.build_codex_skill_artifacts()[codex_target] == source.read_text(
+        encoding="utf-8", errors="replace"
+    )
+
+
+def test_llm_ops_details_are_progressively_disclosed() -> None:
+    main = (s.PROCEDURES_DIR / "llm-ops.md").read_text(encoding="utf-8")
+    for name in ("CONTRACTS.md", "EVALS.md", "TRANSPORTS.md"):
+        source = s.PROCEDURES_DIR / f"llm-ops.{name}"
+        assert source.exists()
+        assert f"[llm-ops.{name}](llm-ops.{name})" in main
+        assert s.SKILLS_DIR / "llm-ops" / name in s.build_claude_artifacts()
+        assert s.CODEX_SKILLS_DIR / "llm-ops" / name in s.build_codex_skill_artifacts()
+
+
+def test_prefixed_reference_links_resolve_in_generated_skills() -> None:
+    references = {
+        "agent-operations": ["agent-operations.SCHEDULING.md"],
+        "code-change": ["code-change.FRONTEND.md", "code-change.REVIEW.md"],
+        "context-engineering": ["context-engineering.REFERENCE.md"],
+        "llm-ops": [
+            "llm-ops.CONTRACTS.md",
+            "llm-ops.EVALS.md",
+            "llm-ops.TRANSPORTS.md",
+        ],
+    }
+    claude = s.build_claude_artifacts()
+    codex = s.build_codex_skill_artifacts()
+    for skill, names in references.items():
+        for name in names:
+            assert s.SKILLS_DIR / skill / name in claude
+            assert s.CODEX_SKILLS_DIR / skill / name in codex
+
+
 def test_live_tree_has_no_artifact_or_doc_path_drift() -> None:
     """After a sync the generated Claude tree matches procedures/, and no rulebook doc names the
     hooks dir with a stale leading dot. These are the guards the pre-push --check relies on."""
@@ -253,3 +327,9 @@ def test_gemini_triggers_row_per_procedure_pointing_at_procedures() -> None:
     assert (
         "harden" in table and "procedures/agents/" in table
     )  # the fleet pointer surfaces
+
+
+def test_gemini_trigger_table_is_a_compact_registry() -> None:
+    table = s.build_gemini_triggers()
+    assert "frontmatter 'use when'" not in table
+    assert "Trigger" in table and "Procedure" in table

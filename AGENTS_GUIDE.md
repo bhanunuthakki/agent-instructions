@@ -16,14 +16,18 @@ You rarely touch any of this. It just shapes how the agent behaves.
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**11 skills** — say the trigger, the agent runs the procedure.
+**15 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
-| **definitions** | Build, refresh, or enforce the project's ubiquitous-language vocabulary file (DEFINITIONS.md). |
+| **agent-operations** | Coordinate subagents, shared worktrees, model tiers, or scheduled LLM work. |
+| **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
+| **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
+| **definitions** | Build, refresh, or enforce the project’s canonical domain vocabulary in DEFINITIONS.md. |
 | **explain-change** | After an LLM writes or edits code, explain the change in plain language for a non-expert reviewer — what changed, what could break, and how to confir… |
-| **grill-me** | Force the Grill-Me requirements-gathering protocol on the current task. |
-| **llm-ops** | Govern an LLM-backed feature so no call is a black box — one entry point, a purpose-keyed model picker, schema-validated output, per-call cost/latenc… |
+| **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
+| **grill-me** | Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. |
+| **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
 | **log-redaction** | Design guidance for keeping secrets out of logs and exception output (AGENTS.md Universal Safety Rule 4). |
 | **model-frontier** | Pick an LLM against the dated cross-provider cost/performance frontier instead of from memory. |
 | **scaffold-auth** | Generate secure-by-default authentication for a web app — the generative counterpart to the sec-authz audit gate. |
@@ -90,9 +94,9 @@ Domain-expert "auditors" that grade a project from idea (L0) to commercial relea
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**13 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates the 11 Claude and Codex skills, the `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**24 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 15 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`definitions.md`, `explain-change.md`, `grill-me.md`, `harden.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`
+`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook

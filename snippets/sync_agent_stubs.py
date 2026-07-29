@@ -47,6 +47,10 @@ AGENTS_MD = Path(r"C:\Users\Bhanu\.gemini\AGENTS.md")
 GEMINI_MD = Path(r"C:\Users\Bhanu\.gemini\GEMINI.md")
 CLAUDE_MD = Path(r"C:\Users\Bhanu\.gemini\CLAUDE.md")
 OUR_SKILLS = [
+    "agent-operations",
+    "code-change",
+    "context-engineering",
+    "external-practice",
     "grill-me",
     "definitions",
     "llm-ops",
@@ -59,6 +63,7 @@ OUR_SKILLS = [
     "scaffold-secrets",
     "scaffold-deploy",
 ]
+CODEX_ONLY_SKILLS = ["harden"]
 
 # The human-facing system map. Its inventory tables (skills/commands/agents/procedures/projects)
 # are regenerated from the filesystem between these markers so the counts can never silently drift;
@@ -96,21 +101,11 @@ def rel_codex(p: Path) -> str:
 
 
 def claude_stub(rulebook_name: str) -> str:
-    return (
-        "# Claude Code\n\n"
-        f"@./{rulebook_name}\n\n"
-        "Claude Code: this imports the repo rulebook. Machine/global specifics come from the "
-        r"root C:\Users\Bhanu\.gemini\CLAUDE.md found up the tree."
-        "\n"
-    )
+    return f"# Claude Code\n\n@./{rulebook_name}\n"
 
 
 GEMINI_STUB = (
-    "# Gemini\n\n"
-    "@./AGENTS.md\n\n"
-    "Global rules + the Gemini skill-mimic fallback come from the root "
-    r"C:\Users\Bhanu\.gemini\GEMINI.md via hierarchical merge."
-    "\n"
+    "# Gemini\n\n@./AGENTS.md\n"
 )
 
 
@@ -120,6 +115,15 @@ def looks_generated(path: Path) -> bool:
         return True
     text = path.read_text(encoding="utf-8", errors="replace")
     return "@./AGENTS.md" in text or "@./GEMINI.md" in text or len(text.strip()) < 120
+
+
+def generated_wrapper_needs_update(path: Path, expected: str) -> bool:
+    """True when a missing or generator-owned wrapper differs from the compact canonical stub."""
+    if not path.exists():
+        return True
+    return looks_generated(path) and _norm(
+        path.read_text(encoding="utf-8", errors="replace")
+    ) != _norm(expected)
 
 
 def project_dirs() -> list[Path]:
@@ -140,30 +144,19 @@ def ensure_wrappers(proj: Path, dry: bool) -> list[str]:
     rulebook = "AGENTS.md"
 
     claude_path = proj / "CLAUDE.md"
-    if looks_generated(claude_path) and not (
-        claude_path.exists()
-        and claude_path.read_text(encoding="utf-8", errors="replace").strip()
-    ):
-        actions.append(f"write {claude_path.name} (-> {rulebook})")
+    expected_claude = claude_stub(rulebook)
+    if generated_wrapper_needs_update(claude_path, expected_claude):
+        actions.append(f"write {claude_path.name} (-> {rulebook}, import-only)")
         if not dry:
-            claude_path.write_bytes(
-                claude_stub(rulebook).encode("utf-8")
-            )  # LF, no CRLF translation
+            claude_path.write_bytes(expected_claude.encode("utf-8"))
 
-    # Only add a GEMINI.md wrapper when the rulebook is AGENTS.md (don't clobber a real project GEMINI.md).
+    # Only manage a GEMINI.md wrapper when the rulebook is AGENTS.md.
     if rulebook == "AGENTS.md":
         gemini_path = proj / "GEMINI.md"
-        already_imports = (
-            gemini_path.exists()
-            and "@./AGENTS.md"
-            in gemini_path.read_text(encoding="utf-8", errors="replace")
-        )
-        if not already_imports and looks_generated(gemini_path):
-            actions.append(f"write {gemini_path.name} (-> AGENTS.md)")
+        if generated_wrapper_needs_update(gemini_path, GEMINI_STUB):
+            actions.append(f"write {gemini_path.name} (-> AGENTS.md, import-only)")
             if not dry:
-                gemini_path.write_bytes(
-                    GEMINI_STUB.encode("utf-8")
-                )  # LF, no CRLF translation
+                gemini_path.write_bytes(GEMINI_STUB.encode("utf-8"))
     return actions
 
 
@@ -242,9 +235,9 @@ def build_claude_artifacts() -> dict[Path, str]:
             sib_name = sib.name[
                 len(name) + 1 :
             ]  # strip the "<name>." prefix -> REFERENCE.md
-            out[SKILLS_DIR / name / sib_name] = sib.read_text(
-                encoding="utf-8", errors="replace"
-            )
+            content = sib.read_text(encoding="utf-8", errors="replace")
+            out[SKILLS_DIR / name / sib_name] = content
+            out[SKILLS_DIR / name / sib.name] = content
 
     # Command: procedures/harden.md -> commands/harden.md
     harden = PROCEDURES_DIR / "harden.md"
@@ -263,7 +256,7 @@ def build_claude_artifacts() -> dict[Path, str]:
 def build_codex_skill_artifacts() -> dict[Path, str]:
     """Pure: canonical procedures mapped to Codex's native personal skill directory."""
     out: dict[Path, str] = {}
-    for name in OUR_SKILLS:
+    for name in [*OUR_SKILLS, *CODEX_ONLY_SKILLS]:
         proc = PROCEDURES_DIR / f"{name}.md"
         if not proc.exists():
             continue
@@ -272,9 +265,9 @@ def build_codex_skill_artifacts() -> dict[Path, str]:
         )
         for sibling in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
             sibling_name = sibling.name[len(name) + 1 :]
-            out[CODEX_SKILLS_DIR / name / sibling_name] = sibling.read_text(
-                encoding="utf-8", errors="replace"
-            )
+            content = sibling.read_text(encoding="utf-8", errors="replace")
+            out[CODEX_SKILLS_DIR / name / sibling_name] = content
+            out[CODEX_SKILLS_DIR / name / sibling.name] = content
     return out
 
 
@@ -395,31 +388,24 @@ def _md_table(header: tuple[str, str], rows: list[tuple[str, str]]) -> str:
 
 
 def build_gemini_triggers() -> str:
-    """Pure: the GEMINI.md skill-mimic trigger table, derived from the canonical procedures/. Gemini
-    has no skill auto-loader, so this maps each procedure to a trigger cue (its frontmatter
-    description) + the file to read. Self-maintaining: add a skill, the row appears on the next sync."""
+    """Pure: compact Gemini procedure registry derived from canonical procedures/.
+
+    Trigger descriptions already live in frontmatter. Repeating them in always-loaded GEMINI.md
+    wastes context and can drift, so this table is navigation only.
+    """
     entries = [(n, PROCEDURES_DIR / f"{n}.md") for n in sorted(OUR_SKILLS)]
     entries.append(("harden", PROCEDURES_DIR / "harden.md"))
     rows: list[tuple[str, str]] = []
     for name, p in entries:
         if not p.exists():
             continue
-        desc = parse_frontmatter(p.read_text(encoding="utf-8", errors="replace")).get(
-            "description", ""
-        )
         target = f"`procedures/{name}.md`"
         if name == "model-frontier":
             target += " (+ `model-frontier.REFERENCE.md`)"
         if name == "harden":
             target += " (+ `procedures/agents/`)"
-        rows.append((f"**{name}** — {first_sentence(desc)}", target))
-    return _md_table(
-        (
-            "Trigger (say the name, or its frontmatter 'use when')",
-            "Read this first, then act on it",
-        ),
-        rows,
-    )
+        rows.append((f"**{name}**", target))
+    return _md_table(("Trigger", "Procedure"), rows)
 
 
 def materialize_gemini_triggers(dry: bool) -> list[str]:
@@ -473,7 +459,9 @@ def build_guide_sections() -> dict[str, str]:
         )
         skill_rows.append((f"**{name}**", first_sentence(desc)))
     skills = (
-        f"**{len(skill_rows)} skills** — say the trigger, the agent runs the procedure.\n\n"
+        f"**{len(skill_rows)} shared skills** — say the trigger, the agent runs the procedure. "
+        f"Codex also exposes `harden` as a native skill; Claude exposes the same procedure as "
+        f"`/harden`.\n\n"
         + _md_table(("Skill", "What it does"), skill_rows)
     )
 
@@ -517,8 +505,9 @@ def build_guide_sections() -> dict[str, str]:
     procedures = (
         f"**{len(proc_files)} files** in `procedures/` (+ **{len(agent_files)} fleet criteria** "
         f"in `procedures/agents/`) — the **canonical, tool-neutral source**. "
-        f"`sync_agent_stubs.py` generates the {len(OUR_SKILLS)} Claude and Codex skills, "
-        f"the `/harden` command, and the agent fleet FROM these, so every runtime reads the same "
+        f"`sync_agent_stubs.py` generates {len(OUR_SKILLS)} shared Claude and Codex skills, "
+        f"Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, "
+        f"so every runtime reads the same "
         f"markdown Claude runs:\n\n" + ", ".join(f"`{f}`" for f in proc_files)
     )
 

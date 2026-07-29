@@ -1,48 +1,36 @@
 ---
 name: definitions
-description: Build, refresh, or enforce the project's ubiquitous-language vocabulary file (DEFINITIONS.md). Use when the user types "/definitions", asks to "define terms", "build a glossary", "create a vocabulary file", "standardize the terminology", or when conflicting domain terminology appears in the codebase. Also use to propose canonicalization renames when synonyms are detected.
+description: Build, refresh, or enforce the project’s canonical domain vocabulary in DEFINITIONS.md. Use for `/definitions`, glossary or terminology requests, conflicting domain names, ambiguous state labels, or a new concept that needs a stable code and data name.
 ---
 
-# Definitions Protocol
-
-Maintain a `DEFINITIONS.md` at the repo root that fixes the canonical terminology for the project. All code, comments, commits, PRs, and conversation must use these terms verbatim. The point is to prevent semantic drift, eliminate verbose paraphrasing, and make the codebase self-consistent.
-
-## Workflow when invoked
-
-1. **Survey and propose.** Scan the codebase for recurring domain terms (exported types, public functions, tables, state labels), cluster synonyms and conflicts — two terms for one thing, one term for two things — and propose the canonical term for each cluster, naming the alternatives subsumed and where they appear. Grill-Me style: propose with tradeoffs, don't ask blank.
-2. **Get user confirmation** on each canonical choice and on conflict resolutions before writing the file.
-3. **Write/update `DEFINITIONS.md`** in the format below.
-4. **Propose** a rename PR for code that drifts from the canonical names. Do NOT execute renames without separate user approval — list them, count occurrences, and wait.
-
-## File format
-
-```markdown
 # Definitions
 
-Canonical terminology for this project. Use these terms verbatim in code (variables, functions, types, columns), comments, commit messages, and PR descriptions. New domain terms must be added here before being used.
+Use one canonical term for each domain concept at code, schema, API, and decision boundaries. Ordinary explanatory prose may be natural; the invariant is that identifiers and domain claims do not blur distinct concepts or multiply synonyms.
 
-## <Term>
+## Workflow
 
-**Definition.** <one sentence — what it is>
-**Lives in.** <modules / tables / types currently using it>
-**Not to be confused with.** <near-synonyms or sibling terms, and how they differ>
-**Subsumes.** <alternative spellings or synonyms previously used; if any>
+1. Scan exported types, public interfaces, tables, state labels, user-visible copy, and existing `DEFINITIONS.md`.
+2. Group true synonyms and flag one term used for several concepts.
+3. Propose a canonical term for each consequential cluster, naming the current alternatives, locations, and migration tradeoff.
+4. Get owner confirmation before changing a public or persisted name.
+5. Add or update the definition. Keep code renames as a separately approved change with an occurrence inventory and migration plan.
 
-## <Next term>
-...
+## Entry shape
+
+```markdown
+## <Canonical Term>
+
+**Definition.** <what it means>
+**Lives in.** <modules, schemas, tables, or UI>
+**Not to be confused with.** <nearby concepts and the boundary>
+**Subsumes.** <retired synonyms, if any>
 ```
 
-## Discipline (always-on, not just when invoked)
+Omit a field only when it adds no information. A definition that merely repeats the term is not useful.
 
-- Never coin a new synonym in a response, variable name, commit, or PR description. If a concept doesn't have a defined term yet, propose adding it to `DEFINITIONS.md` before using it.
-- Variables, functions, types, columns, and labels use the canonical term verbatim — no abbreviations or paraphrases.
-- If reading code surfaces a recurring domain term not yet in `DEFINITIONS.md`, flag it to the user as a candidate addition.
-- When two terms in `DEFINITIONS.md` start to look like they overlap, surface the ambiguity rather than silently choosing one.
+## Decision rules
 
-## Anti-patterns
-
-- Inventing a new term in conversation ("the holdings tracker", "the position monitor") when `DEFINITIONS.md` already has a canonical name.
-- Writing a definition that's a paraphrase of the term itself ("A `Position` is a position held").
-- Skipping the "Not to be confused with" field — disambiguation is the most useful part of the entry.
-- Renaming code without explicit user approval, even when the rename is clearly correct.
-- Treating `DEFINITIONS.md` as write-once. It's a living artifact; revisit during `/definitions` runs.
+- Use existing canonical identifiers verbatim in code, schemas, commits, and PRs.
+- When a new concept is local and obvious, name it consistently without blocking work on a vocabulary ceremony.
+- When the name crosses modules, persistence, APIs, or user decisions—or overlaps an existing term—propose the definition before propagating it.
+- Surface ambiguity instead of silently picking whichever synonym appears first.

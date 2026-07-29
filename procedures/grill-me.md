@@ -1,34 +1,32 @@
 ---
 name: grill-me
-description: Force the Grill-Me requirements-gathering protocol on the current task. Use when the user types "/grill-me" or asks to "grill me", "interview me", "interrogate me", or otherwise wants the agent to interrogate them about a feature, design, or plan before generating any PRD, asset, or code. Also use to restart grilling when an earlier round produced an under-specified plan.
+description: Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. Use when the user says “grill me”, “interview me”, “interrogate me”, invokes `/grill-me`, or asks to restart requirements discovery after an under-specified result.
 ---
 
-# Grill-Me Protocol
+# Grill Me
 
-Do not generate PRDs, designs, code, or any deliverable until a verified shared design concept is reached. The user has explicitly invoked this protocol — they want to be interrogated, not handed a draft.
+The user explicitly wants requirements discovery before a committed deliverable. Inspect the repository and supplied references first, then ask only questions whose answers could change scope, architecture, authority, data, or user-visible behavior.
 
-## How to grill
+## Find the unknowns
 
-- **Walk down each branch of the design tree.** Resolve dependencies between decisions one by one — settle the foundational choice before asking about its dependents. Don't ask leaf questions while the trunk is unresolved.
-- **Ask only what's needed to resolve the next foundational decision before its dependents.** Size each round to what the user can genuinely engage with; number the questions and flag the foundational one when it isn't obvious.
-- **Probe at the interface boundary.** What's hidden vs. exposed? What's the smallest API that covers known callers? What failure modes are in scope? What's explicitly out of scope?
-- **Propose defaults with the tradeoff named.** Instead of "what do you want X to do?", say "X could be (a) ___ — simpler but loses ___, or (b) ___ — handles ___ but adds ___. Which?" The user picks faster from named options than from a blank prompt.
-- **Don't ask preferences you can read.** Interrogate the user only on decisions you can't recover from the codebase, prior memories, or sane defaults.
-- **No drafts to "make it concrete".** Generating a strawman PRD or code skeleton before requirements are settled defeats the protocol — the user will react to the strawman instead of articulating their actual constraints.
+Separate:
 
-## Stop conditions
+- known unknowns the user already recognizes;
+- assumptions recoverable from code, tests, prior decisions, or a safe default;
+- unknowns the user may only recognize when shown an interface, reference, or reversible prototype;
+- implementation details that can remain with the agent.
 
-End the protocol when **either**:
-- The user explicitly says proceed / "go ahead" / "draft it" / "let's see code", **or**
-- All open decisions have answers AND probing yields no new branches (you can't think of another consequential question).
+Start with the highest-cost-to-reverse unknown. Resolve dependencies before leaf preferences.
 
-When stopping, summarize the agreed design in one paragraph and confirm before generating any deliverable.
+## Interview
 
-## Anti-patterns
+- Ask one focused round at a time, sized for a real answer.
+- Name a recommended default and its tradeoff when the options are understood.
+- Probe interfaces, state ownership, failure behavior, permissions, data handling, out-of-scope cases, and the proof of success.
+- Do not ask for facts available in the repository or current context.
+- Use a reference, mockup, or disposable prototype when recognition is more informative than abstract questioning. Label it exploratory and do not let it silently become the accepted design.
+- If implementation later reveals a load-bearing unknown, pause at that decision and resume the interview rather than forcing the original map onto the codebase.
 
-- Generating a draft "to make the discussion concrete" before requirements are settled.
-- Question-dump rounds — overloading so the user answers the easy ones and the hard ones get lost.
-- Abstract questions ("what should X look like?") when concrete options can be named.
-- Restating the request back as questions instead of probing for new information.
-- Asking questions whose answer is already in `CLAUDE.md` / `GEMINI.md` / memory / the visible codebase.
-- Stopping early because the user seems impatient — the cost of a bad spec exceeds the cost of two more rounds.
+## Stop
+
+Stop when the consequential branches are resolved or the user explicitly asks to proceed. Summarize the agreed outcome, decision boundaries, open assumptions, and validation bar. Ask for confirmation only when a remaining ambiguity would materially change the deliverable.
