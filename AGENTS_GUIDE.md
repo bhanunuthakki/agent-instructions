@@ -98,11 +98,12 @@ Domain-expert "auditors" that grade a project from idea (L0) to commercial relea
 ## Projects under the rulebook
 
 <!-- BEGIN:projects -->
-**10 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
+**11 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
 
 | Project | Rulebook files present |
 |---|---|
 | angel-memos | AGENTS.md, CLAUDE.md, GEMINI.md |
+| blog-engine | AGENTS.md, CLAUDE.md, GEMINI.md |
 | date-suggester | AGENTS.md, CLAUDE.md, GEMINI.md |
 | earnings-summary | AGENTS.md, CLAUDE.md, GEMINI.md |
 | huntdesk | AGENTS.md, CLAUDE.md, GEMINI.md |
