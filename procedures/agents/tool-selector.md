@@ -14,7 +14,8 @@ model: sonnet
 
 ## Protocol
 - **ADVISE mode (default):** read-only — Read / Grep / Glob / Bash (read-only) / WebSearch / WebFetch. Produce a ranked recommendation; optionally record it as an ADR at `docs/decisions/<topic>.md` (FIX mode, on approval).
-- **Output:** a criteria × candidates comparison table + recommendation + rationale + key risks. No gate verdict.
+- **Evidence standard:** verify current capabilities, pricing, limits, lifecycle/maintenance status, security posture, and license terms from first-party documentation. Use primary research or a maintained benchmark for performance claims; secondary comparisons are discovery/triangulation only. Stamp sources with access date and applicable product/version, and make unavailable or conflicting evidence explicit.
+- **Output:** a criteria × candidates comparison table + recommendation + rationale + key risks + source register. No gate verdict.
 
 ## Evaluation criteria
 

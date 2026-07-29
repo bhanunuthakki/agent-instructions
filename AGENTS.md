@@ -103,6 +103,15 @@ Apply to Python, TypeScript, Go, etc.
 - Inputs with `value` need `onChange` (or `defaultValue`). Locale-aware dates/numbers (`Intl.*`). Flex children need `min-w-0` for truncation; handle empty states.
 - **Starting a UI from scratch?** Use the design-system scaffold rather than hand-rolling tokens/components — see *Building Secure Apps* below.
 
+## Current External Practice (when the decision can drift)
+
+An **external-practice check** is a codebase scan for load-bearing implementation choices whose safe or effective answer can change with provider capabilities, dependency versions, standards, security guidance, or current research. Before a consequential design, implementation, or review involving one of these choices, inspect the affected code/configuration seam and verify the decision against current primary sources rather than relying on training memory or an undated local convention.
+
+- Typical triggers: LLM selection, judging and eval design; retrieval/RAG, embedded search, embeddings and vector stores; database engines, schema/migration/replication setup; authentication and cryptography; payments, email and deployment infrastructure; browser/platform APIs; and material library/vendor choices.
+- Prefer current official documentation, standards, security advisories, and primary research or maintained benchmarks. Use secondary sources only to discover or triangulate primary evidence.
+- Record the source, applicable product/version, verification date, conclusion, and any uncertainty or evidence gap in the design note or hardening report. If current evidence cannot be obtained, say so and do not present the choice as current best practice.
+- Keep the check proportional: stable internal implementation details do not need web research. The hardening fleet performs the systematic version of this check via `procedures/harden.md`.
+
 ## LLM-Native Engineering (when building LLM-backed features)
 
 Every LLM call must be governed, not a black box. Always-on rules:

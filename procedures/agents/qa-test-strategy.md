@@ -32,6 +32,11 @@ model: sonnet
 ### Determinism & correctness
 - No asserting on copy/log/prompt wording (per Testing Discipline). For financial/numeric features, assert **numerical correctness + edge cases** (rounding, currency, nulls, restatements, timezone/as-of).
 
+### Discriminating fields & guards
+- A field, flag, or predicate whose *purpose* is to distinguish cases must have a test that varies the input across every shape it claims to separate and asserts the outputs actually differ. Presence assertions (`is not None`; `== "expected"` against a single fixture) are **insufficient** — they pass identically for a field that is silently constant, which is the defect they are meant to catch. The audit question is: *what input would make this field take its other value, and is that input in the suite?* If it is not, the field is unverified no matter what coverage reports.
+- Probe three adjacent traps by name. **Constant discriminator:** a flag derived from a source that never actually varies across the shapes in play — measure it against real inputs, not the one the fixture happens to use. **Sentinel compared by equality:** an `"unknown"` / `"unset"` value that matches another `"unknown"` and thereby licenses the very comparison the guard exists to forbid; two admissions of ignorance are not agreement. **Drifted hand-rolled fixture:** a minimal test schema that has fallen behind the real one, so reads quietly take a compatibility fallback and the test exercises the fallback rather than the path under test — assert the fixture matches the migration, or build it from the migration.
+- Where a guard's whole value is preventing a bad output (a false delta, an unsafe write), test the *prevention*, not just the happy path: construct the input that should trip it and assert the bad output does not appear.
+
 ### Multi-tenant scenarios (L2 `↻`)
 - Explicit cross-tenant **negative** tests (coordinate `sec-tenant-isolation`); tenant-scoped fixtures.
 

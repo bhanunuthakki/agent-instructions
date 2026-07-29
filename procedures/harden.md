@@ -100,6 +100,22 @@ Record a one-line rationale for every selected or skipped expert. The matrix giv
 - Documentation/research repositories use source quality, freshness, licensing, and consistency checks; do not force application scaffolds onto them.
 - Native/mobile/XR work uses platform accessibility, permissions, privacy, device performance, and simulator-versus-device evidence; web-only checks are n/a unless a web client exists.
 
+### External-practice check before dispatch
+
+Before expert dispatch on every upgrade, deep run, or single-expert audit, perform the `AGENTS.md` **external-practice check** over the named codebase scope. This is a targeted scan of real implementation seams, not a generic best-practices essay.
+
+1. Inspect entrypoints, dependency manifests and lockfiles, configuration, schemas/migrations, provider adapters, prompts/evals, retrieval/indexing paths, and deployed-service definitions as applicable.
+2. Record a candidate only when a load-bearing decision is both materially consequential and plausibly sensitive to provider/version/standards/research drift. Typical candidates include LLM routing/judging/evals, retrieval/RAG/search/embeddings/vector stores, database topology/configuration/migrations, auth/cryptography, payments/email/deployment, browser/platform APIs, and material library/vendor choices.
+3. Route build/buy, library, service, and vendor comparisons to `tool-selector`; route algorithm, protocol, configuration, and domain-practice questions to the owning expert; route cross-boundary structural choices to `architecture-reviewer`. The owning workhorse expert, not a mechanical scanner, evaluates the evidence and owns the finding.
+4. For every routed item, verify current primary evidence: official documentation, standards, security advisories, or primary research/maintained benchmarks as appropriate. Secondary sources may discover or triangulate but may not be the sole support for a consequential recommendation.
+5. Pass the resulting rows to the selected experts. If no item qualifies, record `none` with a one-line scope rationale; the fact that agents have web tools is not evidence that the check ran.
+
+Use this inventory schema:
+
+`area | code/config seam | decision to verify | why drift-sensitive | owner | evidence status`
+
+A cached verdict is invalid when the relevant dependency/provider version, standard, or load-bearing implementation seam changed. Otherwise, re-verify on `--deep` and at the owner-documented cadence for that evidence class; do not invent a universal freshness period.
+
 **Model tiers:** Fable (Claude) or Sol (Codex) is the orchestrator and final reviewer. Fleet agents default to the workhorse tier (Sonnet/Terra). Mechanical pre-scans may use Haiku/Luna, but a blocking verdict requires workhorse review. Improve a failed brief before escalating model tier.
 
 ## Generative scaffolds (build-it-right-first, not just grade-it-after)
@@ -113,16 +129,18 @@ Before auditing a gate on a greenfield project, prefer to **generate** the secur
 ## Dispatch protocol
 
 1. Read `.harden/state.json` (create at `L0` if absent, conforming to the schema below). Resolve the target rung and its gate set from the matrix, applying the L1 cap unless `--full`.
-2. Apply the applicability rules, then dispatch independent experts through the runtime's native subagent tool. Default to depth 1 and no more than three concurrent workers. Honor `Depends on`; hard-ordered: `data-engineer → backend-multitenancy`; `sec-authz` + `backend-multitenancy → sec-tenant-isolation`; `legal-compliance → payments`.
-3. Each expert runs **AUDIT mode**: product code and state are read-only; `docs/hardening/<rung>/<expert>.md` is the sole permitted write. It returns the same report and verdict to the orchestrator.
-4. **Gate logic:** at a `B` cell, any open `critical`/`high` finding ⇒ rung **BLOCKED**. `A`/`↻` cells log findings, never block. Advancing requires every `B` gate at the target rung = `PASS`.
-5. The Fable/Sol orchestrator checks applicability, deduplicates overlapping findings, reviews every blocking verdict, and presents the consolidated result. **Wait for explicit approval before any product change.**
-6. On approval: create a git **worktree**, dispatch the relevant experts in **FIX mode** to apply approved fixes there, then re-audit to confirm green. Never fix on the working branch. (On this machine, remove worktrees with PowerShell `Remove-Item -Force`, not `git worktree remove` — Drive sync breaks it.)
-7. Update `.harden/state.json`.
+2. Run the external-practice check, record its inventory, and attach each routed row to its owning expert's brief.
+3. Apply the applicability rules, then dispatch independent experts through the runtime's native subagent tool. Default to depth 1 and no more than three concurrent workers. Honor `Depends on`; hard-ordered: `data-engineer → backend-multitenancy`; `sec-authz` + `backend-multitenancy → sec-tenant-isolation`; `legal-compliance → payments`.
+4. Each expert runs **AUDIT mode**: product code and state are read-only; `docs/hardening/<rung>/<expert>.md` is the sole permitted write. It returns the same report and verdict to the orchestrator.
+5. **Gate logic:** at a `B` cell, any open `critical`/`high` finding ⇒ rung **BLOCKED**. `A`/`↻` cells log findings, never block. Advancing requires every `B` gate at the target rung = `PASS`.
+6. The Fable/Sol orchestrator checks applicability, deduplicates overlapping findings, reviews every blocking verdict, and presents the consolidated result. **Wait for explicit approval before any product change.**
+7. On approval: create a git **worktree**, dispatch the relevant experts in **FIX mode** to apply approved fixes there, then re-audit to confirm green. Never fix on the working branch. (On this machine, remove worktrees with PowerShell `Remove-Item -Force`, not `git worktree remove` — Drive sync breaks it.)
+8. Update `.harden/state.json`.
 
 ## Output contract
 
-- **Report** (`docs/hardening/<rung>/<expert>.md`): verdict, findings table (`severity | location | finding | fix`), checklist results, out-of-scope notes. Severity ∈ {critical, high, medium, low, info}. Stamp with today's date.
+- **Report** (`docs/hardening/<rung>/<expert>.md`): verdict, findings table (`severity | location | finding | fix`), checklist results, external-practice evidence, out-of-scope notes. Severity ∈ {critical, high, medium, low, info}. Stamp with today's date.
+- **External-practice evidence:** include every inventory row routed to this expert and, for each, the source title + URL, publisher, published/updated date when available, access date, applicable product/version, conclusion, and uncertainty/evidence gap. If no row was routed, state `none` and the scope rationale. A URL list without an applicability conclusion does not satisfy the check.
 - **State** (`.harden/state.json`) — conform to this schema:
 
 ```json

@@ -28,6 +28,7 @@ model: sonnet
 
 ### Resilience patterns
 - Timeouts on every external call; retries with backoff + jitter; circuit breakers; bulkheads; graceful degradation; idempotency on retried writes (coordinate `architecture-reviewer`).
+- **Degradation must be attributable, not merely graceful.** Every degrade path — fallback branch, compatibility shim, partial-response accept, cache-instead-of-live read — emits a structured event naming *which* branch ran and why, and stamps the returned value with the path that produced it. Audit question: *for any given output, can you tell from the logs or the row itself whether it came from the primary path or a fallback?* If not, the degradation is invisible and the system cannot distinguish "healthy" from "quietly running on the backup." Two consequences to probe for specifically: a genuine defect in the primary path gets absorbed by a fallback written for an unrelated cause and reported as success; and a value sourced from a degraded path silently pollutes any downstream comparison or drift alert built on it. Graceful-but-unobservable degradation is a **finding**, not a pass.
 
 ### Backups & DR (L2 `B`)
 - Automated backups; defined RPO/RTO; a **tested restore drill** (not just backups existing); failover plan.
