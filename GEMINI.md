@@ -7,7 +7,7 @@ Gemini-specific context only:
 - `AGENTS.md`, system instructions, skills, files, and tool selection are additive. Put a rule in the narrowest layer that owns it and do not repeat it here.
 - Gemini has no guaranteed native skill auto-loader in every local runtime. When a task matches a procedure below, read that file completely before acting.
 - Keep critical constraints early and structure large supplied context before the final task or question. Verify the current Gemini model lineup before pinning an ID.
-- Use Gemini’s native subagent surface when available; otherwise run the selected hardening rubric sequentially.
+- Use a native subagent surface only when the active Gemini runtime supports it. The Gemini API managed-agent preview does not support subagent nesting, so run selected hardening rubrics sequentially there.
 
 <!-- BEGIN:triggers -->
 | Trigger | Procedure |
