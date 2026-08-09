@@ -24,7 +24,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
 | **definitions** | Build, refresh, or enforce the project’s canonical domain vocabulary in DEFINITIONS.md. |
-| **explain-change** | After an LLM writes or edits code, explain the change in plain language for a non-expert reviewer — what changed, what could break, and how to confir… |
+| **explain-change** | After an LLM writes or edits code, explain the outcome, impact, risk, and proof in plain language at a depth proportional to the change. |
 | **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
 | **grill-me** | Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. |
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
