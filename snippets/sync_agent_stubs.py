@@ -57,6 +57,7 @@ OUR_SKILLS = [
     "model-frontier",
     "log-redaction",
     "explain-change",
+    "linear-pr-sync",
     "scaffold-auth",
     "scaffold-tenant-schema",
     "scaffold-design-system",

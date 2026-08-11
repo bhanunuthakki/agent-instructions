@@ -48,6 +48,7 @@ Use the smallest procedure that owns the work:
 | consequential ambiguity or explicit interview | `procedures/grill-me.md` |
 | domain vocabulary or conflicting terms | `procedures/definitions.md` |
 | code implementation, fix, refactor, or review | `procedures/code-change.md` |
+| branch or PR lifecycle transition with an exact Linear key | `procedures/linear-pr-sync.md` |
 | multi-agent, worktree, model-tier, or quota scheduling work | `procedures/agent-operations.md` |
 | drift-sensitive external decision | `procedures/external-practice.md` |
 | instruction, skill, prompt, or context hierarchy changes | `procedures/context-engineering.md` |
