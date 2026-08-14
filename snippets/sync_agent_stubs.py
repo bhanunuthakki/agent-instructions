@@ -23,12 +23,18 @@ Or the /sync-agent-stubs Claude command. --check is read-only and exits non-zero
 
 from __future__ import annotations
 
+import re
+import os
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
+
+import definition_governance
 
 SCRATCH = Path(r"C:\Users\Bhanu\.gemini\antigravity\scratch")
 HOOKS_DIR = Path(r"C:\Users\Bhanu\.gemini\githooks")
+ROOT_REPO = Path(r"C:\Users\Bhanu\.gemini")
 
 # CANONICAL DIRECTION: procedures/ is the hand-authored SOURCE OF TRUTH. This script GENERATES the
 # Claude and Codex skills, the /harden command, and the agent fleet FROM procedures/ — identity
@@ -53,6 +59,7 @@ OUR_SKILLS = [
     "external-practice",
     "grill-me",
     "definitions",
+    "judging",
     "llm-ops",
     "model-frontier",
     "log-redaction",
@@ -65,6 +72,11 @@ OUR_SKILLS = [
     "scaffold-deploy",
 ]
 CODEX_ONLY_SKILLS = ["harden"]
+COMMAND_SOURCES = {
+    "harden": PROCEDURES_DIR / "harden.md",
+    "refresh-frontier": PROCEDURES_DIR / "source-command-refresh-frontier.md",
+    "sync-agent-stubs": PROCEDURES_DIR / "source-command-sync-agent-stubs.md",
+}
 
 # The human-facing system map. Its inventory tables (skills/commands/agents/procedures/projects)
 # are regenerated from the filesystem between these markers so the counts can never silently drift;
@@ -105,9 +117,7 @@ def claude_stub(rulebook_name: str) -> str:
     return f"# Claude Code\n\n@./{rulebook_name}\n"
 
 
-GEMINI_STUB = (
-    "# Gemini\n\n@./AGENTS.md\n"
-)
+GEMINI_STUB = "# Gemini\n\n@./AGENTS.md\n"
 
 
 def looks_generated(path: Path) -> bool:
@@ -164,7 +174,10 @@ def ensure_wrappers(proj: Path, dry: bool) -> list[str]:
 def ensure_hooks(proj: Path, dry: bool) -> list[str]:
     if not (proj / ".git").exists():
         return []
-    hooks_posix = HOOKS_DIR.as_posix()
+    # One hooksPath can be active. Always point it at the shared safety hooks; those hooks
+    # explicitly compose an optional project-local .githooks/<hook> instead of letting it
+    # shadow credential scanning or the global instruction gate.
+    target_hooks_val = HOOKS_DIR.as_posix()
     git_base = ["git", "-c", f"safe.directory={proj}", "-C", str(proj)]
     try:
         current = subprocess.run(
@@ -174,7 +187,7 @@ def ensure_hooks(proj: Path, dry: bool) -> list[str]:
         ).stdout.strip()
     except FileNotFoundError:
         return ["git not found — skipped hook wiring"]
-    if current == hooks_posix:
+    if current == target_hooks_val:
         return []
     if not dry:
         subprocess.run(
@@ -183,11 +196,11 @@ def ensure_hooks(proj: Path, dry: bool) -> list[str]:
                 "config",
                 "--local",
                 "core.hooksPath",
-                hooks_posix,
+                target_hooks_val,
             ],
             check=True,
         )
-    return [f"set core.hooksPath -> {hooks_posix}"]
+    return [f"set core.hooksPath -> {target_hooks_val}"]
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
@@ -240,12 +253,12 @@ def build_claude_artifacts() -> dict[Path, str]:
             out[SKILLS_DIR / name / sib_name] = content
             out[SKILLS_DIR / name / sib.name] = content
 
-    # Command: procedures/harden.md -> commands/harden.md
-    harden = PROCEDURES_DIR / "harden.md"
-    if harden.exists():
-        out[COMMANDS_DIR / "harden.md"] = harden.read_text(
-            encoding="utf-8", errors="replace"
-        )
+    # Commands: one canonical source per command, shared byte-for-byte with Codex.
+    for command, source in COMMAND_SOURCES.items():
+        if source.exists():
+            out[COMMANDS_DIR / f"{command}.md"] = source.read_text(
+                encoding="utf-8", errors="replace"
+            )
 
     # Agent fleet: procedures/agents/<expert>.md -> agents/<expert>.md
     if PROCEDURES_AGENTS_DIR.exists():
@@ -269,6 +282,13 @@ def build_codex_skill_artifacts() -> dict[Path, str]:
             content = sibling.read_text(encoding="utf-8", errors="replace")
             out[CODEX_SKILLS_DIR / name / sibling_name] = content
             out[CODEX_SKILLS_DIR / name / sibling.name] = content
+    for command, source in COMMAND_SOURCES.items():
+        if not source.exists():
+            continue
+        skill_name = "harden" if command == "harden" else f"source-command-{command}"
+        out[CODEX_SKILLS_DIR / skill_name / "SKILL.md"] = source.read_text(
+            encoding="utf-8", errors="replace"
+        )
     return out
 
 
@@ -366,6 +386,72 @@ def detect_codex_skill_drift() -> list[str]:
     return drift
 
 
+def detect_command_orphans(
+    commands_dir: Path = COMMANDS_DIR, codex_skills_dir: Path = CODEX_SKILLS_DIR
+) -> list[str]:
+    expected_commands = {f"{name}.md" for name in COMMAND_SOURCES}
+    expected_codex = {
+        f"source-command-{name}" for name in COMMAND_SOURCES if name != "harden"
+    }
+    findings: list[str] = []
+    if commands_dir.exists():
+        for path in sorted(commands_dir.glob("*.md")):
+            if path.name not in expected_commands:
+                findings.append(
+                    f"{path}: ORPHAN command with no canonical COMMAND_SOURCES entry"
+                )
+    if codex_skills_dir.exists():
+        for path in sorted(codex_skills_dir.glob("source-command-*")):
+            if path.is_dir() and path.name not in expected_codex:
+                findings.append(
+                    f"{path}: ORPHAN source-command skill with no canonical command source"
+                )
+    return findings
+
+
+def detect_definition_override_drift(
+    root_definitions: Path = ROOT_REPO / "DEFINITIONS.md",
+    definition_files: list[Path] | None = None,
+) -> list[str]:
+    if not root_definitions.exists():
+        return [f"{root_definitions}: missing global definition registry"]
+    _metadata, root_terms = definition_governance.parse_document(root_definitions)
+    reserved = {
+        definition_governance.normalize_term(term): term for term in root_terms
+    }
+    if definition_files is None:
+        definition_files = []
+        skipped = {
+            ".git",
+            ".venv",
+            "venv",
+            "node_modules",
+            ".tmp",
+            ".claude",
+            "__pycache__",
+            "build",
+            "dist",
+            "deployment",
+            "deploy",
+            "backups",
+        }
+        for project in project_dirs():
+            for directory, children, files in os.walk(project):
+                children[:] = [child for child in children if child not in skipped]
+                if "DEFINITIONS.md" in files:
+                    definition_files.append(Path(directory) / "DEFINITIONS.md")
+    findings: list[str] = []
+    for path in definition_files:
+        _metadata, terms = definition_governance.parse_document(path)
+        for term in terms:
+            normalized = definition_governance.normalize_term(term)
+            if normalized in reserved:
+                findings.append(
+                    f"{path}: downstream override of global term {reserved[normalized]!r}"
+                )
+    return findings
+
+
 def detect_doc_path_drift() -> list[str]:
     """The rulebook prose names the hooks dir with a leading dot (`.githooks`) — the dir is `githooks`
     (HOOKS_DIR.name), wired per-repo via core.hooksPath. Flag the stale token so prose can't drift
@@ -380,6 +466,103 @@ def detect_doc_path_drift() -> list[str]:
                 f"`{HOOKS_DIR.name}` (no dot) — fix the wording"
             )
     return drift
+
+
+def detect_hook_capability_drift() -> list[str]:
+    required = {
+        "pre-commit": ("credential", ".githooks/pre-commit"),
+        "pre-push": ("sync_agent_stubs.py", ".githooks/pre-push"),
+    }
+    findings: list[str] = []
+    for hook, tokens in required.items():
+        path = HOOKS_DIR / hook
+        if not path.exists():
+            findings.append(f"{path}: missing required shared hook")
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for token in tokens:
+            if token not in text:
+                findings.append(f"{path}: missing required capability token {token!r}")
+    return findings
+
+
+def semantic_documents() -> list[Path]:
+    docs = [AGENTS_MD, GEMINI_MD, CLAUDE_MD, GUIDE_PATH]
+    docs.extend(sorted(PROCEDURES_DIR.rglob("*.md")))
+    docs.extend(proj / "AGENTS.md" for proj in project_dirs())
+    return [path for path in docs if path.exists()]
+
+
+def detect_semantic_drift(
+    docs: list[Path] | None = None, *, root_doc: Path = AGENTS_MD
+) -> list[str]:
+    """Catch meaning-level contradictions that byte identity cannot detect."""
+    findings: list[str] = []
+    paths = docs if docs is not None else semantic_documents()
+    root_text = (
+        root_doc.read_text(encoding="utf-8", errors="replace")
+        if root_doc.exists()
+        else ""
+    )
+    root_headings = {
+        match.group(1).strip().casefold()
+        for match in re.finditer(r"^##\s+(.+?)\s*$", root_text, re.MULTILINE)
+    }
+    reversed_direction = re.compile(
+        r"(?:claude\s+)?skills?\s+(?:are|is)\s+(?:the\s+)?canonical|"
+        r"procedures?\s+(?:are|is)\s+overwritten|overwrite(?:s|n)?\s+(?:the\s+)?procedures?",
+        re.IGNORECASE,
+    )
+    for path in paths:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        if reversed_direction.search(text):
+            findings.append(
+                f"{path}: reverses canonical direction; procedures generate runtime artifacts"
+            )
+        if re.search(
+            r"\bno\s+`?DEFINITIONS\.md`?\s+(?:yet|exists)", text, re.IGNORECASE
+        ):
+            if (path.parent / "DEFINITIONS.md").exists():
+                findings.append(
+                    f"{path}: claims no DEFINITIONS.md exists, but the file is present"
+                )
+        for heading in re.findall(r"\[\[root:([^\]]+)\]\]", text):
+            if heading.strip().casefold() not in root_headings:
+                findings.append(f"{path}: missing root heading reference {heading!r}")
+        ordinary_refs = re.findall(
+            r"(?:global\s+)?`AGENTS\.md`\s*§\s*([^\n.,;)]+)", text, re.IGNORECASE
+        )
+        ordinary_refs += re.findall(
+            r"(?:global\s+)?`AGENTS\.md`\s*(?:→|->)\s*[\"“]([^\"”]+)",
+            text,
+            re.IGNORECASE,
+        )
+        for heading in ordinary_refs:
+            if heading.strip().casefold() not in root_headings:
+                findings.append(f"{path}: missing root heading reference {heading!r}")
+
+        for target in re.findall(r"\[[^\]]+\]\(([^)]+)\)", text):
+            target = target.strip().strip("<>")
+            if target.startswith(("http://", "https://", "mailto:", "#")):
+                continue
+            raw_path = target.partition("#")[0]
+            if not raw_path or any(char in raw_path for char in "*<>"):
+                continue
+            resolved = (path.parent / raw_path).resolve()
+            if not resolved.exists():
+                findings.append(f"{path}: missing Markdown target {target!r}")
+
+    frontier = PROCEDURES_DIR / "model-frontier.REFERENCE.md"
+    if docs is None and frontier.exists():
+        text = frontier.read_text(encoding="utf-8", errors="replace")
+        match = re.search(r"Next review:\s*(\d{4}-\d{2}-\d{2})", text)
+        if not match:
+            findings.append(f"{frontier}: missing machine-checkable Next review date")
+        elif date.fromisoformat(match.group(1)) < date.today():
+            findings.append(f"{frontier}: model frontier review is expired")
+    return findings
 
 
 def _md_table(header: tuple[str, str], rows: list[tuple[str, str]]) -> str:
@@ -462,8 +645,7 @@ def build_guide_sections() -> dict[str, str]:
     skills = (
         f"**{len(skill_rows)} shared skills** — say the trigger, the agent runs the procedure. "
         f"Codex also exposes `harden` as a native skill; Claude exposes the same procedure as "
-        f"`/harden`.\n\n"
-        + _md_table(("Skill", "What it does"), skill_rows)
+        f"`/harden`.\n\n" + _md_table(("Skill", "What it does"), skill_rows)
     )
 
     cmd_rows: list[tuple[str, str]] = []
@@ -668,6 +850,12 @@ def main() -> None:
     pending = False
     drift: list[str] = []
     if includes_project_wiring(sys.argv):
+        root_actions = ensure_hooks(ROOT_REPO, readonly)
+        if root_actions:
+            pending = True
+            print("[.gemini]")
+            for action in root_actions:
+                print(f"  - {action}")
         for proj in project_dirs():
             if is_worktree_path(proj):
                 continue
@@ -718,6 +906,10 @@ def main() -> None:
     drift += (
         detect_doc_path_drift()
     )  # always read-only — a prose fix needs human attention
+    drift += detect_hook_capability_drift()
+    drift += detect_command_orphans()
+    drift += detect_definition_override_drift()
+    drift += detect_semantic_drift()
 
     if drift:
         print("\n[drift — needs YOUR attention (not auto-fixed):]")

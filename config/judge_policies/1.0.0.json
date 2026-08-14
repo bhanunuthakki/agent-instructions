@@ -1,0 +1,22 @@
+{
+  "policy_version": "1.0.0",
+  "ordinary_audit_rates": {
+    "J0": 0.10,
+    "J1": 0.20,
+    "J2": 0.50,
+    "J3": 1.00
+  },
+  "promotion": {
+    "human_agreement_minimum": 0.80,
+    "repeated_material_misses": 2
+  },
+  "demotion": {
+    "minimum_audited_cases": 40,
+    "required_strata_counts": {
+      "coding": 10,
+      "research": 10,
+      "boundary": 5
+    },
+    "wilson_lower_bound_minimum": 0.90
+  }
+}

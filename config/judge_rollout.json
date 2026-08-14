@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "repositories": {
+    ".gemini": {
+      "disposition": "adopt_partially",
+      "mode": "shadow",
+      "reason": "Correctness controls are shadowed; activation awaits owner-ratified tolerances, calibrated Judge purposes, and an independent task population frame."
+    },
+    "earnings-summary": {
+      "disposition": "adopt_partially",
+      "mode": "shadow",
+      "reason": "Mature LLM and eval system; collect routing and audit evidence before blocking."
+    }
+  },
+  "unlisted_repository": {
+    "disposition": "defer",
+    "mode": "reminder",
+    "reason": "Needs an explicit repository applicability decision.",
+    "reminder": true
+  }
+}

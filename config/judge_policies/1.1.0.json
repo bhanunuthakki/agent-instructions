@@ -1,0 +1,111 @@
+{
+  "policy_version": "1.1.0",
+  "enforcement_mode": "shadow",
+  "routing": {
+    "j3_signals": [
+      "irreversible_side_effect",
+      "high_impact_production_action",
+      "security_boundary_action",
+      "external_publication_action",
+      "capital_action",
+      "legal_action",
+      "owner_requested_j3",
+      "unresolved_j2_disagreement"
+    ],
+    "j2_signal_groups": {
+      "material_ambiguity": "evidence_uncertainty",
+      "conflicting_evidence": "evidence_uncertainty",
+      "missing_oracle": "evidence_uncertainty",
+      "multi_scope": "scope_state",
+      "concurrent_dirty_state": "scope_state",
+      "unfamiliar_dependency": "novelty",
+      "prior_regression": "observed_failure",
+      "material_cost_or_latency": "economics",
+      "owner_requested_second_judge": "governance"
+    },
+    "j2_direct_signals": [
+      "conflicting_evidence",
+      "missing_oracle",
+      "prior_regression",
+      "owner_requested_second_judge"
+    ],
+    "j2_minimum_distinct_groups": 2
+  },
+  "judge_requirements": {
+    "registry_version": "1.1.0",
+    "base_counts": {
+      "J0": 0,
+      "J1": 1,
+      "J2": 1,
+      "J3": 2
+    },
+    "j2_second_judge_signals": [
+      "conflicting_evidence",
+      "prior_regression",
+      "owner_requested_second_judge"
+    ],
+    "required_purposes": {
+      "J1": [
+        "specialist"
+      ],
+      "J2": [
+        "specialist"
+      ],
+      "J3": [
+        "specialist",
+        "risk"
+      ]
+    },
+    "distinct_purposes_when_multiple": true
+  },
+  "statistical_sampling": {
+    "status": "pending_owner_tolerances",
+    "confidence": null,
+    "tolerable_error_rates": {
+      "J0": {
+        "coding": null,
+        "research": null
+      },
+      "J1": {
+        "coding": null,
+        "research": null
+      },
+      "J2": {
+        "coding": null,
+        "research": null
+      }
+    },
+    "selection_method": "sealed_episode_derived_count_without_replacement",
+    "mandatory_controls": [
+      "J3",
+      "disagreement",
+      "owner_override",
+      "policy_change"
+    ]
+  },
+  "invocation_coverage": {
+    "status": "pending_independent_task_population_frame",
+    "missing_receipt_finding": "routing_miss",
+    "active_blocking_allowed": false
+  },
+  "evidence_verification": {
+    "status": "pending_verifier_backed_evidence_records",
+    "active_blocking_allowed": false
+  },
+  "audit_schema": {
+    "findings": [
+      "none",
+      "routing_miss",
+      "execution_miss",
+      "material_miss",
+      "critical_miss"
+    ]
+  },
+  "adaptation": {
+    "automatic_changes": false,
+    "owner_ratification_required": true,
+    "promotion_rule": "one_tier_owner_review_on_audited_miss_or_owner_overturn",
+    "demotion_rule": "one_tier_owner_review_after_zero_failure_targets_in_coding_and_research",
+    "router_floor_enforced": true
+  }
+}

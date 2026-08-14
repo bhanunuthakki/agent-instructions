@@ -7,7 +7,7 @@ description: Pick an LLM against the dated cross-provider cost/performance front
 
 `REFERENCE.md` is the dated, blended cost-per-MTok table across Anthropic, OpenAI, and Google, ordered cheapest → most expensive. Read it before answering a price/routing question. A stale row is evidence to refresh, not authority.
 
-This skill is the procedure; `REFERENCE.md` is the data. The always-on rules (one `call_llm` entry point, model-picker per purpose, eval-before-trust, self-judging is brand-blind) live in `AGENTS.md` → LLM-Native Engineering — do not restate them, apply them.
+This skill is the procedure; `REFERENCE.md` is the data. Shared call governance lives in `llm-ops`; review rigor and brand-blind judging live in `judging`. Do not restate those contracts here.
 
 ## How to read the reference
 

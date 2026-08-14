@@ -19,6 +19,7 @@ Gemini-specific context only:
 | **explain-change** | `procedures/explain-change.md` |
 | **external-practice** | `procedures/external-practice.md` |
 | **grill-me** | `procedures/grill-me.md` |
+| **judging** | `procedures/judging.md` |
 | **linear-pr-sync** | `procedures/linear-pr-sync.md` |
 | **llm-ops** | `procedures/llm-ops.md` |
 | **log-redaction** | `procedures/log-redaction.md` |

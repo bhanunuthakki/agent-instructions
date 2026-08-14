@@ -6,6 +6,14 @@
 
 fail=0
 
+# Compose an optional project-local hook. core.hooksPath remains on this shared directory so a
+# local toolchain can extend, but never replace, the credential scan below.
+root=$(git rev-parse --show-toplevel) || exit 0
+local_hook="$root/.githooks/pre-commit"
+if [ -f "$local_hook" ]; then
+  sh "$local_hook" "$@" || exit 1
+fi
+
 # 1. Block credential FILES from being committed (added/copied/modified), excluding *.example/*.sample/*.template.
 cred_files=$(git diff --cached --name-only --diff-filter=ACM \
   | grep -iE '(^|/)(\.env|credentials.*\.json|token.*\.json|.*secret.*|.*\.(pem|key|p12|pfx|keystore))$' \

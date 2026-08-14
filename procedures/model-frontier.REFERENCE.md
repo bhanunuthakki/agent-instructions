@@ -1,6 +1,6 @@
 # Model Cost/Performance Frontier
 
-**Last refreshed: 2026-07-21 for Anthropic and OpenAI rows; 2026-06-18 for Google rows.** Cross-provider blended cost-per-MTok, ordered cheapest → most expensive. Read this before answering model-cost questions; see `SKILL.md` for the formula and cheapest-at-parity procedure.
+**Last refreshed: 2026-07-21 for Anthropic and OpenAI rows; 2026-06-18 for Google rows. Next review: 2026-08-31.** Cross-provider blended cost-per-MTok, ordered cheapest → most expensive. Read this before answering model-cost questions; see `SKILL.md` for the formula and cheapest-at-parity procedure.
 
 Blended sort key: `(6 * input + 1 * output) / 7` (input weighted 6:1 over output). Prices are public list API prices in USD per million tokens (per-MTok), standard context tier (≤200K) where a model charges a long-context premium. Capability bucket is a coarse routing hint, not a benchmark.
 

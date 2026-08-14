@@ -13,10 +13,18 @@ The **inventory tables** below (skills · commands · agents · procedures · pr
 
 You rarely touch any of this. It just shapes how the agent behaves.
 
+## Evidence governance
+
+- **Shared language:** root `DEFINITIONS.md` defines only cross-project control-plane terms. Projects may add terms but never override them.
+- **Review rigor:** J0 is deterministic; J1 uses one Judge; J2 uses one specialist plus a conditional independent second Judge; J3 is reserved for actual irreversible or external actions and requires owner approval only to PASS.
+- **Reliability loop:** an exclusive writer seals task identity before work and typed receipts separate routing from execution. Mandatory J3/exception controls are censused; ordinary prevalence estimates use sealed episodes and owner-ratified, per-stratum Statistical Sample Targets.
+- **Activation boundary:** Judge purposes, ordinary sampling, evidence authenticity, and invocation coverage remain shadow-only until calibration, tolerances/confidence, verifier-backed evidence, and an independent Task Population Frame are ratified. Receipt audits cannot detect omitted work by themselves.
+- **Adaptation:** the ledger may recommend promotion or demotion, but changes require owner ratification. Missing statistical targets or sample volume reports `INSUFFICIENT_EVIDENCE`; budget never manufactures confidence.
+
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**16 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**17 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
@@ -27,6 +35,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **explain-change** | After an LLM writes or edits code, explain the outcome, impact, risk, and proof in plain language at a depth proportional to the change. |
 | **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
 | **grill-me** | Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. |
+| **judging** | Route substantive coding and research work through J0-J3 evidence tiers, typed judge receipts, risk controls, and statistically derived audit samples. |
 | **linear-pr-sync** | Synchronize an existing Linear issue with branch and pull-request progress. |
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
 | **log-redaction** | Design guidance for keeping secrets out of logs and exception output (AGENTS.md Universal Safety Rule 4). |
@@ -46,14 +55,14 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | Command | What it does |
 |---|---|
 | `/harden` | Run the maturity-gated hardening fleet (L0→L3) — audit a project with domain-expert subagents and gate advancement. |
-| `/refresh-frontier` | Re-verify and restamp the model cost/performance frontier reference with today's prices. |
-| `/sync-agent-stubs` | Ensure every scratch project has CLAUDE.md/GEMINI.md wrappers importing its rulebook, and wire the shared git hooks. |
+| `/refresh-frontier` | Re-verify and restamp the canonical model cost and capability frontier from current primary provider sources, then flag purposes for evaluation. |
+| `/sync-agent-stubs` | Audit and synchronize canonical procedures, generated runtime artifacts, rulebook wrappers, semantic references, and composable shared hooks. |
 <!-- END:commands -->
 
 ## What happens automatically (no action needed)
 
 - **On `git commit`** → the pre-commit hook blocks credential files and hardcoded secrets. Bypass a false positive with `git commit --no-verify`.
-- **On `git push`** → the pre-push hook runs the full toolchain gate in order (sync deps → format → lint → typecheck → tests → build), **then verifies the global instruction system is in sync** (`sync_agent_stubs.py --check` + its tests) — so a stale or hand-edited Claude artifact, GEMINI trigger table, or guide table blocks the push from *any* wired repo (the meta-repo isn't itself under git, so this cross-repo gate is what enforces it). Never pushes red. Bypass with `git push --no-verify`.
+- **On `git push`** → the effective pre-push hook runs the project gate, then verifies the global instruction system (`sync_agent_stubs.py --check` + its tests). The `.gemini` meta-repo and every wired scratch repo use the shared hook path; an optional project `.githooks/pre-push` is composed, not substituted. Never pushes red. Bypass with `git push --no-verify`.
 - Hooks live in `C:\Users\bhanu\.gemini\githooks\` and are wired into each repo by `/sync-agent-stubs`. They work in **both** Claude and Gemini sessions (and plain `git`).
 
 ## The hardening fleet (advanced, opt-in)
@@ -95,9 +104,9 @@ Domain-expert "auditors" that grade a project from idea (L0) to commercial relea
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**25 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 16 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**30 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 17 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`
+`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook

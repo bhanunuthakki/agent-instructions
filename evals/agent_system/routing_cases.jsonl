@@ -1,0 +1,6 @@
+{"case_id":"bounded-deterministic-code","task_class":"coding","signals":{"deterministic_complete":true},"expected_tier":"J0"}
+{"case_id":"routine-evidence-synthesis","task_class":"research","signals":{},"expected_tier":"J1"}
+{"case_id":"cross-module-incomplete-oracle","task_class":"coding","signals":{"multi_scope":true,"missing_oracle":true},"expected_tier":"J2"}
+{"case_id":"conflicting-new-vendor-research","task_class":"research","signals":{"conflicting_evidence":true,"unfamiliar_dependency":true},"expected_tier":"J2"}
+{"case_id":"production-migration","task_class":"coding","signals":{"high_impact_production_action":true},"expected_tier":"J3"}
+{"case_id":"direct-capital-recommendation","task_class":"research","signals":{"capital_action":true},"expected_tier":"J3"}

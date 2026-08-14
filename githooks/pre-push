@@ -9,9 +9,15 @@ cd "$root" || exit 1
 run() { printf '>> %s\n' "$*" >&2; "$@" || { printf 'PRE-PUSH FAILED at: %s\n' "$*" >&2; exit 1; }; }
 has()  { command -v "$1" >/dev/null 2>&1; }
 
-if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+local_hook="$root/.githooks/pre-push"
+if [ -f "$local_hook" ]; then
+  # The project hook owns its specialized gate; the shared instruction gate below still runs.
+  run sh "$local_hook" "$@"
+elif [ -f pyproject.toml ] || [ -f requirements.txt ]; then
   # Python: format -> lint -> typecheck(s) -> tests, in order.
-  if has uv && [ -f uv.lock ]; then run uv sync --quiet; fi
+  # --all-extras: plain `uv sync` PRUNES dev tools (pytest/ruff/pyright) from the venv
+  # (documented AGENTS.md footgun), then the typecheck steps run against the gutted env.
+  if has uv && [ -f uv.lock ]; then run uv sync --quiet --all-extras; fi
   if has ruff; then run ruff format --check .; run ruff check .; fi
   if has pyright;      then run pyright;      fi
   if has basedpyright; then run basedpyright; fi
@@ -27,15 +33,25 @@ fi
 
 # --- Global instruction-system gate (the AGENTS.md / procedures/ system stays in sync) ---
 # Runs on EVERY wired repo's push, regardless of project type: a stale or hand-edited Claude
-# artifact, GEMINI trigger table, guide table, or `.githooks` doc token blocks the push. The
-# coupling is intentional — the meta-repo (C:/Users/Bhanu/.gemini) is not itself under git, so
-# this cross-repo gate is what actually enforces sync. Fix with /sync-agent-stubs; bypass once
-# with git push --no-verify.
+# artifact, GEMINI trigger table, guide table, or semantic contradiction blocks the push. The
+# .gemini meta-repo and every wired scratch repo use this same gate. Fix with
+# /sync-agent-stubs; bypass once with git push --no-verify.
 stubs="C:/Users/Bhanu/.gemini/snippets/sync_agent_stubs.py"
 if has python && [ -f "$stubs" ]; then
   run python "$stubs" --check
   if python -c "import pytest" >/dev/null 2>&1; then
-    run python -m pytest "C:/Users/Bhanu/.gemini/snippets/test_guide_generation.py" -q
+    run python -m pytest \
+      "C:/Users/Bhanu/.gemini/snippets/test_guide_generation.py" \
+      "C:/Users/Bhanu/.gemini/snippets/test_governance.py" -q
+  fi
+  governance="C:/Users/Bhanu/.gemini/snippets/judge_governance.py"
+  ledger="C:/Users/Bhanu/.gemini/governance/judge_ledger.jsonl"
+  if [ -f "$governance" ]; then
+    run python "$governance" activation-check --repository-id "$(basename "$root")"
+    if [ "$root" = "C:/Users/Bhanu/.gemini" ] || [ -f "$ledger" ]; then
+      run python "$governance" audit-ledger "$ledger" --repository-id "$(basename "$root")"
+    fi
+    python "$governance" rollout-reminders >&2 || true
   fi
 fi
 

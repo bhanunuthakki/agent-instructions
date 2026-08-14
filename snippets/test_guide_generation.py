@@ -39,6 +39,123 @@ def test_hook_probe_marks_project_as_safe_for_sandboxed_runtimes(
     assert calls[0][1:3] == ["-c", f"safe.directory={tmp_path}"]
 
 
+def test_local_hook_directory_does_not_shadow_shared_safety_hooks(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    (tmp_path / ".git").mkdir()
+    (tmp_path / ".githooks").mkdir()
+    calls: list[list[str]] = []
+
+    def record_run(args: list[str], **_kwargs: object) -> SimpleNamespace:
+        calls.append(args)
+        return SimpleNamespace(stdout=".githooks")
+
+    monkeypatch.setattr(s.subprocess, "run", record_run)
+    actions = s.ensure_hooks(tmp_path, dry=True)
+
+    assert actions == [f"set core.hooksPath -> {s.HOOKS_DIR.as_posix()}"]
+
+
+def test_shared_hooks_expose_required_composed_capabilities() -> None:
+    assert s.detect_hook_capability_drift() == []
+
+
+def test_shared_hook_is_the_only_owner_of_global_instruction_gate() -> None:
+    shared = (s.HOOKS_DIR / "pre-push").read_text(encoding="utf-8")
+    earnings_local = (
+        s.SCRATCH / "earnings-summary" / ".githooks" / "pre-push"
+    ).read_text(encoding="utf-8")
+    assert shared.count('run python "$stubs" --check') == 1
+    assert "sync_agent_stubs.py" not in earnings_local
+
+
+def test_command_artifacts_share_one_canonical_source() -> None:
+    claude = s.build_claude_artifacts()
+    codex = s.build_codex_skill_artifacts()
+    for command, source in s.COMMAND_SOURCES.items():
+        expected = source.read_text(encoding="utf-8", errors="replace")
+        assert claude[s.COMMANDS_DIR / f"{command}.md"] == expected
+        codex_name = "harden" if command == "harden" else f"source-command-{command}"
+        assert codex[s.CODEX_SKILLS_DIR / codex_name / "SKILL.md"] == expected
+
+
+def test_semantic_linter_rejects_reversed_canonical_direction(tmp_path: Path) -> None:
+    bad = tmp_path / "bad.md"
+    bad.write_text(
+        "Claude skills are canonical and procedures are overwritten.\n",
+        encoding="utf-8",
+    )
+    findings = s.detect_semantic_drift([bad])
+    assert any("canonical direction" in finding for finding in findings)
+
+
+def test_semantic_linter_rejects_stale_definitions_pointer(tmp_path: Path) -> None:
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "AGENTS.md").write_text("No `DEFINITIONS.md` yet.\n", encoding="utf-8")
+    (project / "DEFINITIONS.md").write_text("# Definitions\n", encoding="utf-8")
+    findings = s.detect_semantic_drift([project / "AGENTS.md"])
+    assert any("claims no DEFINITIONS.md" in finding for finding in findings)
+
+
+def test_semantic_linter_validates_explicit_root_heading_refs(tmp_path: Path) -> None:
+    root = tmp_path / "AGENTS.md"
+    child = tmp_path / "child.md"
+    root.write_text("# Rules\n\n## Existing\n", encoding="utf-8")
+    child.write_text("Apply [[root:Missing]].\n", encoding="utf-8")
+    findings = s.detect_semantic_drift([child], root_doc=root)
+    assert any("missing root heading" in finding for finding in findings)
+
+
+def test_semantic_linter_rejects_ordinary_stale_heading_reference(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "AGENTS.md"
+    child = tmp_path / "child.md"
+    root.write_text("# Rules\n\n## Existing\n", encoding="utf-8")
+    child.write_text("Use global `AGENTS.md` §Missing Heading.\n", encoding="utf-8")
+    findings = s.detect_semantic_drift([child], root_doc=root)
+    assert any("missing root heading" in finding for finding in findings)
+
+
+def test_semantic_linter_rejects_missing_local_markdown_link(tmp_path: Path) -> None:
+    doc = tmp_path / "doc.md"
+    doc.write_text("Read [missing](missing.REFERENCE.md).\n", encoding="utf-8")
+    findings = s.detect_semantic_drift([doc])
+    assert any("missing Markdown target" in finding for finding in findings)
+
+
+def test_unmanaged_command_artifacts_are_orphans(tmp_path: Path) -> None:
+    commands = tmp_path / "commands"
+    skills = tmp_path / "skills"
+    commands.mkdir()
+    (skills / "source-command-orphan").mkdir(parents=True)
+    (commands / "orphan.md").write_text("orphan", encoding="utf-8")
+    (skills / "source-command-orphan" / "SKILL.md").write_text(
+        "orphan", encoding="utf-8"
+    )
+    findings = s.detect_command_orphans(commands, skills)
+    assert len(findings) == 2
+
+
+def test_global_definition_override_is_semantic_drift_in_legacy_format(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "DEFINITIONS.md"
+    child = tmp_path / "project" / "DEFINITIONS.md"
+    child.parent.mkdir()
+    root.write_text(
+        "# Definitions\n\n## Judge Verdict\n\n**Definition.** Typed review result.\n",
+        encoding="utf-8",
+    )
+    child.write_text(
+        "# Definitions\n\n## Enums\n\n- **Judge Verdict** — another meaning.\n",
+        encoding="utf-8",
+    )
+    findings = s.detect_definition_override_drift(root, [child])
+    assert any("override" in finding for finding in findings)
+
+
 def _synthetic_guide() -> str:
     parts = ["# Guide\n\nIntro prose that must survive.\n"]
     for k in MARKER_KEYS:
@@ -166,9 +283,7 @@ def test_legacy_generated_wrapper_is_refreshable(tmp_path: Path) -> None:
         "Claude Code: this imports the repo rulebook.\n",
         encoding="utf-8",
     )
-    assert s.generated_wrapper_needs_update(
-        wrapper, s.claude_stub("AGENTS.md")
-    )
+    assert s.generated_wrapper_needs_update(wrapper, s.claude_stub("AGENTS.md"))
 
 
 # ----- Inverted graph: procedures/ is canonical; Claude artifacts are generated FROM it -----
@@ -283,6 +398,7 @@ def test_prefixed_reference_links_resolve_in_generated_skills() -> None:
             "llm-ops.EVALS.md",
             "llm-ops.TRANSPORTS.md",
         ],
+        "judging": ["judging.EVALS.md", "judging.REFERENCE.md"],
     }
     claude = s.build_claude_artifacts()
     codex = s.build_codex_skill_artifacts()

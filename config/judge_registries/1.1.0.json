@@ -1,0 +1,21 @@
+{
+  "registry_version": "1.1.0",
+  "enforcement_mode": "shadow",
+  "activation_requirement": "every_used_purpose_must_be_calibrated",
+  "purposes": {
+    "specialist": {
+      "description": "Primary task-quality review against the task-specific rubric.",
+      "calibration_status": "shadow",
+      "rubric_versions": [
+        "judge-specialist-1.1.0"
+      ]
+    },
+    "risk": {
+      "description": "Independent blast-radius, safety, and gate review.",
+      "calibration_status": "shadow",
+      "rubric_versions": [
+        "judge-risk-1.1.0"
+      ]
+    }
+  }
+}

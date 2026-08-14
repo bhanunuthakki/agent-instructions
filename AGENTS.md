@@ -36,6 +36,7 @@ Ask only when a missing choice would materially change the result or authorize a
 - Use existing scripts, tests, schemas, and utilities before creating replacements.
 - Keep mutable state under one writer. Parallel reads are fine; overlapping writers need explicit ownership.
 - Use canonical domain terms from `DEFINITIONS.md`. If a needed concept is undefined or ambiguous, invoke `definitions` before inventing a synonym.
+- `DEFINITIONS.md` at this root owns shared system vocabulary. Project and subtree definition files may add terms but never override an ancestor; an override request means the higher-scope term must be narrowed, qualified, or demoted.
 
 Behavior-changing code uses the `code-change` procedure. Its contract includes a relevant failing test or regression test, strong types and boundary schemas, observable degradation paths, deep-module review, UI-specific references, and repository-appropriate verification.
 
@@ -47,6 +48,7 @@ Use the smallest procedure that owns the work:
 |---|---|
 | consequential ambiguity or explicit interview | `procedures/grill-me.md` |
 | domain vocabulary or conflicting terms | `procedures/definitions.md` |
+| substantive coding/research validation, Judge, Critic, or Evaluation Suite work | `procedures/judging.md` |
 | code implementation, fix, refactor, or review | `procedures/code-change.md` |
 | branch or PR lifecycle transition with an exact Linear key | `procedures/linear-pr-sync.md` |
 | multi-agent, worktree, model-tier, or quota scheduling work | `procedures/agent-operations.md` |
@@ -60,14 +62,23 @@ Use the smallest procedure that owns the work:
 
 An external-practice check starts at the real code or configuration seam and ends with an applicability conclusion, current primary-source provenance, version and access date, and explicit uncertainty. A URL list is not evidence synthesis.
 
-## Delegation
+## Evidence governance
 
-The interactive root owns requirements, architecture, synthesis, and final verification. Delegate a bounded implementation, audit, or research slice when its brief and result can be checked independently; use the cheapest capable tier. Workers receive explicit scope or file ownership and return concise evidence. Read `agent-operations` before a burst, shared-checkout write, or recurring LLM job.
+Substantive coding and research begin with deterministic J0 proof and route through the J0-J3 policy in `procedures/judging.md`. Higher tiers add registered, purpose-specific judges; active enforcement also requires calibrated Judge purposes. Judges never replace tests, source checks, arithmetic, or owner approval. J2 uses one specialist Judge by default and adds an independent second review only for registered escalation conditions; model-family diversity is optional. J3 applies to actual irreversible or external actions, and owner approval is required only to PASS. Mandatory controls are distinct from statistical samples. Ordinary sampling remains shadow-only until the owner ratifies per-stratum Tolerable Error Rates and confidence targets. Receipt sampling does not prove invocation coverage without an independent Task Population Frame. Judge, parser, evidence, provider, or budget failure produces `HOLD`/`ABSTAIN`, never a pass or silent de-tier.
+
+## Delegation & Subagent Calibration
+
+The root agent owns architecture, synthesis, and verification. Calibrate delegation by workload type:
+- **Discovery (Read-Only):** Parallelize lightweight workers (fast/budget tier). Workers save long logs to disk and return short summaries to prevent context bloat.
+- **Research & Audit:** Fan out bounded workers; synthesize results centrally.
+- **Code Mutation:** Limit concurrent writers. Keep mutable state under one process or isolate in separate worktree branches.
+- **Tier Matching:** Match task complexity to model tier (lightweight for discovery, frontier/reasoning for synthesis). Delegate when brief and outcome are independently verifiable.
 
 ## Completion
 
 - Lead with the outcome. Report changed files, validation actually run, and remaining uncertainty or blockers.
-- Validate in the repository’s configured order: dependency sync when changed, format, lint, typecheck, tests, then build. Run the applicable checks; do not invent missing tooling.
+- Validate in the repository’s configured order: dependency sync when changed, format, lint, typecheck, tests, then build. Run applicable checks (e.g. `make check-fast` for active iteration); do not invent missing tooling.
+- Local pre-commit typechecking is rigid per-file, whereas CI enforces the authoritative diff-aware ratchet (`head_n > base_n`). If local pre-commit flags untouched legacy lines in a modified file, use `FAST_PUSH=1` or `git push --no-verify` and rely on CI.
 - Never weaken a test to accommodate an implementation.
 - For a pull request, use an imperative title and a body with `## Why`, `## Changes`, and `## Test Plan`.
 - A generated artifact is not canonical when a procedure source exists. Edit `procedures/`, then run `snippets/sync_agent_stubs.py --check --artifacts-only`, synchronize, and recheck.

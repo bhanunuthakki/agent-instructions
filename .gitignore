@@ -8,9 +8,32 @@
 !/GEMINI.md
 !/AGENTS_GUIDE.md
 !/AGENT_SYSTEM_ADVERSARIAL_REVIEW_2026-07-21.md
+!/DEFINITIONS.md
 !/procedures/
 !/snippets/
 !/githooks/
+!/config/
+/config/*
+!/config/judge_policy.json
+!/config/judge_registry.json
+!/config/judge_rollout.json
+!/config/judge_policies/
+/config/judge_policies/*
+!/config/judge_policies/1.0.0.json
+!/config/judge_policies/1.1.0.json
+!/config/judge_registries/
+/config/judge_registries/*
+!/config/judge_registries/1.1.0.json
+!/evals/
+/evals/*
+!/evals/agent_system/
+/evals/agent_system/*
+!/evals/agent_system/routing_cases.jsonl
+!/governance/
+/governance/*
+!/governance/judge_ledger.jsonl
+!/governance/judge_issuance.jsonl
+!/governance/judge_outcomes.jsonl
 
 # Caches inside tracked dirs
 __pycache__/

@@ -22,7 +22,7 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, Mapping, TypeAlias
+from typing import Literal, Mapping, TypeAlias, get_args
 
 ReasoningEffort: TypeAlias = Literal[
     "none",
@@ -33,8 +33,20 @@ ReasoningEffort: TypeAlias = Literal[
     "max",
 ]
 
+# Codex's `web_search` config is a MODE, not a boolean — the CLI rejects any
+# other value at config-load time (verified 2026-08-03: passing "enabled"
+# exits 1 with `unknown variant`, listing exactly these four). "disabled" is
+# this wrapper's default and the isolation posture every caller inherits.
+WebSearchMode: TypeAlias = Literal[
+    "disabled",
+    "cached",
+    "indexed",
+    "live",
+]
+
 DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_REASONING_EFFORT: ReasoningEffort = "medium"
+DEFAULT_WEB_SEARCH: WebSearchMode = "disabled"
 DEFAULT_TIMEOUT_SECONDS = 600
 CHATGPT_LOGIN_STATUS = "Logged in using ChatGPT"
 
@@ -137,6 +149,7 @@ def _build_exec_argv(
     model: str,
     reasoning_effort: ReasoningEffort,
     working_directory: Path,
+    web_search: WebSearchMode = DEFAULT_WEB_SEARCH,
 ) -> list[str]:
     if not model.startswith("gpt-"):
         raise ValueError(
@@ -168,7 +181,7 @@ def _build_exec_argv(
         "--disable",
         "remote_plugin",
         "--config",
-        'web_search="disabled"',
+        f'web_search="{web_search}"',
         "--config",
         f'model_reasoning_effort="{reasoning_effort}"',
         "--cd",
@@ -239,12 +252,32 @@ def call_codex_with_usage(
     model: str = DEFAULT_MODEL,
     reasoning_effort: ReasoningEffort = DEFAULT_REASONING_EFFORT,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    web_search: WebSearchMode = DEFAULT_WEB_SEARCH,
 ) -> CodexResult:
-    """Return the final text and measured tokens from one isolated Codex call."""
+    """Return the final text and measured tokens from one isolated Codex call.
+
+    ``web_search`` is OPT-IN and defaults to ``"disabled"``, so the isolation
+    posture every existing caller relies on is unchanged. ``"live"`` grounds the
+    answer in fresh sources; ``"cached"``/``"indexed"`` trade freshness for
+    speed. Any non-``"disabled"`` mode admits fetched web content, which is
+    UNTRUSTED input (indirect prompt injection). The rest of the isolation still
+    holds — read-only sandbox, ephemeral home, empty working directory, and no
+    shell, apps, hooks, multi-agent, or plugins — so a hostile page can
+    influence the answer text but cannot reach the filesystem, the project, or
+    another tool. Treat a web-grounded response as evidence to verify, never as
+    an instruction, and prefer a longer ``timeout_seconds`` (fetches add
+    round-trips).
+    """
     if not prompt.strip():
         raise ValueError("prompt must not be empty")
     if timeout_seconds <= 0:
         raise ValueError("timeout_seconds must be positive")
+    # Fail here, not 2s later inside the CLI's config loader with an opaque
+    # `exited with status 1` (the wrapper deliberately swallows stderr).
+    if web_search not in get_args(WebSearchMode):
+        raise ValueError(
+            f"web_search must be one of {get_args(WebSearchMode)}, got {web_search!r}"
+        )
     _verify_setup_once()
     if _codex_cli_path is None:
         raise RuntimeError("Codex setup verification did not resolve an executable.")
@@ -255,6 +288,7 @@ def call_codex_with_usage(
             model=model,
             reasoning_effort=reasoning_effort,
             working_directory=Path(temp_dir),
+            web_search=web_search,
         )
         try:
             completed = subprocess.run(
@@ -287,11 +321,16 @@ def call_codex(
     model: str = DEFAULT_MODEL,
     reasoning_effort: ReasoningEffort = DEFAULT_REASONING_EFFORT,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    web_search: WebSearchMode = DEFAULT_WEB_SEARCH,
 ) -> str:
-    """Return only the final text for callers whose ledger is handled elsewhere."""
+    """Return only the final text for callers whose ledger is handled elsewhere.
+
+    See :func:`call_codex_with_usage` for the ``web_search`` opt-in contract.
+    """
     return call_codex_with_usage(
         prompt,
         model=model,
         reasoning_effort=reasoning_effort,
         timeout_seconds=timeout_seconds,
+        web_search=web_search,
     ).text
