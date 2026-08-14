@@ -24,7 +24,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**17 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**18 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
@@ -36,6 +36,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
 | **grill-me** | Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. |
 | **judging** | Route substantive coding and research work through J0-J3 evidence tiers, typed judge receipts, risk controls, and statistically derived audit samples. |
+| **linear-pipeline-hygiene** | Audit and conservatively reconcile Linear pipelines across projects. |
 | **linear-pr-sync** | Synchronize an existing Linear issue with branch and pull-request progress. |
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
 | **log-redaction** | Design guidance for keeping secrets out of logs and exception output (AGENTS.md Universal Safety Rule 4). |
@@ -104,9 +105,9 @@ Domain-expert "auditors" that grade a project from idea (L0) to commercial relea
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**30 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 17 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**31 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 18 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`
+`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook

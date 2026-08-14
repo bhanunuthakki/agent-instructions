@@ -51,6 +51,7 @@ Use the smallest procedure that owns the work:
 | substantive coding/research validation, Judge, Critic, or Evaluation Suite work | `procedures/judging.md` |
 | code implementation, fix, refactor, or review | `procedures/code-change.md` |
 | branch or PR lifecycle transition with an exact Linear key | `procedures/linear-pr-sync.md` |
+| Linear backlog hygiene, cross-project cleanup, or stale/duplicate/dependency reconciliation | `procedures/linear-pipeline-hygiene.md` |
 | multi-agent, worktree, model-tier, or quota scheduling work | `procedures/agent-operations.md` |
 | drift-sensitive external decision | `procedures/external-practice.md` |
 | instruction, skill, prompt, or context hierarchy changes | `procedures/context-engineering.md` |

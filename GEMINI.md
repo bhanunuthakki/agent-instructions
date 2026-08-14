@@ -20,6 +20,7 @@ Gemini-specific context only:
 | **external-practice** | `procedures/external-practice.md` |
 | **grill-me** | `procedures/grill-me.md` |
 | **judging** | `procedures/judging.md` |
+| **linear-pipeline-hygiene** | `procedures/linear-pipeline-hygiene.md` |
 | **linear-pr-sync** | `procedures/linear-pr-sync.md` |
 | **llm-ops** | `procedures/llm-ops.md` |
 | **log-redaction** | `procedures/log-redaction.md` |
