@@ -356,6 +356,8 @@ def test_progressive_disclosure_skills_are_generated_for_both_runtimes() -> None
         "code-change",
         "context-engineering",
         "external-practice",
+        "linear-pipeline-hygiene",
+        "linear-pr-sync",
     }
     assert names <= set(s.OUR_SKILLS)
     claude = s.build_claude_artifacts()

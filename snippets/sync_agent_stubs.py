@@ -65,6 +65,7 @@ OUR_SKILLS = [
     "log-redaction",
     "explain-change",
     "linear-pr-sync",
+    "linear-pipeline-hygiene",
     "scaffold-auth",
     "scaffold-tenant-schema",
     "scaffold-design-system",
