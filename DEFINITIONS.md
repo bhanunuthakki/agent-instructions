@@ -118,8 +118,18 @@ scope: use a qualified local term or narrow/demote the global definition.
 
 **Definition.** A reviewed move of a definition to its true narrower owning scope. A downstream override request is evidence for this move, but the change holds until that owner is identified.
 
+## Reconstructability
+
+**Definition.** The guarantee that an entire system or project subsystem, including its state, schemas, data transformations, domain semantics, prompts, evaluation suites, and verification entrypoints, can be deterministically audited, rebuilt, and operated from locally owned, version-controlled repository assets alone without reliance on unversioned external harness state.
+
+## Exit-Ready Design
+
+**Definition.** The architectural discipline of keeping core business logic, data models, schemas, prompts, evaluation datasets, and verification suites runtime-neutral and locally owned, while treating runtime skills, hosted CI, subscription wrappers, provider SDKs/CLIs, model IDs, grounding connectors, and realtime formats as replaceable boundary adapters.
+**Not to be confused with.** Universal portability, which claims unconstrained zero-effort migration across arbitrary environments without adapter boundaries.
+
 # Registered cross-project collisions
 
 The unqualified terms `Decision`, `conviction`, and `drift` have different existing project
 meanings. Cross-project work must qualify them with their owning domain; they are not global
 definitions.
+

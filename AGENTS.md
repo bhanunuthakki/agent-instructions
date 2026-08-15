@@ -10,8 +10,11 @@ This is the small, always-loaded contract shared by Claude, Codex, Gemini, and o
 - `CLAUDE.md` and `GEMINI.md` add runtime mechanics only. Codex reads `AGENTS.md` directly.
 - `procedures/<name>.md` is the canonical source for reusable workflows. Claude and Codex receive generated native skills; Gemini reads the same procedure through its trigger table.
 - Source code, tests, schemas, rubrics, mockups, and directives are preferred references when they express a requirement more precisely than prose.
+- Systems are exit-ready by design rather than universally portable: prompts, schemas, domain semantics, tests, eval definitions, and deterministic verification entrypoints remain locally owned and runtime-neutral.
+- Runtime skills, hosted CI, subscription wrappers, provider SDKs/CLIs, model IDs, grounding connectors, and realtime formats are treated as replaceable adapters behind documented boundaries.
 
 When a task matches a procedure’s frontmatter description, load that procedure completely before acting. Keep unrelated procedures out of context.
+
 
 ## Safety and authority
 
