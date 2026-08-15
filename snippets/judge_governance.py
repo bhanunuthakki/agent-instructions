@@ -1130,10 +1130,12 @@ def _issuance_state(
 
 
 def _outcome_state(
-    outcome_path: Path = OUTCOME_PATH,
+    outcome_path: Path | None = OUTCOME_PATH,
     issuance_path: Path = ISSUANCE_PATH,
     repository_id: str | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
+    if outcome_path is None or not outcome_path.exists():
+        return [], 0
     try:
         events = _read_ledger(outcome_path)
         issuance = _read_ledger(issuance_path)
@@ -1180,7 +1182,7 @@ def review_policy_change(
     current_tier: str,
     signals: Mapping[str, bool],
     issuance_path: Path = ISSUANCE_PATH,
-    outcome_path: Path = OUTCOME_PATH,
+    outcome_path: Path | None = OUTCOME_PATH,
 ) -> dict[str, Any]:
     """Derive a review recommendation from the ledger; never mutate policy."""
     if current_tier not in TIERS:
@@ -1198,6 +1200,9 @@ def review_policy_change(
     invalid_receipts = [receipt for receipt in terminal if validate_receipt(receipt)]
     lineage_failures = _ledger_lineage_failures(policy_receipts)
     issuance_state = _issuance_state(policy_receipts, issuance_path)
+    if outcome_path == OUTCOME_PATH and issuance_path != ISSUANCE_PATH:
+        candidate = issuance_path.parent / OUTCOME_PATH.name
+        outcome_path = candidate if candidate.exists() else None
     outcome_events, outcome_failures = _outcome_state(outcome_path, issuance_path)
     if (
         invalid_receipts

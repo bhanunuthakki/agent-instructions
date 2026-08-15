@@ -451,3 +451,21 @@ def test_gemini_trigger_table_is_a_compact_registry() -> None:
     table = s.build_gemini_triggers()
     assert "frontmatter 'use when'" not in table
     assert "Trigger" in table and "Procedure" in table
+
+
+def test_mcp_registry_builds_valid_configs_for_all_targets() -> None:
+    configs = s.build_mcp_configs()
+    assert len(configs) == len(s.MCP_TARGETS)
+    for path, content in configs.items():
+        assert content.endswith("\n")
+        assert b"\r" not in content.encode("utf-8")
+        parsed = s.json.loads(content)
+        assert "mcpServers" in parsed
+        assert isinstance(parsed["mcpServers"], dict)
+        for universal in ("github", "linear", "fmp"):
+            assert universal in parsed["mcpServers"]
+
+
+def test_live_mcp_configs_have_no_drift() -> None:
+    assert s.detect_mcp_drift() == []
+

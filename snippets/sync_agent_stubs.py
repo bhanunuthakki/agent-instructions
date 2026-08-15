@@ -23,12 +23,14 @@ Or the /sync-agent-stubs Claude command. --check is read-only and exits non-zero
 
 from __future__ import annotations
 
+import json
 import re
 import os
 import subprocess
 import sys
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import definition_governance
 
@@ -77,6 +79,14 @@ COMMAND_SOURCES = {
     "harden": PROCEDURES_DIR / "harden.md",
     "refresh-frontier": PROCEDURES_DIR / "source-command-refresh-frontier.md",
     "sync-agent-stubs": PROCEDURES_DIR / "source-command-sync-agent-stubs.md",
+}
+
+MCP_REGISTRY = ROOT_REPO / "snippets" / "mcp_registry.json"
+MCP_TARGETS: dict[str, Path] = {
+    "gemini": ROOT_REPO / "config" / "mcp_config.json",
+    "antigravity": ROOT_REPO / "antigravity" / "mcp_config.json",
+    "claude": CLAUDE_ROOT / "mcp_config.json",
+    "codex": CODEX_ROOT / "mcp_config.json",
 }
 
 # The human-facing system map. Its inventory tables (skills/commands/agents/procedures/projects)
@@ -383,6 +393,81 @@ def detect_codex_skill_drift() -> list[str]:
             drift.append(
                 f"{rel_codex(path)}: diverged from its procedures/ source — "
                 "sync OVERWRITES it; edit the canonical procedure"
+            )
+    return drift
+
+
+def _rel_target(p: Path) -> str:
+    try:
+        return "~/.claude/" + p.relative_to(CLAUDE_ROOT).as_posix()
+    except ValueError:
+        pass
+    try:
+        return "~/.agents/" + p.relative_to(CODEX_ROOT).as_posix()
+    except ValueError:
+        pass
+    try:
+        return p.relative_to(ROOT_REPO).as_posix()
+    except ValueError:
+        return str(p)
+
+
+def build_mcp_configs() -> dict[Path, str]:
+    """Pure: compile the canonical mcp_registry.json into target JSON config strings."""
+    if not MCP_REGISTRY.exists():
+        return {}
+    data = json.loads(MCP_REGISTRY.read_text(encoding="utf-8"))
+    servers = data.get("servers", {})
+    configs: dict[Path, str] = {}
+    for target_name, path in MCP_TARGETS.items():
+        matched_servers: dict[str, Any] = {}
+        for server_name, spec in sorted(servers.items()):
+            targets = spec.get("targets", ["all"])
+            if "all" in targets or target_name in targets:
+                entry: dict[str, Any] = {}
+                if "command" in spec:
+                    entry["command"] = spec["command"]
+                if "args" in spec:
+                    entry["args"] = spec["args"]
+                if "env" in spec:
+                    entry["env"] = spec["env"]
+                matched_servers[server_name] = entry
+        payload = {"mcpServers": matched_servers}
+        configs[path] = json.dumps(payload, indent=2) + "\n"
+    return configs
+
+
+def materialize_mcp_configs(dry: bool) -> list[str]:
+    """Write target MCP configs derived from the canonical mcp_registry.json."""
+    configs = build_mcp_configs()
+    actions: list[str] = []
+    for path, content in configs.items():
+        data = content.encode("utf-8")
+        existing = path.read_bytes() if path.exists() else None
+        if existing == data:
+            continue
+        rel = _rel_target(path)
+        actions.append(("write " if existing is None else "update ") + f"{rel} from mcp_registry.json")
+        if not dry:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+    return actions
+
+
+def detect_mcp_drift() -> list[str]:
+    """Report drift between canonical mcp_registry.json and runtime MCP config files."""
+    configs = build_mcp_configs()
+    drift: list[str] = []
+    for path, expected in configs.items():
+        rel = _rel_target(path)
+        if not path.exists():
+            drift.append(
+                f"{rel}: MISSING MCP config — run sync to generate it from mcp_registry.json"
+            )
+        elif _norm(path.read_text(encoding="utf-8", errors="replace")) != _norm(expected):
+            drift.append(
+                f"{rel}: diverged from canonical mcp_registry.json — "
+                "run /sync-agent-stubs to regenerate"
             )
     return drift
 
@@ -903,6 +988,14 @@ def main() -> None:
             print(f"  - {a}")
     if readonly:  # in SYNC mode the trigger table is regenerated (auto-fixed)
         drift += detect_gemini_drift()
+
+    mcp_actions = materialize_mcp_configs(readonly)
+    if mcp_actions:
+        print("[mcp configs — synchronized from snippets/mcp_registry.json]")
+        for a in mcp_actions:
+            print(f"  - {a}")
+    if readonly:
+        drift += detect_mcp_drift()
 
     drift += (
         detect_doc_path_drift()
