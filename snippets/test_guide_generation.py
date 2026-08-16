@@ -64,6 +64,20 @@ def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None
         assert "Generated from" in artifacts[s.GEMINI_GLOBAL_RULES]
 
 
+def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
+    bootstrap = (s.ROOT_REPO / "snippets" / "bootstrap_mac.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'ROOT_REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)' in bootstrap
+    assert 'DEVELOPER_ROOT=${BHANU_DEVELOPER_ROOT:-"$HOME/Developer"}' in bootstrap
+    assert 'for PROJECT_DIR in "$DEVELOPER_ROOT"/*' in bootstrap
+    assert "--check --artifacts-only" in bootstrap
+    assert "BHANU_SCRATCH_ROOT" not in bootstrap
+    assert "C:/Users/" not in bootstrap
+    assert "C:\\Users\\" not in bootstrap
+
+
 def test_local_hook_directory_does_not_shadow_shared_safety_hooks(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

@@ -19,10 +19,8 @@ policy snapshots.
 `route` is a read-only preview and does not create a sealed episode. Governed work uses the exclusive
 `begin` writer, which appends the issuance before revealing the sampling identity:
 
-```powershell
-python C:\Users\Bhanu\.gemini\snippets\judge_governance.py begin `
-  --task-id <display-id> --task-class coding|research --signals <signals> `
-  --repository-id <repo> --work-anchor <commit-pr-or-work-unit>
+```shell
+python snippets/judge_governance.py begin --task-id <display-id> --task-class coding|research --signals <signals> --repository-id <repo> --work-anchor <commit-pr-or-work-unit>
 ```
 
 Use `--retry-of <prior-receipt.json>` for a retry. A retry keeps repository, work anchor, policy,
@@ -59,8 +57,8 @@ change, failure code, sampling state, outcome, and audit. A registered purpose a
 required; active enforcement additionally rejects purposes without calibrated status.
 Evidence references are typed but not yet verifier-backed, so policy 1.1 cannot enter active mode.
 
-```powershell
-python C:\Users\Bhanu\.gemini\snippets\judge_governance.py complete <receipt.json>
+```shell
+python snippets/judge_governance.py complete <receipt.json>
 ```
 
 `complete` validates the terminal receipt, verifies every sealed field against the issuance ledger,
@@ -82,9 +80,8 @@ both coding and research recommends a one-tier demotion review. Owner ratificati
 and no demotion may undercut the current router floor. Evidence from another tier or a Mandatory
 Control Review cannot satisfy an ordinary demotion target.
 
-```powershell
-python C:\Users\Bhanu\.gemini\snippets\judge_governance.py review-policy `
-  governance\judge_ledger.jsonl --current-tier J1 --signals <signals>
+```shell
+python snippets/judge_governance.py review-policy governance/judge_ledger.jsonl --current-tier J1 --signals <signals>
 ```
 
 Read [judging.EVALS.md](judging.EVALS.md) for sampling, audit-schema, and calibration rules, and

@@ -4,11 +4,10 @@ This module invokes the official Codex CLI as an isolated, non-interactive
 subprocess. It never uses the OpenAI SDK or API-key authentication. The managed
 CLI and its dedicated authentication home live beside this shared snippet tree.
 
-One-time setup::
+One-time setup from the agent-instructions clone::
 
-    npm.cmd install --prefix C:\\Users\\Bhanu\\.gemini\\.tools @openai/codex
-    set CODEX_HOME=C:\\Users\\Bhanu\\.gemini\\.codex-membership
-    C:\\Users\\Bhanu\\.gemini\\.tools\\node_modules\\.bin\\codex.cmd login
+    npm install --prefix .tools @openai/codex
+    CODEX_HOME=.codex-membership .tools/node_modules/.bin/codex login
 
 Choose "Sign in with ChatGPT" in the browser flow. Do not use ``--with-api-key``.
 """
@@ -51,7 +50,10 @@ DEFAULT_TIMEOUT_SECONDS = 600
 CHATGPT_LOGIN_STATUS = "Logged in using ChatGPT"
 
 _WORKSPACE_ROOT = Path(__file__).resolve().parents[1]
-MANAGED_CODEX_CLI = _WORKSPACE_ROOT / ".tools" / "node_modules" / ".bin" / "codex.cmd"
+_MANAGED_CODEX_NAME = "codex.cmd" if os.name == "nt" else "codex"
+MANAGED_CODEX_CLI = (
+    _WORKSPACE_ROOT / ".tools" / "node_modules" / ".bin" / _MANAGED_CODEX_NAME
+)
 MEMBERSHIP_CODEX_HOME = _WORKSPACE_ROOT / ".codex-membership"
 METERED_CREDENTIAL_KEYS = ("OPENAI_API_KEY", "CODEX_API_KEY")
 
@@ -97,7 +99,7 @@ def _resolve_cli() -> str:
     if resolved is None:
         raise RuntimeError(
             "Codex CLI is not installed. Install the managed copy with: "
-            "npm.cmd install --prefix C:\\Users\\Bhanu\\.gemini\\.tools @openai/codex"
+            f"npm install --prefix {_WORKSPACE_ROOT / '.tools'} @openai/codex"
         )
     return resolved
 
@@ -137,7 +139,7 @@ def _verify_setup_once() -> None:
     if status.returncode != 0 or CHATGPT_LOGIN_STATUS not in status_values:
         raise RuntimeError(
             "The dedicated Codex home is not signed in with ChatGPT. Set CODEX_HOME to "
-            f"{MEMBERSHIP_CODEX_HOME} and run the managed 'codex.cmd login' command."
+            f"{MEMBERSHIP_CODEX_HOME} and run '{cli_path} login'."
         )
     _codex_cli_path = cli_path
     _setup_verified = True

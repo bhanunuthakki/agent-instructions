@@ -8,10 +8,10 @@ description: Audit and synchronize canonical procedures, generated runtime artif
 Run the canonical generator. Procedures are the source; generated Claude and Codex artifacts are
 outputs and are overwritten.
 
-```powershell
-python C:\Users\Bhanu\.gemini\snippets\sync_agent_stubs.py --check
-python C:\Users\Bhanu\.gemini\snippets\sync_agent_stubs.py
-python C:\Users\Bhanu\.gemini\snippets\sync_agent_stubs.py --check
+```shell
+python snippets/sync_agent_stubs.py --check
+python snippets/sync_agent_stubs.py
+python snippets/sync_agent_stubs.py --check
 ```
 
 The check audits every visible scratch project, thin runtime wrappers, command/skill/fleet identity,

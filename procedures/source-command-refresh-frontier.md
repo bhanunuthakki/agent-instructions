@@ -15,7 +15,7 @@ challenged by a new candidate. Do not silently repin: run the registered parity 
 
 Then run:
 
-```powershell
-python C:\Users\Bhanu\.gemini\snippets\sync_agent_stubs.py --artifacts-only
-python C:\Users\Bhanu\.gemini\snippets\sync_agent_stubs.py --check --artifacts-only
+```shell
+python snippets/sync_agent_stubs.py --artifacts-only
+python snippets/sync_agent_stubs.py --check --artifacts-only
 ```

@@ -36,6 +36,14 @@ def reset_setup_cache(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(codex_cli, "_codex_cli_path", None)
 
 
+def test_transport_source_has_no_machine_bound_windows_install_path() -> None:
+    source = Path(codex_cli.__file__).read_text(encoding="utf-8")
+
+    assert "C:" not in source
+    assert "npm.cmd" not in source
+    assert '"codex.cmd login"' not in source
+
+
 @pytest.mark.parametrize("key", ["OPENAI_API_KEY", "CODEX_API_KEY"])
 def test_setup_rejects_metered_api_credentials(
     monkeypatch: pytest.MonkeyPatch,
