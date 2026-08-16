@@ -36,19 +36,21 @@ fi
 # artifact, GEMINI trigger table, guide table, or semantic contradiction blocks the push. The
 # .gemini meta-repo and every wired scratch repo use this same gate. Fix with
 # /sync-agent-stubs; bypass once with git push --no-verify.
-stubs="C:/Users/Bhanu/.gemini/snippets/sync_agent_stubs.py"
+hook_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+instructions_home=${AGENT_INSTRUCTIONS_HOME:-$(CDPATH= cd -- "$hook_dir/.." && pwd)}
+stubs="$instructions_home/snippets/sync_agent_stubs.py"
 if has python && [ -f "$stubs" ]; then
   run python "$stubs" --check
   if python -c "import pytest" >/dev/null 2>&1; then
     run python -m pytest \
-      "C:/Users/Bhanu/.gemini/snippets/test_guide_generation.py" \
-      "C:/Users/Bhanu/.gemini/snippets/test_governance.py" -q
+      "$instructions_home/snippets/test_guide_generation.py" \
+      "$instructions_home/snippets/test_governance.py" -q
   fi
-  governance="C:/Users/Bhanu/.gemini/snippets/judge_governance.py"
-  ledger="C:/Users/Bhanu/.gemini/governance/judge_ledger.jsonl"
+  governance="$instructions_home/snippets/judge_governance.py"
+  ledger="$instructions_home/governance/judge_ledger.jsonl"
   if [ -f "$governance" ]; then
     run python "$governance" activation-check --repository-id "$(basename "$root")"
-    if [ "$root" = "C:/Users/Bhanu/.gemini" ] || [ -f "$ledger" ]; then
+    if [ "$root" = "$instructions_home" ] || [ -f "$ledger" ]; then
       run python "$governance" audit-ledger "$ledger" --repository-id "$(basename "$root")"
     fi
     python "$governance" rollout-reminders >&2 || true

@@ -39,6 +39,31 @@ def test_hook_probe_marks_project_as_safe_for_sandboxed_runtimes(
     assert calls[0][1:3] == ["-c", f"safe.directory={tmp_path}"]
 
 
+def test_instruction_paths_are_derived_instead_of_machine_bound() -> None:
+    expected_root = Path(s.__file__).resolve().parents[1]
+
+    assert s.ROOT_REPO == expected_root
+    assert s.PROCEDURES_DIR == expected_root / "procedures"
+    assert s.HOOKS_DIR == expected_root / "githooks"
+    assert s.SCRATCH == expected_root / "antigravity" / "scratch"
+
+
+def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None:
+    artifacts = s.build_global_rulebook_artifacts()
+
+    assert s.CODEX_GLOBAL_AGENTS in artifacts
+    assert s.CLAUDE_GLOBAL_RULES in artifacts
+    assert s.GEMINI_GLOBAL_RULES in artifacts
+    assert s.AGENTS_MD.read_text(encoding="utf-8") in artifacts[s.CODEX_GLOBAL_AGENTS]
+    assert "Generated from" in artifacts[s.CLAUDE_GLOBAL_RULES]
+    if s.GEMINI_GLOBAL_RULES.resolve() == s.GEMINI_MD.resolve():
+        assert artifacts[s.GEMINI_GLOBAL_RULES] == s.GEMINI_MD.read_text(
+            encoding="utf-8"
+        )
+    else:
+        assert "Generated from" in artifacts[s.GEMINI_GLOBAL_RULES]
+
+
 def test_local_hook_directory_does_not_shadow_shared_safety_hooks(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -468,4 +493,3 @@ def test_mcp_registry_builds_valid_configs_for_all_targets() -> None:
 
 def test_live_mcp_configs_have_no_drift() -> None:
     assert s.detect_mcp_drift() == []
-

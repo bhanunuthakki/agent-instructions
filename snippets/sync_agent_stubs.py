@@ -16,16 +16,17 @@ canonical procedures/, regenerate the GEMINI.md skill-mimic trigger table, and r
 inventory tables inside AGENTS_GUIDE.md's
 <!-- BEGIN/END --> markers so the human map can never silently drift from the filesystem.
 
-Run via:  python C:\\Users\\Bhanu\\.gemini\\snippets\\sync_agent_stubs.py [--dry-run | --check] [--artifacts-only]
+Run from the instruction clone via:
+  python snippets/sync_agent_stubs.py [--dry-run | --check] [--artifacts-only]
 Or the /sync-agent-stubs Claude command. --check is read-only and exits non-zero on any drift
 (usable from CI / the pre-push hook). --artifacts-only skips project wrappers and hook wiring.
 """
 
 from __future__ import annotations
 
+import os
 import json
 import re
-import os
 import subprocess
 import sys
 from datetime import date
@@ -34,26 +35,40 @@ from typing import Any
 
 import definition_governance
 
-SCRATCH = Path(r"C:\Users\Bhanu\.gemini\antigravity\scratch")
-HOOKS_DIR = Path(r"C:\Users\Bhanu\.gemini\githooks")
-ROOT_REPO = Path(r"C:\Users\Bhanu\.gemini")
+ROOT_REPO = Path(__file__).resolve().parents[1]
+
+
+def configured_path(name: str, default: Path) -> Path:
+    """Resolve an optional machine-local path without baking a user's home into source."""
+    raw = os.environ.get(name)
+    return Path(raw).expanduser().resolve() if raw else default.resolve()
+
+
+USER_HOME = Path.home()
+SCRATCH = configured_path("BHANU_SCRATCH_ROOT", ROOT_REPO / "antigravity" / "scratch")
+HOOKS_DIR = ROOT_REPO / "githooks"
 
 # CANONICAL DIRECTION: procedures/ is the hand-authored SOURCE OF TRUTH. This script GENERATES the
 # Claude and Codex skills, the /harden command, and the agent fleet FROM procedures/ — identity
 # copies with only the directory layout remapped, so the round-trip is lossless. Gemini, Cursor,
 # and local models can read procedures/ directly. Edit procedures/<name>.md — NEVER a generated
 # ~/.claude/* or ~/.agents/* copy (it is overwritten).
-CLAUDE_ROOT = Path(r"C:\Users\Bhanu\.claude")
+CLAUDE_ROOT = configured_path("CLAUDE_CONFIG_HOME", USER_HOME / ".claude")
 SKILLS_DIR = CLAUDE_ROOT / "skills"
 COMMANDS_DIR = CLAUDE_ROOT / "commands"
 AGENTS_DIR = CLAUDE_ROOT / "agents"
-CODEX_ROOT = Path(r"C:\Users\Bhanu\.agents")
+CODEX_ROOT = configured_path("AGENTS_HOME", USER_HOME / ".agents")
 CODEX_SKILLS_DIR = CODEX_ROOT / "skills"
-PROCEDURES_DIR = Path(r"C:\Users\Bhanu\.gemini\procedures")
+CODEX_CONFIG_ROOT = configured_path("CODEX_CONFIG_HOME", USER_HOME / ".codex")
+CODEX_GLOBAL_AGENTS = CODEX_CONFIG_ROOT / "AGENTS.md"
+CLAUDE_GLOBAL_RULES = CLAUDE_ROOT / "CLAUDE.md"
+GEMINI_CONFIG_ROOT = configured_path("GEMINI_CONFIG_HOME", USER_HOME / ".gemini")
+GEMINI_GLOBAL_RULES = GEMINI_CONFIG_ROOT / "GEMINI.md"
+PROCEDURES_DIR = ROOT_REPO / "procedures"
 PROCEDURES_AGENTS_DIR = PROCEDURES_DIR / "agents"
-AGENTS_MD = Path(r"C:\Users\Bhanu\.gemini\AGENTS.md")
-GEMINI_MD = Path(r"C:\Users\Bhanu\.gemini\GEMINI.md")
-CLAUDE_MD = Path(r"C:\Users\Bhanu\.gemini\CLAUDE.md")
+AGENTS_MD = ROOT_REPO / "AGENTS.md"
+GEMINI_MD = ROOT_REPO / "GEMINI.md"
+CLAUDE_MD = ROOT_REPO / "CLAUDE.md"
 OUR_SKILLS = [
     "agent-operations",
     "code-change",
@@ -92,7 +107,7 @@ MCP_TARGETS: dict[str, Path] = {
 # The human-facing system map. Its inventory tables (skills/commands/agents/procedures/projects)
 # are regenerated from the filesystem between these markers so the counts can never silently drift;
 # all prose OUTSIDE the markers is hand-written and left untouched.
-GUIDE_PATH = Path(r"C:\Users\Bhanu\.gemini\AGENTS_GUIDE.md")
+GUIDE_PATH = ROOT_REPO / "AGENTS_GUIDE.md"
 GUIDE_MARKERS = ("skills", "commands", "agents", "procedures", "projects")
 # A healthy project CLAUDE.md/GEMINI.md is a thin @import wrapper. More than this much prose
 # (beyond the title + import line) suggests a one-off leaked into the wrapper instead of the rulebook.
@@ -303,6 +318,63 @@ def build_codex_skill_artifacts() -> dict[Path, str]:
     return out
 
 
+def _without_local_import(text: str) -> str:
+    """Drop a thin local AGENTS import before embedding a provider wrapper globally."""
+    lines = text.splitlines()
+    return "\n".join(
+        line for line in lines if line.strip() not in {"@AGENTS.md", "@./AGENTS.md"}
+    ).strip()
+
+
+def build_global_rulebook_artifacts() -> dict[Path, str]:
+    """Build global runtime guidance from the clone's canonical, tracked rulebooks."""
+    banner = (
+        "<!-- Generated from the agent-instructions repository. "
+        "Edit the tracked source and rerun snippets/sync_agent_stubs.py. -->\n\n"
+    )
+    agents = AGENTS_MD.read_text(encoding="utf-8", errors="replace")
+    claude = CLAUDE_MD.read_text(encoding="utf-8", errors="replace")
+    gemini = GEMINI_MD.read_text(encoding="utf-8", errors="replace")
+    out = {
+        CODEX_GLOBAL_AGENTS: banner + agents,
+        CLAUDE_GLOBAL_RULES: banner
+        + agents
+        + "\n\n"
+        + _without_local_import(claude)
+        + "\n",
+    }
+    # On Windows the canonical source checkout itself normally is ~/.gemini. Do not
+    # replace the source GEMINI.md with an embedded generated copy in that layout.
+    out[GEMINI_GLOBAL_RULES] = (
+        gemini
+        if GEMINI_GLOBAL_RULES.resolve() == GEMINI_MD.resolve()
+        else banner + agents + "\n\n" + _without_local_import(gemini) + "\n"
+    )
+    return out
+
+
+def materialize_global_rulebook_artifacts(dry: bool) -> list[str]:
+    actions: list[str] = []
+    for path, content in build_global_rulebook_artifacts().items():
+        data = content.encode("utf-8")
+        existing = path.read_bytes() if path.exists() else None
+        if existing == data:
+            continue
+        actions.append(("write " if existing is None else "update ") + str(path))
+        if not dry:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+    return actions
+
+
+def detect_global_rulebook_drift() -> list[str]:
+    drift: list[str] = []
+    for path, content in build_global_rulebook_artifacts().items():
+        if not path.exists() or path.read_bytes() != content.encode("utf-8"):
+            drift.append(f"global runtime rulebook drift: {path}")
+    return drift
+
+
 def materialize_claude_artifacts(dry: bool) -> list[str]:
     """Write the Claude artifacts from procedures/ (overwrites — procedures/ is canonical). Compares
     and writes RAW BYTES with LF newlines, so a generated artifact is byte-identical to its LF
@@ -447,7 +519,10 @@ def materialize_mcp_configs(dry: bool) -> list[str]:
         if existing == data:
             continue
         rel = _rel_target(path)
-        actions.append(("write " if existing is None else "update ") + f"{rel} from mcp_registry.json")
+        actions.append(
+            ("write " if existing is None else "update ")
+            + f"{rel} from mcp_registry.json"
+        )
         if not dry:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
@@ -464,7 +539,9 @@ def detect_mcp_drift() -> list[str]:
             drift.append(
                 f"{rel}: MISSING MCP config — run sync to generate it from mcp_registry.json"
             )
-        elif _norm(path.read_text(encoding="utf-8", errors="replace")) != _norm(expected):
+        elif _norm(path.read_text(encoding="utf-8", errors="replace")) != _norm(
+            expected
+        ):
             drift.append(
                 f"{rel}: diverged from canonical mcp_registry.json — "
                 "run /sync-agent-stubs to regenerate"
@@ -502,9 +579,7 @@ def detect_definition_override_drift(
     if not root_definitions.exists():
         return [f"{root_definitions}: missing global definition registry"]
     _metadata, root_terms = definition_governance.parse_document(root_definitions)
-    reserved = {
-        definition_governance.normalize_term(term): term for term in root_terms
-    }
+    reserved = {definition_governance.normalize_term(term): term for term in root_terms}
     if definition_files is None:
         definition_files = []
         skipped = {
@@ -927,15 +1002,19 @@ def main() -> None:
         "--check" in sys.argv
     )  # read-only audit; exits non-zero if anything is off (CI/hook usable)
     readonly = dry or check
-    if not SCRATCH.exists():
+    project_wiring = includes_project_wiring(sys.argv)
+    if project_wiring and not SCRATCH.exists():
         print(f"scratch parent not found: {SCRATCH}")
         sys.exit(1)
     mode = "CHECK (read-only)" if check else ("DRY RUN" if dry else "SYNC")
-    print(f"[{mode}] agent stubs under {SCRATCH}\n")
+    scope = (
+        f"project stubs under {SCRATCH}" if project_wiring else "runtime artifacts only"
+    )
+    print(f"[{mode}] {scope}\n")
 
     pending = False
     drift: list[str] = []
-    if includes_project_wiring(sys.argv):
+    if project_wiring:
         root_actions = ensure_hooks(ROOT_REPO, readonly)
         if root_actions:
             pending = True
@@ -970,6 +1049,16 @@ def main() -> None:
             print(f"  - {action}")
     if readonly:
         drift += detect_codex_skill_drift()
+
+    global_actions = materialize_global_rulebook_artifacts(readonly)
+    if global_actions:
+        print(
+            "[global runtime rulebooks — generated from tracked AGENTS/CLAUDE/GEMINI sources]"
+        )
+        for action in global_actions:
+            print(f"  - {action}")
+    if readonly:
+        drift += detect_global_rulebook_drift()
 
     guide_actions = materialize_guide(readonly)
     if guide_actions:
