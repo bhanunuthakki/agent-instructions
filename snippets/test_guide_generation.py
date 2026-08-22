@@ -9,6 +9,7 @@ Run:  python -m pytest C:\\Users\\Bhanu\\.gemini\\snippets\\test_guide_generatio
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -45,7 +46,13 @@ def test_instruction_paths_are_derived_instead_of_machine_bound() -> None:
     assert s.ROOT_REPO == expected_root
     assert s.PROCEDURES_DIR == expected_root / "procedures"
     assert s.HOOKS_DIR == expected_root / "githooks"
-    assert s.SCRATCH == expected_root / "antigravity" / "scratch"
+    configured_scratch = os.environ.get("BHANU_SCRATCH_ROOT")
+    expected_scratch = (
+        Path(configured_scratch).expanduser().resolve()
+        if configured_scratch
+        else expected_root / "antigravity" / "scratch"
+    )
+    assert s.SCRATCH == expected_scratch
 
 
 def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None:
