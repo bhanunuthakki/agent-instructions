@@ -29,6 +29,19 @@ from typing import Iterable
 ARCHIVE_PREFIX = "mac_workspace_"
 ARCHIVE_SUFFIX = ".tar.gz"
 DEFAULT_KEEP = 3
+APPLICATION_REPOSITORIES = (
+    ("Earnings-Summary", "earnings-summary"),
+    ("Portfolio-Tracker", "portfolio-tracker"),
+    ("Date-Suggester", "date-suggester"),
+    ("Angel-Memos", "angel-memos"),
+    ("Blog-Engine", "blog-engine"),
+    ("Harness", "harness"),
+    ("Huntdesk", "huntdesk"),
+    ("Reading-Companion-App", "reading-companion-app"),
+    ("Repo-Maintenance", "repo-maintenance"),
+    ("Wealthplan", "wealthplan"),
+    ("Resume-System", "bhanu-resume-system"),
+)
 EXCLUDED_DIRS = {
     ".agents",
     ".claude",
@@ -224,8 +237,8 @@ def parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("/Applications/agent-instructions"),
     )
+    p.add_argument("--applications-root", type=Path, default=Path("/Applications"))
     p.add_argument("--claude-projects-root", type=Path, default=home / "Documents" / "Claude" / "Projects")
-    p.add_argument("--recovery-root", type=Path, default=home / "Migration-Recovery")
     p.add_argument("--cloud-storage", type=Path, default=home / "Library" / "CloudStorage")
     p.add_argument("--log-dir", type=Path, default=home / "Library" / "Logs" / "MacWorkspaceBackup")
     p.add_argument("--keep", type=int, default=DEFAULT_KEEP)
@@ -236,8 +249,11 @@ def configured_sources(args: argparse.Namespace) -> list[Source]:
     return [
         Source("Developer", args.developer_root),
         Source("Agent-Instructions", args.agent_instructions_root),
+        *[
+            Source(label, args.applications_root / directory)
+            for label, directory in APPLICATION_REPOSITORIES
+        ],
         Source("Claude-Projects", args.claude_projects_root),
-        Source("Migration-Recovery", args.recovery_root),
     ]
 
 

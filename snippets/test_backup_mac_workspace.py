@@ -38,6 +38,15 @@ def test_default_sources_include_the_instruction_clone_outside_developer() -> No
     ]
 
 
+def test_default_sources_cover_expected_application_repositories_but_not_recovery() -> None:
+    sources = backup.configured_sources(backup.parser().parse_args([]))
+    labels_and_paths = {(source.label, source.path) for source in sources}
+
+    assert ("Earnings-Summary", Path("/Applications/earnings-summary")) in labels_and_paths
+    assert ("Resume-System", Path("/Applications/bhanu-resume-system")) in labels_and_paths
+    assert all(source.label != "Migration-Recovery" for source in sources)
+
+
 def test_archive_verification_preserves_git_and_rejects_unsafe_files(tmp_path: Path) -> None:
     project = tmp_path / "project"
     (project / ".git").mkdir(parents=True)
@@ -71,8 +80,6 @@ def test_dry_run_writes_a_structured_log(tmp_path: Path) -> None:
             str(developer),
             "--claude-projects-root",
             str(tmp_path / "absent-claude"),
-            "--recovery-root",
-            str(tmp_path / "absent-recovery"),
             "--cloud-storage",
             str(cloud),
             "--log-dir",

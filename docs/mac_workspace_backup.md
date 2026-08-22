@@ -1,6 +1,6 @@
-# Mac workspace and recovery backup
+# Mac workspace backup
 
-This Mac-only job archives local workspace and recovery material to Google Drive.
+This Mac-only job archives local workspace material to Google Drive.
 It is not an Earnings or Portfolio Tracker database backup. Windows remains the
 sole owner and backup writer for both live databases.
 
@@ -8,9 +8,15 @@ sole owner and backup writer for both live databases.
 
 - `~/Developer` (including `.git` and uncommitted work)
 - `/Applications/agent-instructions` (the active shared-instruction clone)
+- the known working repositories stored directly under `/Applications`:
+  `earnings-summary`, `portfolio-tracker`, `date-suggester`, `angel-memos`,
+  `blog-engine`, `harness`, `huntdesk`, `reading-companion-app`,
+  `repo-maintenance`, `wealthplan`, and `bhanu-resume-system`
 - `~/Documents/Claude/Projects`, when present
-- `~/Migration-Recovery`, when present; use this for the verified Codex-memory
-  bundle rather than backing up live Codex configuration/token directories
+
+`~/Migration-Recovery` is deliberately excluded from this job. It holds
+recovery artifacts downloaded from Google Drive, so re-archiving it to the
+same Drive would be redundant. Protect it locally with Time Machine instead.
 
 The job dynamically finds `GoogleDrive-*/My Drive` beneath
 `~/Library/CloudStorage`, then targets `scratch-backups`. It never places a
@@ -47,8 +53,8 @@ python3 snippets/backup_mac_workspace.py --verify \
 
 Each archive is built in the local temporary directory, re-opened, checked for
 its manifest and restore guide, checksum-verified, copied to Drive under an
-`.uploading` name, and atomically renamed only after the copy completes. Two
-Three completed archives are retained by default; retention applies only after a new
+`.uploading` name, and atomically renamed only after the copy completes. Three
+completed archives are retained by default; retention applies only after a new
 verified archive is published. Each invocation writes a structured summary to
 `~/Library/Logs/MacWorkspaceBackup`; launchd also captures stdout/stderr.
 
