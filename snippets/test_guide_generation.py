@@ -310,6 +310,12 @@ def test_artifacts_only_mode_skips_project_wiring() -> None:
     assert not s.includes_project_wiring(["sync_agent_stubs.py", "--artifacts-only"])
 
 
+def test_artifacts_only_mode_skips_machine_specific_inventory() -> None:
+    assert not s.includes_machine_specific_inventory(
+        ["sync_agent_stubs.py", "--artifacts-only"]
+    )
+
+
 def test_generated_project_wrappers_are_import_only() -> None:
     assert s.claude_stub("AGENTS.md") == "# Claude Code\n\n@./AGENTS.md\n"
     assert s.GEMINI_STUB == "# Gemini\n\n@./AGENTS.md\n"

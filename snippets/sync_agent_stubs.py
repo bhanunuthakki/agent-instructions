@@ -996,6 +996,11 @@ def includes_project_wiring(argv: list[str]) -> bool:
     return "--artifacts-only" not in argv
 
 
+def includes_machine_specific_inventory(argv: list[str]) -> bool:
+    """Whether this invocation may inspect machine-specific project folders."""
+    return "--artifacts-only" not in argv
+
+
 def main() -> None:
     dry = "--dry-run" in sys.argv
     check = (
@@ -1003,6 +1008,7 @@ def main() -> None:
     )  # read-only audit; exits non-zero if anything is off (CI/hook usable)
     readonly = dry or check
     project_wiring = includes_project_wiring(sys.argv)
+    machine_inventory = includes_machine_specific_inventory(sys.argv)
     if project_wiring and not SCRATCH.exists():
         print(f"scratch parent not found: {SCRATCH}")
         sys.exit(1)
@@ -1060,15 +1066,16 @@ def main() -> None:
     if readonly:
         drift += detect_global_rulebook_drift()
 
-    guide_actions = materialize_guide(readonly)
-    if guide_actions:
-        print(
-            "[AGENTS_GUIDE.md — human map; inventory tables regenerated from the filesystem]"
-        )
-        for a in guide_actions:
-            print(f"  - {a}")
-    if readonly:  # in SYNC mode the guide tables are regenerated (auto-fixed)
-        drift += detect_guide_drift()
+    if machine_inventory:
+        guide_actions = materialize_guide(readonly)
+        if guide_actions:
+            print(
+                "[AGENTS_GUIDE.md — human map; inventory tables regenerated from the filesystem]"
+            )
+            for a in guide_actions:
+                print(f"  - {a}")
+        if readonly:  # in SYNC mode the guide tables are regenerated (auto-fixed)
+            drift += detect_guide_drift()
 
     gemini_actions = materialize_gemini_triggers(readonly)
     if gemini_actions:
@@ -1091,8 +1098,15 @@ def main() -> None:
     )  # always read-only — a prose fix needs human attention
     drift += detect_hook_capability_drift()
     drift += detect_command_orphans()
-    drift += detect_definition_override_drift()
-    drift += detect_semantic_drift()
+    if machine_inventory:
+        drift += detect_definition_override_drift()
+        drift += detect_semantic_drift()
+    else:
+        drift += detect_definition_override_drift(definition_files=[])
+        drift += detect_semantic_drift(
+            docs=[AGENTS_MD, GEMINI_MD, CLAUDE_MD, GUIDE_PATH]
+            + sorted(PROCEDURES_DIR.rglob("*.md"))
+        )
 
     if drift:
         print("\n[drift — needs YOUR attention (not auto-fixed):]")
