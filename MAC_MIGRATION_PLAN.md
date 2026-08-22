@@ -4,6 +4,45 @@
 **Plan generated from a live scan:** August 15, 2026; refreshed August 16, 2026
 **Operating decision:** the Mac becomes the development computer; the Windows laptop remains the always-on runner for scheduled jobs, databases, backups, and the Portfolio Tracker API.
 
+## Mac continuation status — August 21, 2026
+
+This section is the current sequential checklist. It supersedes older Windows-era
+`WAITING` and `BLOCKED` labels below where the verified facts differ.
+
+| # | Status | Result / next gate |
+|---:|---|---|
+| 1 | DONE | Inventoried and freshly fetched all 14 Mac repositories in place under `/Applications`; no repository was moved. |
+| 2 | DONE | Weekly backup covers every actual repository root, `/Applications/agent-instructions`, `/Applications/bhanu-resume-system`, and restored `~/Documents/Claude/Projects`; it excludes `~/Migration-Recovery`, `.app` bundles, credentials, databases, environments, dependencies, caches, builds, and temporary files while retaining `.git` and dirty work. |
+| 3 | DONE | The four Drive recovery artifacts are present under `~/Migration-Recovery`, byte-identical to Drive, and intact where the format supports an independent test (`zstd -t` for both archives and `git bundle verify` for Codex memory). The encrypted database artifact was not decrypted because its key remains outside the migration flow. |
+| 4 | DONE | Restored the five non-Git reference folders under `~/Documents/Claude/Projects` without converting them to repositories. The archived Resume copy remains isolated under `~/Migration-Recovery/windows-resume-2026-08-21`. |
+| 5 | DONE; PUSH/MERGE PENDING | Owner approved the Resume recovery diff. It is committed locally as `e16d366` on `codex/windows-resume-recovery-2026-08-21`; all 65 tests pass (2 expected failures), every changed Python file passes Ruff format/lint, and the staged credential scan found zero matches. Nothing is pushed or merged. |
+| 6 | DONE | Mac bootstrap completed with no generated drift. Global Codex, Claude, and Gemini instructions exist at Mac home paths; hooks resolve to `/Applications/agent-instructions/githooks`; Codex and Claude subscription transports returned their exact harmless success markers without API keys. |
+| 7 | DEFERRED BY OWNER | FileVault is on. Google Drive is using the Stream-files CloudStorage path and no Git checkout was found there. On August 22 the owner deferred external Time Machine setup and accepted Google Drive as interim protection; Time Machine still has no configured destination, so local recovery archives currently have no independent Mac backup. |
+| 8 | PARTIAL | Rebuilt the actively used Resume Python environment from declared dependencies. Earnings and Portfolio production execution/data remain Windows-only; no Windows environment, token directory, database, or scheduled job was migrated. |
+| 9 | DONE | Final dry run: 5,908 included files, 6,289 excluded files, 344.1 MB estimated; high-confidence credential-content scan found zero matches. Destination is Drive `scratch-backups`; schedule remains Saturday 01:30 PT, retention 3, launchd inactive. |
+| 10 | DONE FROM PRIOR SESSION; NO NEW RUN | A prior live archive `mac_workspace_2026-08-21_223225.tar.gz` exists. It independently verifies all 5,892 manifest files and restored into an isolated temporary directory with Git metadata for all 14 repositories and representative files intact. No archive was pruned. |
+| 11 | DEFERRED / PARTIAL | Encrypted Time Machine remains deferred. Resume recovery is committed locally; push and merge remain separate owner-approved actions. |
+| 12 | OWNER APPROVAL REQUIRED | Load launchd only after Time Machine proof and explicit approval. Reboot Windows only after separate approval and PIN sign-in. Perform the harmless Git branch/push/merge practice only with approval before the GitHub merge. |
+
+### Mac repository inventory (fresh fetch on August 21)
+
+| Repository | Actual Mac path | Branch | Origin alignment | Worktree | Tracked files | Approx. size |
+|---|---|---|---|---|---:|---:|
+| agent-instructions | `/Applications/agent-instructions` | `main` | aligned with `origin/main` | clean before this status update | 91 | 647 MB |
+| earnings-summary | `/Applications/earnings-summary` | `main` | aligned with `origin/main` | clean | 3,189 | 187 MB |
+| portfolio-tracker | `/Applications/portfolio-tracker` | `main` | aligned with `origin/main` | clean | 170 | 3.3 MB |
+| date-suggester | `/Applications/date-suggester` | `main` | aligned with `origin/main` | clean | 91 | 2.3 MB |
+| angel-memos | `/Applications/angel-memos` | `master` | aligned with `origin/master` | clean | 75 | 1.5 MB |
+| blog-engine | `/Applications/blog-engine` | `main` | aligned with `origin/main` | clean | 54 | 676 KB |
+| harness | `/Applications/harness` | `main` | aligned with `origin/main` | clean | 34 | 436 KB |
+| huntdesk | `/Applications/huntdesk` | `main` | aligned with `origin/main` | dirty; preserved | 159 | 78 MB |
+| myclaw | `/Applications/myclaw` | `master` | behind `origin/master` by 1 | dirty; preserved, not pulled | 77 | 1.3 MB |
+| reading-companion-app | `/Applications/reading-companion-app` | `main` | aligned with `origin/main` | clean | 145 | 1.5 MB |
+| repo-maintenance | `/Applications/repo-maintenance` | `main` | aligned with `origin/main` | clean | 10 | 216 KB |
+| wealthplan | `/Applications/wealthplan` | `main` | aligned with `origin/main` | clean | 60 | 892 KB |
+| xr-glasses-dev-guide | `/Applications/xr-glasses-dev-guide` | `main` | aligned with `origin/main` | clean | 17 | 488 KB |
+| bhanu-resume-system | `/Applications/bhanu-resume-system` | `codex/windows-resume-recovery-2026-08-21` | based at current `origin/main` | dirty recovery diff; preserved | 69 | 4.1 MB |
+
 **What “mostly hands-off Windows” means:** in a normal week, you should not touch Windows. After a Windows restart, expect a two-minute remote sign-in so Google Drive and 33 jobs return. This cannot be made fully zero-touch in four days while backups depend on Google Drive for desktop. If the laptop loses power and does not turn itself back on, remote desktop cannot turn it on; check the BIOS “power on after AC loss” option if the laptop supports it.
 
 ## The simple version
