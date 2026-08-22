@@ -28,7 +28,7 @@ from typing import Iterable
 
 ARCHIVE_PREFIX = "mac_workspace_"
 ARCHIVE_SUFFIX = ".tar.gz"
-DEFAULT_KEEP = 2
+DEFAULT_KEEP = 3
 EXCLUDED_DIRS = {
     ".agents",
     ".claude",
@@ -109,6 +109,14 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def human_bytes(value: int) -> str:
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if value < 1024 or unit == "TB":
+            return f"{value:.1f} {unit}" if unit != "B" else f"{value} B"
+        value /= 1024
+    raise AssertionError("unreachable")
+
+
 def build_archive(sources: list[Source], archive: Path, *, dry_run: bool) -> dict[str, object]:
     included: list[dict[str, object]] = []
     excluded = 0
@@ -135,6 +143,7 @@ def build_archive(sources: list[Source], archive: Path, *, dry_run: bool) -> dic
         "sources": [{"label": source.label, "path": str(source.path)} for source in sources],
         "included_file_count": len(included),
         "excluded_file_count": excluded,
+        "estimated_bytes": sum(item["bytes"] for item in included),
         "files": included,
     }
     if dry_run:
@@ -210,12 +219,26 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--dry-run", action="store_true", help="show source, exclusions, and destination only")
     p.add_argument("--verify", type=Path, help="verify an existing archive and exit")
     p.add_argument("--developer-root", type=Path, default=home / "Developer")
+    p.add_argument(
+        "--agent-instructions-root",
+        type=Path,
+        default=Path("/Applications/agent-instructions"),
+    )
     p.add_argument("--claude-projects-root", type=Path, default=home / "Documents" / "Claude" / "Projects")
     p.add_argument("--recovery-root", type=Path, default=home / "Migration-Recovery")
     p.add_argument("--cloud-storage", type=Path, default=home / "Library" / "CloudStorage")
     p.add_argument("--log-dir", type=Path, default=home / "Library" / "Logs" / "MacWorkspaceBackup")
     p.add_argument("--keep", type=int, default=DEFAULT_KEEP)
     return p
+
+
+def configured_sources(args: argparse.Namespace) -> list[Source]:
+    return [
+        Source("Developer", args.developer_root),
+        Source("Agent-Instructions", args.agent_instructions_root),
+        Source("Claude-Projects", args.claude_projects_root),
+        Source("Migration-Recovery", args.recovery_root),
+    ]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -226,11 +249,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.keep < 1:
         raise ValueError("--keep must be at least 1")
-    sources = [
-        Source("Developer", args.developer_root),
-        Source("Claude-Projects", args.claude_projects_root),
-        Source("Migration-Recovery", args.recovery_root),
-    ]
+    sources = configured_sources(args)
     present = [source for source in sources if source.path.is_dir()]
     missing = [source for source in sources if not source.path.is_dir()]
     if not present:
@@ -248,7 +267,8 @@ def main(argv: list[str] | None = None) -> int:
         print("not present (skipped): " + ", ".join(str(source.path) for source in missing))
     print(
         f"contents: {manifest['included_file_count']} files; "
-        f"excluded: {manifest['excluded_file_count']} files"
+        f"excluded: {manifest['excluded_file_count']} files; "
+        f"estimated size: {human_bytes(manifest['estimated_bytes'])}"
     )
     print("exclusions: credentials/tokens/.env, SQLite databases/WAL/SHM, virtualenvs, node_modules, caches, build output, temporary files")
     log_record = {
@@ -259,6 +279,7 @@ def main(argv: list[str] | None = None) -> int:
         "missing_sources": [str(source.path) for source in missing],
         "included_file_count": manifest["included_file_count"],
         "excluded_file_count": manifest["excluded_file_count"],
+        "estimated_bytes": manifest["estimated_bytes"],
         "retention_keep": args.keep,
         "schedule": "Saturday 01:30 America/Los_Angeles; inactive pending owner approval",
     }

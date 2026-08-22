@@ -6,7 +6,7 @@
   <string>com.bhanu.mac-workspace-backup</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/usr/bin/python3</string>
+    <string>/opt/homebrew/bin/python3</string>
     <string>/Applications/agent-instructions/snippets/backup_mac_workspace.py</string>
   </array>
   <key>StartCalendarInterval</key>

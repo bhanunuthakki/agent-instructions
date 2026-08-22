@@ -7,6 +7,7 @@ sole owner and backup writer for both live databases.
 ## Scope
 
 - `~/Developer` (including `.git` and uncommitted work)
+- `/Applications/agent-instructions` (the active shared-instruction clone)
 - `~/Documents/Claude/Projects`, when present
 - `~/Migration-Recovery`, when present; use this for the verified Codex-memory
   bundle rather than backing up live Codex configuration/token directories
@@ -47,7 +48,7 @@ python3 snippets/backup_mac_workspace.py --verify \
 Each archive is built in the local temporary directory, re-opened, checked for
 its manifest and restore guide, checksum-verified, copied to Drive under an
 `.uploading` name, and atomically renamed only after the copy completes. Two
-completed archives are retained by default; retention applies only after a new
+Three completed archives are retained by default; retention applies only after a new
 verified archive is published. Each invocation writes a structured summary to
 `~/Library/Logs/MacWorkspaceBackup`; launchd also captures stdout/stderr.
 

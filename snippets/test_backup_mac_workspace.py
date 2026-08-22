@@ -30,6 +30,14 @@ def test_drive_root_is_discovered_without_an_account_name(tmp_path: Path) -> Non
     assert backup.discover_drive_root(tmp_path) == drive_root
 
 
+def test_default_sources_include_the_instruction_clone_outside_developer() -> None:
+    sources = backup.configured_sources(backup.parser().parse_args([]))
+
+    assert ("Agent-Instructions", Path("/Applications/agent-instructions")) in [
+        (source.label, source.path) for source in sources
+    ]
+
+
 def test_archive_verification_preserves_git_and_rejects_unsafe_files(tmp_path: Path) -> None:
     project = tmp_path / "project"
     (project / ".git").mkdir(parents=True)
@@ -45,6 +53,7 @@ def test_archive_verification_preserves_git_and_rejects_unsafe_files(tmp_path: P
 
     assert manifest["included_file_count"] == 2
     assert verified["included_file_count"] == 2
+    assert manifest["estimated_bytes"] == len("ref: refs/heads/main\n") + len("answer = 42\n")
 
 
 def test_dry_run_writes_a_structured_log(tmp_path: Path) -> None:
