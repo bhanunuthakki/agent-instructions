@@ -77,8 +77,8 @@ def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
     )
 
     assert 'ROOT_REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)' in bootstrap
-    assert 'DEVELOPER_ROOT=${BHANU_DEVELOPER_ROOT:-"$HOME/Developer"}' in bootstrap
-    assert 'for PROJECT_DIR in "$DEVELOPER_ROOT"/*' in bootstrap
+    assert 'PROJECT_ROOT=${BHANU_DEVELOPER_ROOT:-"$(dirname "$ROOT_REPO")"}' in bootstrap
+    assert 'for PROJECT_DIR in "$PROJECT_ROOT"/*' in bootstrap
     assert "--check --artifacts-only" in bootstrap
     assert "BHANU_SCRATCH_ROOT" not in bootstrap
     assert "C:/Users/" not in bootstrap
@@ -237,15 +237,7 @@ def test_agents_section_matches_disk_count_and_names() -> None:
 
 def test_projects_section_splits_wired_from_unwired() -> None:
     body = s.build_guide_sections()["projects"]
-    for child in sorted(s.SCRATCH.iterdir()):
-        if (
-            not child.is_dir()
-            or child.name.startswith(".")
-            or child.name.startswith(s.SKIP_PREFIXES)
-            or child.name in s.SKIP_PROJECT_NAMES
-            or s.is_linked_git_worktree(child)
-        ):
-            continue
+    for child in s.project_dirs():
         assert child.name in body  # every real project surfaces, wired or not
 
 
@@ -262,15 +254,31 @@ def test_projects_section_excludes_hidden_and_temp_dirs() -> None:
             )  # Drive temp/hidden dirs never leak into the map
 
 
+def test_project_discovery_excludes_non_repositories(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = tmp_path / "project"
+    repository.mkdir()
+    (repository / ".git").mkdir()
+    (tmp_path / "Example.app").mkdir()
+    (tmp_path / "Utilities").mkdir()
+
+    monkeypatch.setattr(s, "SCRATCH", tmp_path)
+
+    assert s.project_dirs() == [repository]
+
+
 def test_project_discovery_checks_unwired_projects_too() -> None:
     expected = {
         child
         for child in s.SCRATCH.iterdir()
         if child.is_dir()
+        and (child / ".git").is_dir()
         and not child.name.startswith(".")
         and not child.name.startswith(s.SKIP_PREFIXES)
         and child.name not in s.SKIP_PROJECT_NAMES
         and not s.is_linked_git_worktree(child)
+        and child.resolve() != s.ROOT_REPO.resolve()
     }
     assert set(s.project_dirs()) == expected
 
@@ -278,6 +286,10 @@ def test_project_discovery_checks_unwired_projects_too() -> None:
 def test_demo_sandbox_is_preserved_but_excluded_from_active_projects() -> None:
     assert "demo_sandbox" in s.SKIP_PROJECT_NAMES
     assert all(project.name != "demo_sandbox" for project in s.project_dirs())
+
+
+def test_resume_wrappers_are_deferred_while_recovery_branch_is_held() -> None:
+    assert "bhanu-resume-system" in s.DEFERRED_WRAPPER_PROJECT_NAMES
 
 
 def test_linked_git_worktree_is_not_treated_as_a_separate_project(

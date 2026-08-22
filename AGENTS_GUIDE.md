@@ -24,7 +24,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**18 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**19 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
@@ -32,6 +32,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
 | **definitions** | Build, refresh, or enforce the project’s canonical domain vocabulary in DEFINITIONS.md. |
+| **design-conformance-audit** | Audit Earnings Summary dashboard surfaces for semantic design drift that deterministic UI guards cannot detect. |
 | **explain-change** | After an LLM writes or edits code, explain the outcome, impact, risk, and proof in plain language at a depth proportional to the change. |
 | **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
 | **grill-me** | Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. |
@@ -105,19 +106,21 @@ Domain-expert "auditors" that grade a project from idea (L0) to commercial relea
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**31 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 18 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**32 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 19 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`
+`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `design-conformance-audit.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook
 
 <!-- BEGIN:projects -->
-**12 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
+**14 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
 
 | Project | Rulebook files present |
 |---|---|
+| agent-instructions | AGENTS.md, CLAUDE.md, GEMINI.md |
 | angel-memos | AGENTS.md, CLAUDE.md, GEMINI.md |
+| bhanu-resume-system | AGENTS.md |
 | blog-engine | AGENTS.md, CLAUDE.md, GEMINI.md |
 | date-suggester | AGENTS.md, CLAUDE.md, GEMINI.md |
 | earnings-summary | AGENTS.md, CLAUDE.md, GEMINI.md |

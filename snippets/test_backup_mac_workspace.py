@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import plistlib
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -83,6 +84,21 @@ def test_archive_verification_preserves_git_and_rejects_unsafe_files(tmp_path: P
     assert manifest["estimated_bytes"] == len("ref: refs/heads/main\n") + len("answer = 42\n")
 
 
+def test_sqlite_snapshot_is_consistent_and_archive_safe(tmp_path: Path) -> None:
+    source = tmp_path / "live.db"
+    with sqlite3.connect(source) as connection:
+        connection.execute("CREATE TABLE notes (body TEXT NOT NULL)")
+        connection.execute("INSERT INTO notes VALUES ('preserved')")
+    snapshot = tmp_path / "Database-Snapshots" / "HuntDesk" / "huntdesk.db.snapshot"
+
+    backup.snapshot_sqlite_database(source, snapshot)
+
+    with sqlite3.connect(f"file:{snapshot.as_posix()}?mode=ro", uri=True) as connection:
+        assert connection.execute("PRAGMA integrity_check").fetchone() == ("ok",)
+        assert connection.execute("SELECT body FROM notes").fetchone() == ("preserved",)
+    assert not backup.should_exclude(Path("Database-Snapshots/HuntDesk/huntdesk.db.snapshot"))
+
+
 def test_dry_run_writes_a_structured_log(tmp_path: Path) -> None:
     developer = tmp_path / "Developer"
     developer.mkdir()
@@ -106,3 +122,30 @@ def test_dry_run_writes_a_structured_log(tmp_path: Path) -> None:
     ) == 0
     receipt = next(logs.glob("*.json"))
     assert '"mode": "dry-run"' in receipt.read_text(encoding="utf-8")
+
+
+def test_run_output_describes_the_configured_schedule(
+    tmp_path: Path, capsys
+) -> None:
+    developer = tmp_path / "Developer"
+    developer.mkdir()
+    (developer / "notes.txt").write_text("work\n", encoding="utf-8")
+    cloud = tmp_path / "CloudStorage"
+    (cloud / "GoogleDrive-id" / "My Drive").mkdir(parents=True)
+
+    assert backup.main(
+        [
+            "--dry-run",
+            "--developer-root",
+            str(developer),
+            "--claude-projects-root",
+            str(tmp_path / "absent-claude"),
+            "--cloud-storage",
+            str(cloud),
+            "--log-dir",
+            str(tmp_path / "logs"),
+        ]
+    ) == 0
+    output = capsys.readouterr().out
+    assert "configured schedule: Saturday 01:30 America/Los_Angeles" in output
+    assert "inactive until approved" not in output

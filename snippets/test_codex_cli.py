@@ -147,3 +147,17 @@ def test_call_returns_validated_text_and_usage(
 def test_event_stream_validation_fails_loudly(stdout: str) -> None:
     with pytest.raises(codex_cli.CodexEventError):
         codex_cli._parse_exec_events(stdout)
+
+
+def test_cli_entrypoint_prints_the_transport_result(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(codex_cli, "call_codex", lambda prompt: f"reply:{prompt}")
+
+    assert codex_cli.main(["hello", "world"]) == 0
+    assert capsys.readouterr().out == "reply:hello world\n"
+
+
+def test_cli_entrypoint_requires_a_prompt(capsys: pytest.CaptureFixture[str]) -> None:
+    assert codex_cli.main([]) == 2
+    assert "Usage:" in capsys.readouterr().err

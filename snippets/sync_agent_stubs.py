@@ -120,6 +120,9 @@ WRAPPER_MAX_CHARS = 500
 # including documentation-only repositories such as xr-glasses-dev-guide.
 SKIP_PREFIXES = ("_presync", "_reconcile", "_redeploy", "localwip", "reconcile-backup")
 SKIP_PROJECT_NAMES = frozenset({"demo_sandbox"})
+# Resume recovery remains on its dedicated branch while newer Windows-local work is reconciled.
+# Wire its local safety hooks, but do not add wrapper files that would dirty that held branch.
+DEFERRED_WRAPPER_PROJECT_NAMES = frozenset({"bhanu-resume-system"})
 
 
 def is_worktree_path(p: Path) -> bool:
@@ -172,9 +175,19 @@ def generated_wrapper_needs_update(path: Path, expected: str) -> bool:
 
 
 def project_dirs() -> list[Path]:
+    """Return primary Git repositories under the configured project root.
+
+    The Mac estate lives beside normal applications under /Applications, so directory presence
+    alone is not a project signal. The instruction repository is handled separately by main().
+    """
     out: list[Path] = []
     for child in sorted(SCRATCH.iterdir()):
-        if not child.is_dir() or child.name.startswith("."):
+        if (
+            not child.is_dir()
+            or not (child / ".git").is_dir()
+            or child.name.startswith(".")
+            or child.resolve() == ROOT_REPO.resolve()
+        ):
             continue
         if (
             child.name.startswith(SKIP_PREFIXES)
@@ -869,15 +882,8 @@ def build_guide_sections() -> dict[str, str]:
 
     wired_rows: list[tuple[str, str]] = []
     unwired: list[str] = []
-    for child in sorted(SCRATCH.iterdir()):
-        if (
-            not child.is_dir()
-            or child.name.startswith(".")
-            or child.name.startswith(SKIP_PREFIXES)
-            or child.name in SKIP_PROJECT_NAMES
-            or is_linked_git_worktree(child)
-        ):
-            continue  # skip hidden/temp dirs and explicitly archived non-project folders
+    guide_projects = [ROOT_REPO, *project_dirs()]
+    for child in guide_projects:
         if (child / "AGENTS.md").exists() or (child / "GEMINI.md").exists():
             present = [
                 n
@@ -1044,13 +1050,19 @@ def main() -> None:
         for proj in project_dirs():
             if is_worktree_path(proj):
                 continue
-            actions = ensure_wrappers(proj, readonly) + ensure_hooks(proj, readonly)
+            wrapper_actions = (
+                []
+                if proj.name in DEFERRED_WRAPPER_PROJECT_NAMES
+                else ensure_wrappers(proj, readonly)
+            )
+            actions = wrapper_actions + ensure_hooks(proj, readonly)
             if actions:
                 pending = True
                 print(f"[{proj.name}]")
                 for a in actions:
                     print(f"  - {a}")
-            drift += detect_wrapper_drift(proj)
+            if proj.name not in DEFERRED_WRAPPER_PROJECT_NAMES:
+                drift += detect_wrapper_drift(proj)
 
     claude_actions = materialize_claude_artifacts(readonly)
     if claude_actions:

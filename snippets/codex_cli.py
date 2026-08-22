@@ -18,6 +18,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -336,3 +337,16 @@ def call_codex(
         timeout_seconds=timeout_seconds,
         web_search=web_search,
     ).text
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = sys.argv[1:] if argv is None else argv
+    if not args:
+        print("Usage: python codex_cli.py <prompt>", file=sys.stderr)
+        return 2
+    print(call_codex(" ".join(args)))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

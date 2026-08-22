@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Create a static, Drive-safe backup of Mac workspace and recovery material.
 
-This is deliberately not a database backup. Windows remains the only writer of
-the live Earnings and Portfolio Tracker databases.  The archive excludes every
-SQLite database and its WAL/SHM sidecars, credentials, and rebuildable files.
+Windows remains the only writer of the live Earnings and Portfolio Tracker
+databases, which are excluded with all raw SQLite files and sidecars. HuntDesk
+is a manual Mac application, so its database is captured through SQLite's
+online backup API as a verified static snapshot rather than copied live.
 It includes Git metadata and uncommitted source work so it complements GitHub
 without turning Google Drive into a live worktree synchronizer.
 """
@@ -17,6 +18,7 @@ import json
 import os
 import re
 import shutil
+import sqlite3
 import sys
 import tarfile
 import tempfile
@@ -132,6 +134,18 @@ def human_bytes(value: int) -> str:
     raise AssertionError("unreachable")
 
 
+def snapshot_sqlite_database(source: Path, destination: Path) -> None:
+    """Create and integrity-check a transactionally consistent SQLite snapshot."""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    source_uri = f"file:{source.resolve().as_posix()}?mode=ro"
+    with sqlite3.connect(source_uri, uri=True) as source_conn:
+        with sqlite3.connect(destination) as destination_conn:
+            source_conn.backup(destination_conn)
+            result = destination_conn.execute("PRAGMA integrity_check").fetchone()
+            if result != ("ok",):
+                raise RuntimeError(f"SQLite snapshot integrity check failed: {result}")
+
+
 def build_archive(sources: list[Source], archive: Path, *, dry_run: bool) -> dict[str, object]:
     included: list[dict[str, object]] = []
     excluded = 0
@@ -172,8 +186,10 @@ def build_archive(sources: list[Source], archive: Path, *, dry_run: bool) -> dic
 4. Review Git status in each restored repository, then copy only wanted files.
 
 Included: Git history and uncommitted source/recovery files.
-Excluded: live SQLite databases and sidecars, credentials/tokens/.env files,
+Excluded: raw live SQLite databases and sidecars, credentials/tokens/.env files,
 virtual environments, node_modules, caches, build output, and temporary files.
+The Database-Snapshots/HuntDesk snapshot was created with SQLite's online backup
+API and passed PRAGMA integrity_check before publication.
 Windows remains the sole writer and backup owner for live Earnings and Portfolio
 Tracker databases; restore those only through the Windows-tested DB procedure.
 """
@@ -276,9 +292,22 @@ def main(argv: list[str] | None = None) -> int:
     destination = drive_root / "scratch-backups"
     stamp = datetime.now().astimezone().strftime("%Y-%m-%d_%H%M%S")
     local_archive = Path(tempfile.gettempdir()) / f"{ARCHIVE_PREFIX}{stamp}{ARCHIVE_SUFFIX}"
-    manifest = build_archive(present, local_archive, dry_run=args.dry_run)
+    snapshot_root: Path | None = None
+    huntdesk_db = args.applications_root / "huntdesk" / "huntdesk.db"
+    if not args.dry_run and huntdesk_db.is_file():
+        snapshot_root = Path(tempfile.mkdtemp(prefix="mac-workspace-db-snapshots-"))
+        snapshot_sqlite_database(
+            huntdesk_db,
+            snapshot_root / "HuntDesk" / "huntdesk.db.snapshot",
+        )
+        present.append(Source("Database-Snapshots", snapshot_root))
+    try:
+        manifest = build_archive(present, local_archive, dry_run=args.dry_run)
+    finally:
+        if snapshot_root is not None:
+            shutil.rmtree(snapshot_root)
     print(f"destination: {destination}")
-    print(f"schedule proposal: Saturday 01:30 America/Los_Angeles (inactive until approved)")
+    print("configured schedule: Saturday 01:30 America/Los_Angeles")
     print(f"retention: keep {args.keep} completed archives")
     print("sources: " + ", ".join(str(source.path) for source in present))
     if missing:
@@ -288,7 +317,7 @@ def main(argv: list[str] | None = None) -> int:
         f"excluded: {manifest['excluded_file_count']} files; "
         f"estimated size: {human_bytes(manifest['estimated_bytes'])}"
     )
-    print("exclusions: credentials/tokens/.env, SQLite databases/WAL/SHM, virtualenvs, node_modules, caches, build output, temporary files")
+    print("exclusions: credentials/tokens/.env, raw SQLite databases/WAL/SHM, virtualenvs, node_modules, caches, build output, temporary files")
     log_record = {
         "created_at": datetime.now(UTC).isoformat(),
         "mode": "dry-run" if args.dry_run else "live",
@@ -299,7 +328,7 @@ def main(argv: list[str] | None = None) -> int:
         "excluded_file_count": manifest["excluded_file_count"],
         "estimated_bytes": manifest["estimated_bytes"],
         "retention_keep": args.keep,
-        "schedule": "Saturday 01:30 America/Los_Angeles; inactive pending owner approval",
+        "schedule": "Saturday 01:30 America/Los_Angeles; active",
     }
     args.log_dir.mkdir(parents=True, exist_ok=True)
     log_path = args.log_dir / f"mac-workspace-backup-{stamp}-{'dryrun' if args.dry_run else 'live'}.json"

@@ -1,10 +1,10 @@
 #!/bin/sh
 # Install the tracked shared agent rules from a Mac clone, then wire every
-# Git repository already cloned under ~/Developer to the same safety hooks.
+# Git repository beside this clone to the same safety hooks.
 set -eu
 
 ROOT_REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-DEVELOPER_ROOT=${BHANU_DEVELOPER_ROOT:-"$HOME/Developer"}
+PROJECT_ROOT=${BHANU_DEVELOPER_ROOT:-"$(dirname "$ROOT_REPO")"}
 PYTHON_BIN=${PYTHON_BIN:-python3}
 
 if [ "$(uname -s)" != "Darwin" ]; then
@@ -20,7 +20,7 @@ if ! command -v npm >/dev/null 2>&1; then
     exit 1
 fi
 
-mkdir -p "$DEVELOPER_ROOT"
+mkdir -p "$PROJECT_ROOT"
 npm install --prefix "$ROOT_REPO/.tools" @openai/codex
 
 AGENT_INSTRUCTIONS_HOME="$ROOT_REPO"
@@ -30,8 +30,8 @@ export AGENT_INSTRUCTIONS_HOME
 
 # Project CLAUDE.md/GEMINI.md wrappers are tracked in each repository. Only
 # wire Git repositories here; do not regenerate the tracked human guide from a
-# machine-specific subset of ~/Developer.
-for PROJECT_DIR in "$DEVELOPER_ROOT"/*; do
+# machine-specific subset of the project root.
+for PROJECT_DIR in "$PROJECT_ROOT"/*; do
     [ -d "$PROJECT_DIR/.git" ] || continue
     [ "$(CDPATH= cd -- "$PROJECT_DIR" && pwd)" = "$ROOT_REPO" ] && continue
     git -C "$PROJECT_DIR" config core.hooksPath "$ROOT_REPO/githooks"
@@ -44,7 +44,7 @@ printf '%s\n' \
     "Shared agent setup complete." \
     "Codex global rules: $HOME/.codex/AGENTS.md" \
     "Claude global rules: $HOME/.claude/CLAUDE.md" \
-    "Projects and hooks: $DEVELOPER_ROOT" \
+    "Projects and hooks: $PROJECT_ROOT" \
     "Next owner sign-ins:" \
     "  CODEX_HOME=$ROOT_REPO/.codex-membership $ROOT_REPO/.tools/node_modules/.bin/codex login" \
     "  claude auth login"
