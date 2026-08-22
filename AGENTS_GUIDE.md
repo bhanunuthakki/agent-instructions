@@ -129,8 +129,6 @@ Domain-expert "auditors" that grade a project from idea (L0) to commercial relea
 | repo-maintenance | AGENTS.md, CLAUDE.md, GEMINI.md |
 | wealthplan | AGENTS.md, CLAUDE.md, GEMINI.md |
 | xr-glasses-dev-guide | AGENTS.md, CLAUDE.md, GEMINI.md |
-
-_Not wired (no `AGENTS.md`, so the global rulebook is not inherited — run `/sync-agent-stubs` after adding one): `demo_sandbox`._
 <!-- END:projects -->
 
 ## Adding a new project
