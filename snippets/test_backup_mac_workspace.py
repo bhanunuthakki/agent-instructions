@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import plistlib
 import sys
 from pathlib import Path
 
@@ -50,6 +51,18 @@ def test_default_sources_cover_expected_application_repositories_but_not_recover
         Path("/Applications/xr-glasses-dev-guide"),
     ) in labels_and_paths
     assert all(source.label != "Migration-Recovery" for source in sources)
+
+
+def test_launchd_schedule_is_saturday_at_0130() -> None:
+    plist_path = (
+        Path(__file__).parent.parent
+        / "launchd"
+        / "com.bhanu.mac-workspace-backup.plist.disabled"
+    )
+    with plist_path.open("rb") as handle:
+        schedule = plistlib.load(handle)["StartCalendarInterval"]
+
+    assert schedule == {"Weekday": 6, "Hour": 1, "Minute": 30}
 
 
 def test_archive_verification_preserves_git_and_rejects_unsafe_files(tmp_path: Path) -> None:
