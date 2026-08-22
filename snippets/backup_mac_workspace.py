@@ -37,9 +37,11 @@ APPLICATION_REPOSITORIES = (
     ("Blog-Engine", "blog-engine"),
     ("Harness", "harness"),
     ("Huntdesk", "huntdesk"),
+    ("MyClaw", "myclaw"),
     ("Reading-Companion-App", "reading-companion-app"),
     ("Repo-Maintenance", "repo-maintenance"),
     ("Wealthplan", "wealthplan"),
+    ("XR-Glasses-Dev-Guide", "xr-glasses-dev-guide"),
     ("Resume-System", "bhanu-resume-system"),
 )
 EXCLUDED_DIRS = {

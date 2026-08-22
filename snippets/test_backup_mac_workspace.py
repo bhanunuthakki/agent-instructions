@@ -43,7 +43,12 @@ def test_default_sources_cover_expected_application_repositories_but_not_recover
     labels_and_paths = {(source.label, source.path) for source in sources}
 
     assert ("Earnings-Summary", Path("/Applications/earnings-summary")) in labels_and_paths
+    assert ("MyClaw", Path("/Applications/myclaw")) in labels_and_paths
     assert ("Resume-System", Path("/Applications/bhanu-resume-system")) in labels_and_paths
+    assert (
+        "XR-Glasses-Dev-Guide",
+        Path("/Applications/xr-glasses-dev-guide"),
+    ) in labels_and_paths
     assert all(source.label != "Migration-Recovery" for source in sources)
 
 

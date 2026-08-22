@@ -10,8 +10,9 @@ sole owner and backup writer for both live databases.
 - `/Applications/agent-instructions` (the active shared-instruction clone)
 - the known working repositories stored directly under `/Applications`:
   `earnings-summary`, `portfolio-tracker`, `date-suggester`, `angel-memos`,
-  `blog-engine`, `harness`, `huntdesk`, `reading-companion-app`,
-  `repo-maintenance`, `wealthplan`, and `bhanu-resume-system`
+  `blog-engine`, `harness`, `huntdesk`, `myclaw`, `reading-companion-app`,
+  `repo-maintenance`, `wealthplan`, `xr-glasses-dev-guide`, and
+  `bhanu-resume-system`
 - `~/Documents/Claude/Projects`, when present
 
 `~/Migration-Recovery` is deliberately excluded from this job. It holds
