@@ -16,6 +16,7 @@ Gemini-specific context only:
 | **code-change** | `procedures/code-change.md` |
 | **context-engineering** | `procedures/context-engineering.md` |
 | **definitions** | `procedures/definitions.md` |
+| **design-conformance-audit** | `procedures/design-conformance-audit.md` |
 | **explain-change** | `procedures/explain-change.md` |
 | **external-practice** | `procedures/external-practice.md` |
 | **grill-me** | `procedures/grill-me.md` |

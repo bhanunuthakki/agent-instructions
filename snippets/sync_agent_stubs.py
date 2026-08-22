@@ -73,6 +73,7 @@ OUR_SKILLS = [
     "agent-operations",
     "code-change",
     "context-engineering",
+    "design-conformance-audit",
     "external-practice",
     "grill-me",
     "definitions",
