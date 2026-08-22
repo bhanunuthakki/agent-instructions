@@ -235,6 +235,8 @@ def test_projects_section_splits_wired_from_unwired() -> None:
             not child.is_dir()
             or child.name.startswith(".")
             or child.name.startswith(s.SKIP_PREFIXES)
+            or child.name in s.SKIP_PROJECT_NAMES
+            or s.is_linked_git_worktree(child)
         ):
             continue
         assert child.name in body  # every real project surfaces, wired or not
@@ -245,6 +247,8 @@ def test_projects_section_excludes_hidden_and_temp_dirs() -> None:
     for child in s.SCRATCH.iterdir():
         if child.is_dir() and (
             child.name.startswith(".") or child.name.startswith(s.SKIP_PREFIXES)
+            or child.name in s.SKIP_PROJECT_NAMES
+            or s.is_linked_git_worktree(child)
         ):
             assert (
                 child.name not in body
@@ -258,8 +262,31 @@ def test_project_discovery_checks_unwired_projects_too() -> None:
         if child.is_dir()
         and not child.name.startswith(".")
         and not child.name.startswith(s.SKIP_PREFIXES)
+        and child.name not in s.SKIP_PROJECT_NAMES
+        and not s.is_linked_git_worktree(child)
     }
     assert set(s.project_dirs()) == expected
+
+
+def test_demo_sandbox_is_preserved_but_excluded_from_active_projects() -> None:
+    assert "demo_sandbox" in s.SKIP_PROJECT_NAMES
+    assert all(project.name != "demo_sandbox" for project in s.project_dirs())
+
+
+def test_linked_git_worktree_is_not_treated_as_a_separate_project(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    primary = tmp_path / "primary-project"
+    primary.mkdir()
+    (primary / ".git").mkdir()
+
+    linked = tmp_path / "primary-project-feature"
+    linked.mkdir()
+    (linked / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8")
+
+    monkeypatch.setattr(s, "SCRATCH", tmp_path)
+
+    assert s.project_dirs() == [primary]
 
 
 def test_missing_project_rulebook_is_reported(tmp_path: Path) -> None:

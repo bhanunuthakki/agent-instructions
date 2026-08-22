@@ -113,14 +113,21 @@ GUIDE_MARKERS = ("skills", "commands", "agents", "procedures", "projects")
 # (beyond the title + import line) suggests a one-off leaked into the wrapper instead of the rulebook.
 WRAPPER_MAX_CHARS = 500
 
-# Temporary reconciliation/worktree directories are not projects. Every other visible
-# scratch directory is an active project and must carry the standard AGENTS.md chain,
+# Temporary reconciliation/worktree directories are not projects. Explicitly archived
+# prototypes stay in the workspace backup but do not receive active-project wrappers or
+# hooks. Every other visible scratch directory must carry the standard AGENTS.md chain,
 # including documentation-only repositories such as xr-glasses-dev-guide.
 SKIP_PREFIXES = ("_presync", "_reconcile", "_redeploy", "localwip", "reconcile-backup")
+SKIP_PROJECT_NAMES = frozenset({"demo_sandbox"})
 
 
 def is_worktree_path(p: Path) -> bool:
     return ".claude" in p.parts and "worktrees" in p.parts
+
+
+def is_linked_git_worktree(project: Path) -> bool:
+    """True when ``project`` is a linked worktree rather than a primary checkout."""
+    return (project / ".git").is_file()
 
 
 def rel_claude(p: Path) -> str:
@@ -168,7 +175,11 @@ def project_dirs() -> list[Path]:
     for child in sorted(SCRATCH.iterdir()):
         if not child.is_dir() or child.name.startswith("."):
             continue
-        if child.name.startswith(SKIP_PREFIXES):
+        if (
+            child.name.startswith(SKIP_PREFIXES)
+            or child.name in SKIP_PROJECT_NAMES
+            or is_linked_git_worktree(child)
+        ):
             continue
         out.append(child)
     return out
@@ -862,8 +873,10 @@ def build_guide_sections() -> dict[str, str]:
             not child.is_dir()
             or child.name.startswith(".")
             or child.name.startswith(SKIP_PREFIXES)
+            or child.name in SKIP_PROJECT_NAMES
+            or is_linked_git_worktree(child)
         ):
-            continue  # skip hidden/temp dirs (.git, .tmp.driveupload) and known non-project prefixes
+            continue  # skip hidden/temp dirs and explicitly archived non-project folders
         if (child / "AGENTS.md").exists() or (child / "GEMINI.md").exists():
             present = [
                 n
