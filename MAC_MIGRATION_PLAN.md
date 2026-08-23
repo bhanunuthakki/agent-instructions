@@ -1,10 +1,31 @@
 # Canonical Windows-to-Mac migration plan
 
 **Mac arrival:** Wednesday, August 19, 2026  
-**Plan generated from a live scan:** August 15, 2026; refreshed August 22, 2026
+**Plan generated from a live scan:** August 15, 2026; refreshed August 23, 2026
 **Operating decision:** all development occurs on the Mac. Windows remains a production-only runner for Earnings, Portfolio, and Windows-resident backups. MyClaw is retired; Date Suggester and HuntDesk are Mac-owned.
 
-## Mac continuation status — August 22, 2026
+## Authoritative pending items — August 23, 2026
+
+This is the only active migration follow-up list. Everything not listed here is complete,
+retired, an intentional operating split, or ordinary project backlog. Historical
+`WAITING`, `BLOCKED`, `YOU NEXT`, and unchecked boxes later in this document record the
+original execution plan and are not current tasks.
+
+| Priority | Item | Owner / trigger | Current disposition |
+|---:|---|---|---|
+| 1 | Add an independent Mac backup | Owner, after purchasing an external disk | **DEFERRED BY OWNER.** FileVault is on and the verified weekly Google Drive snapshot is the accepted interim control. This does not protect against loss of the Google account. |
+| 2 | Reduce the Windows signed-in-session dependency | Future reliability project, only if unattended reboot recovery becomes important | **OPTIONAL.** This means replacing reliance on an interactive login for Google Drive and user-session jobs with machine-start services or non-Drive runtime paths. Until then, remotely sign in once after affected restarts. Earnings, Portfolio, and repository-maintenance production remain intentionally on Windows. |
+| 3 | Retire rollback artifacts | Review scheduled for August 30, 2026; deletion still requires an owner decision | **OPTIONAL CLEANUP.** Preserve the Resume recovery branch/stash, migration archives, Windows rollback copies, and retired MyClaw history until the review recommends what is safe to retire. Morning Markets Brief definitions may be archived or deleted if its retirement is permanent. |
+
+**Settled decision:** Date Suggester's four personal learning-state files remain private,
+local, and snapshot-backed. Do not publish them to Git unless the owner explicitly reverses
+this decision.
+
+Resume product/editorial work is tracked only in
+`/Applications/bhanu-resume-system/HANDOFF.md`; it is not migration work. HuntDesk product
+work belongs in the HuntDesk repository. New development for both starts from Mac `main`.
+
+## Completed migration status — August 23, 2026
 
 This section is the current sequential checklist. It supersedes older Windows-era
 `WAITING` and `BLOCKED` labels below where the verified facts differ.
@@ -15,7 +36,7 @@ This section is the current sequential checklist. It supersedes older Windows-er
 | 2 | DONE | Weekly backup covers every actual repository root, `/Applications/agent-instructions`, `/Applications/bhanu-resume-system`, and restored `~/Documents/Claude/Projects`; it excludes `~/Migration-Recovery`, `.app` bundles, credentials, databases, environments, dependencies, caches, builds, and temporary files while retaining `.git` and dirty work. |
 | 3 | DONE | The four Drive recovery artifacts are present under `~/Migration-Recovery`, byte-identical to Drive, and intact where the format supports an independent test (`zstd -t` for both archives and `git bundle verify` for Codex memory). The encrypted database artifact was not decrypted because its key remains outside the migration flow. |
 | 4 | DONE | Restored the five non-Git reference folders under `~/Documents/Claude/Projects` without converting them to repositories. The archived Resume copy remains isolated under `~/Migration-Recovery/windows-resume-2026-08-21`. |
-| 5 | DONE | Resume's six clean Windows commits were transferred through a verified Git bundle and pushed byte-identically to private `origin/main`; the Mac-only Georgia filename repair was regression-tested and pushed at `b57e3c4`. `/Applications/bhanu-resume-system` is now a clean `main` checkout aligned with the remote. The superseded recovery branch remains preserved, and its generated artifacts/prototype changes are recoverable in `stash@{0}`. |
+| 5 | DONE | Resume's six clean Windows commits were transferred through a verified Git bundle and pushed byte-identically to private `origin/main`; later recovery reconciliation and compile-gate hardening are pushed through `be1c09c`. `/Applications/bhanu-resume-system` is a clean `main` checkout aligned with the remote, and all 70 tests pass. All four fixtures now pass gate 8. The superseded recovery branch and `stash@{0}` remain optional rollback evidence. |
 | 6 | DONE | Mac bootstrap and shared instruction generation work. All 14 real repositories use `/Applications/agent-instructions/githooks`, and non-repository `.app`/Utilities folders are excluded. Both subscription-authenticated CLI wrappers passed harmless live checks on August 22: `CODEX_TRANSPORT_OK` and `CLAUDE_TRANSPORT_OK`; no API-key fallback was used. |
 | 7 | DEFERRED BY OWNER | FileVault is on. The owner explicitly accepts the active weekly Google Drive workspace snapshot as interim protection until an external Time Machine disk is purchased. This is not independent of the Google account. |
 | 8 | DONE / INTENTIONAL SPLIT | Mac holds the authoritative development checkouts and recreates project environments from declared dependencies as needed. Earnings and Portfolio production execution/data intentionally remain Windows-only; their Windows environment, token directory, database, and scheduled jobs were not duplicated on the Mac. Resume's Python environment and native macOS font path are verified. |
@@ -27,7 +48,10 @@ This section is the current sequential checklist. It supersedes older Windows-er
 | 14 | RETIRED | The owner chose not to retain MyClaw functionality. Both verified Windows jobs, `weekly_review` and `monthly_curate`, are disabled; no Mac replacement was activated and no Telegram task exists. The repository is preserved as rollback/history rather than deleted. The previously merged hardening remains useful if the project is revived. |
 | 15 | DONE | Date Suggester is now Mac-owned. Fresh official Google OAuth granted the four required scopes; the no-email canary passed. Commit `17dc68e` makes the Windows-trained sklearn model degrade safely on Mac; all 431 tests pass. The verified Windows-completed August 16 slot was seeded before cutover, `DateSuggester_Weekly` is disabled on Windows, and the Mac Sunday 09:00 LaunchAgent is loaded. Its RunAtLoad canary skipped the seeded slot, exited 0, and wrote no stderr, proving duplicate suppression. Canary-refreshed personal learning-state changes remain local and unpushed pending a separate data-publication decision. The Windows-only URI handler remains retired unless separately requested. |
 
-### Mac repository inventory (fresh fetch on August 21)
+### Historical Mac repository inventory — August 21 snapshot
+
+This table records the discovery snapshot and is not a live worktree report. The dated
+completion rows above supersede it where later reconciliation changed a repository.
 
 | Repository | Actual Mac path | Branch | Origin alignment | Worktree | Tracked files | Approx. size |
 |---|---|---|---|---|---:|---:|
@@ -57,7 +81,7 @@ That gives every important thing the right protection:
 | Thing | Working copy | Off-computer protection | If the Mac dies |
 |---|---|---|---|
 | Code already committed and pushed | Mac local folder | Private GitHub repository | Clone it again from GitHub |
-| Code not committed yet | Mac local folder | A **completed, recent** Time Machine backup | Restore from Time Machine; commit and push at the end of every work session |
+| Code not committed yet | Mac local folder | Latest completed weekly Drive workspace snapshot; Time Machine after the owner adds an external disk | Restore from the snapshot; commit and push at the end of every work session |
 | Live databases used by scheduled jobs | Windows runner only | Existing encrypted database backups in Google Drive | Restore the verified database backup |
 | Project documents, PDFs, spreadsheets, exports | Google Drive | Google cloud plus Time Machine where downloaded | Download them again |
 | Passwords, API keys, and login tokens | Each machine's secure local configuration | Password manager or fresh sign-in | Sign in again; never recover these from GitHub |
@@ -66,7 +90,14 @@ That gives every important thing the right protection:
 
 **Important:** a Git clone is a one-time download. GitHub Desktop does not silently pull forever. On the Mac you will fetch/pull before starting work, commit and push your branch, then merge the pull request on GitHub. A merge also does **not** automatically update the Windows runner. Windows deployments remain a deliberate, tested release step; scheduled jobs keep running the last approved version until that happens.
 
-## Historical pre-arrival readiness record (superseded by the checklist above)
+## Historical execution archive — not current work
+
+Sections explicitly labeled **Original** below preserve the migration sequence and
+evidence. Their status labels and checkboxes are frozen history. The intervening operating
+guidance remains applicable. Use **Authoritative pending items** at the top of this file
+for current work.
+
+### Pre-arrival readiness record
 
 This section preserves the August 15 baseline for audit history. Its counts and verdict are not current; use the dated continuation checklist above for operational decisions.
 
@@ -85,7 +116,7 @@ This section preserves the August 15 baseline for audit history. Its counts and 
 | Local agent state | Codex memory was a clean local Git repo with no remote and was outside the workspace archive | Protected snapshot | A verified Git bundle now exists in Google Drive; sign-ins, task history, plugin connections, and machine caches are intentionally recreated instead of copied |
 | Earnings on Mac | Its exact SQLite runtime is Windows/Linux-specific today | Accepted limit | Edit on Mac, execute production on Windows; do not promise Mac runtime parity yet |
 
-## Four-day master checklist
+### Original four-day master checklist
 
 The rows are deliberately sequential. Do not skip a dependency just because a later row looks easy.
 
@@ -118,7 +149,7 @@ The rows are deliberately sequential. Do not skip a dependency just because a la
 | 23 | WAITING | Wed Aug 19 | 1-2 hr | Codex | Run quick start-up checks for portable projects. For Earnings, test editing/static checks only and leave managed execution on Windows | 22 | Results are recorded per project; Windows-only limits are clearly labeled |
 | 24 | WAITING | First week | 15 min/day | You | Work from the Mac and follow the exact GitHub Desktop loop below. Connect Time Machine at least daily and commit/push at the end of each work session | 23 | No Drive worktrees; GitHub contains committed work; a recent Time Machine backup protects anything uncommitted |
 
-## Git cleanup table before cloning
+### Original Git cleanup table before cloning
 
 “Remote exists” means GitHub has a repository. It does **not** prove that today's local work is on GitHub. The live GitHub check now covers 14 repositories: 13 private and one public, Earnings Summary. Changing that repository's visibility is an owner decision because it affects anyone who may already use its public URL.
 
@@ -140,7 +171,7 @@ The rows are deliberately sequential. Do not skip a dependency just because a la
 | Resume evidence system | Newly committed and pushed to a new private GitHub repository; 34 deterministic tests pass | Clone normally; archived scratch scripts have known legacy lint warnings but active tests are green | Active private Mac project; HuntDesk consumes only approved outputs |
 | Five non-Git Claude project folders | 332 archive entries across Blog Investment Memo, Papers, Private/Public Investment Analyst, Resume parent content, and SoftwareCo Co-Founder are now in a verified Drive archive | Restore as reference folders under `~/Documents/Claude/Projects`; do not turn binary/reference collections into Git repos merely for migration | Documents/reference material, not working code repos |
 
-## What to do with the old code copies in Google Drive
+### Original rollback-copy instructions
 
 Do not edit them and do not clone from them. Before Mac cutover, have Codex identify the exact parent folder that contains the old Windows code copies, then rename only that parent folder to `OLD-WINDOWS-CODE-DO-NOT-EDIT`. Keep it unchanged for two weeks as an extra rollback copy. Work only from `~/Developer` on the Mac. After two weeks, compare the old folder with GitHub and the verified August 15 archive before deciding whether to delete anything.
 
@@ -162,7 +193,7 @@ Every Windows application release is an exact-commit boundary: record the approv
 
 The Windows laptop can stay closed, plugged in, awake, and locked. **Locked is fine; signed out is not currently fine.** Google Drive and 33 scheduled jobs still depend on a signed-in user. After a power loss or Windows Update reboot, use Chrome Remote Desktop to sign in once. Before cutover, turn on Windows restart notifications, set sensible active hours, and check whether the BIOS supports “power on after AC loss.” Removing the final login dependency is a separate reliability project, mainly because Google Drive's mounted folder is user-session software.
 
-## Exact Mac setup
+### Original Mac setup sequence
 
 | Order | Install/configure | Plain-English action | Important caution |
 |---:|---|---|---|
@@ -231,7 +262,7 @@ The target is not “everything in one cloud.” It is at least two independent 
 **Mac arrival and first-week setup:** about 8-16 engineering hours plus 2-4 hours of your direct sign-ins and choices.
 **Not required:** the extra 36-64 hours to move Earnings execution and all Windows schedules onto the Mac.
 
-## Cutover acceptance checklist
+### Original cutover acceptance checklist
 
 Do not declare the migration complete until every required box is checked or explicitly marked as
 an accepted owner deferral in the current continuation-status table above.
