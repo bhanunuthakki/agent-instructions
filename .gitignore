@@ -3,6 +3,7 @@
 # tool homes, scratch projects) must never be committed.
 /*
 !/.gitignore
+!/README.md
 !/AGENTS.md
 !/CLAUDE.md
 !/GEMINI.md
