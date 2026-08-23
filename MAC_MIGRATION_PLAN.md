@@ -2,7 +2,7 @@
 
 **Mac arrival:** Wednesday, August 19, 2026  
 **Plan generated from a live scan:** August 15, 2026; refreshed August 22, 2026
-**Operating decision:** all development moves to the Mac. Windows remains a production-only runner for Earnings, Portfolio, Windows-resident backups, and temporarily MyClaw until its single-consumer service can be cut over safely.
+**Operating decision:** all development moves to the Mac. Windows remains a production-only runner for Earnings, Portfolio, and Windows-resident backups. MyClaw's two state jobs and Date Suggester's weekly job move only through separate stop-old-before-start-new canaries.
 
 ## Mac continuation status — August 22, 2026
 
@@ -16,16 +16,16 @@ This section is the current sequential checklist. It supersedes older Windows-er
 | 3 | DONE | The four Drive recovery artifacts are present under `~/Migration-Recovery`, byte-identical to Drive, and intact where the format supports an independent test (`zstd -t` for both archives and `git bundle verify` for Codex memory). The encrypted database artifact was not decrypted because its key remains outside the migration flow. |
 | 4 | DONE | Restored the five non-Git reference folders under `~/Documents/Claude/Projects` without converting them to repositories. The archived Resume copy remains isolated under `~/Migration-Recovery/windows-resume-2026-08-21`. |
 | 5 | OWNER HOLD | Resume remains on its dedicated recovery branch while newer Windows-local Resume work is reconciled. Mac instruction sync deliberately skips creating Resume wrapper files, while its safety-hook configuration remains wired. |
-| 6 | PARTIAL | Mac bootstrap and shared instruction generation work. All 14 real repositories use `/Applications/agent-instructions/githooks`, and non-repository `.app`/Utilities folders are excluded. The Codex wrapper entry point is repaired and unit-tested, but its live prompt hung; Claude's browser flow reported success while `claude auth status` still reports logged out. Both live transport markers remain acceptance gates. |
+| 6 | DONE | Mac bootstrap and shared instruction generation work. All 14 real repositories use `/Applications/agent-instructions/githooks`, and non-repository `.app`/Utilities folders are excluded. Both subscription-authenticated CLI wrappers passed harmless live checks on August 22: `CODEX_TRANSPORT_OK` and `CLAUDE_TRANSPORT_OK`; no API-key fallback was used. |
 | 7 | DEFERRED BY OWNER | FileVault is on. The owner explicitly accepts the active weekly Google Drive workspace snapshot as interim protection until an external Time Machine disk is purchased. This is not independent of the Google account. |
 | 8 | PARTIAL | Rebuilt the actively used Resume Python environment from declared dependencies. Earnings and Portfolio production execution/data remain Windows-only; no Windows environment, token directory, database, or scheduled job was migrated. |
-| 9 | DONE | The Saturday 01:30 user LaunchAgent is installed and loaded. A live August 22 run exited 0 and published `mac_workspace_2026-08-22_161211.tar.gz` to Drive `scratch-backups`; 5,998 files verified, 6,403 excluded, 344.3 MB, retention 3. |
+| 9 | DONE | The Saturday 01:30 user LaunchAgent is installed and loaded. The latest live run exited 0 and published `mac_workspace_2026-08-22_162603.tar.gz` to Drive `scratch-backups`; 6,021 files verified. It includes an online SQLite snapshot of HuntDesk that passed restore `integrity_check` (`ok`, schema version 20), while still excluding raw live databases and sidecars. |
 | 10 | DONE FROM PRIOR SESSION; NO NEW RUN | A prior live archive `mac_workspace_2026-08-21_223225.tar.gz` exists. It independently verifies all 5,892 manifest files and restored into an isolated temporary directory with Git metadata for all 14 repositories and representative files intact. No archive was pruned. |
 | 11 | DEFERRED / PARTIAL | Encrypted Time Machine remains deferred. Resume recovery is committed locally; push and merge remain separate owner-approved actions. |
-| 12 | INVESTIGATED; LIVE CHECK PENDING | The Earnings manifest declares 43 tasks. `refresh_scenario_priors` alone targets the Windows `runtime` tree while the other 42 target `scratch`, explaining a scratch-path count of 42. Morning Markets Brief is unrelated and retired. Run `execution/verify_cron_registration.py` on Windows to determine whether this task is present, misregistered, or intentionally different. |
-| 13 | HOLD | HuntDesk is manual-only on Mac and is not a retained Windows service. Its 448 offline tests passed and DB integrity/schema are OK, but its live DB is excluded from the workspace archive. Before sole-Mac use: quiesce writers, choose/compare the authoritative DB via SQLite-consistent snapshots, restore-test it, and activate a recurring consistent DB snapshot with stale-backup detection. |
-| 14 | HOLD | MyClaw development can move to Mac, but Windows weekly/monthly jobs still mutate Git-tracked state and use unrestricted `git add -A`; the Telegram poller is also a single consumer. Before calling the split complete: establish the Windows runtime-state checkout/branch as authoritative, allowlist staged state paths, push/snapshot state commits, and define exact-commit code releases that preserve state. Runtime cutover additionally requires stop-transfer-start verification of offset, inbox, and pending audio. |
-| 15 | PENDING | Port Date Suggester's weekly job to Mac after its environment, OAuth, path assumptions, and macOS scheduling are repaired. Retire or separately port the Windows-only URI handler. |
+| 12 | DONE | Live Windows inspection found 44 tasks in `\earnings-summary\`: all 42 Task-Scheduler-owned manifest tasks, plus two healthy repo-maintenance tasks stored in that folder. `refresh_scenario_priors` exists and is Ready. The 43rd manifest lane, `capture_poller`, intentionally runs as the healthy `es-poller` Windows service instead of a scheduled task. Running the verifier from the clean production `runtime` checkout reports: `OK All 43 tasks parsed, registered and enabled`. The scratch checkout's 35 wrong-root findings are the expected guard against auditing/deploying from scratch. Morning Markets Brief is unrelated. |
+| 13 | PARTIAL | HuntDesk is manual-only on Mac and is not a retained Windows service. Its 448 offline tests passed; its Mac DB now has a recurring transactionally consistent Drive snapshot and a successful restore integrity check. Still reconcile the authoritative Windows/Mac DB and source state before declaring sole-Mac ownership; do not schedule HuntDesk. |
+| 14 | HARDENED; CUTOVER PENDING | Windows MyClaw is clean and aligned at `fd28eee`; weekly review and monthly curation are Ready and last exited 0. No `telegram_bridge` scheduled task is registered, so there is no active Windows Telegram poller to preserve or transfer. MyClaw PR #1 is merged after a J2 Sol PASS: the jobs now require a clean canonical branch aligned with origin, share one mutex, stage only procedure-owned paths, preserve immutable history byte-for-byte, reject out-of-scope changes, and push explicitly without force. Five focused tests pass. The preserved Mac checkout remains untouched; reconcile it and perform stop-Windows-before-start-Mac activation before declaring cutover. |
+| 15 | PENDING / WINDOWS HEALTHY | `DateSuggester_Weekly` is Ready on Windows, last exited 0, and next runs August 23 at 09:00. Port it only after Mac OAuth, path/scheduling fixes, stop-old-before-start-new, and a no-duplicate canary. Retire or separately port the Windows-only URI handler. |
 
 ### Mac repository inventory (fresh fetch on August 21)
 
@@ -46,7 +46,7 @@ This section is the current sequential checklist. It supersedes older Windows-er
 | xr-glasses-dev-guide | `/Applications/xr-glasses-dev-guide` | `main` | aligned with `origin/main` | clean | 17 | 488 KB |
 | bhanu-resume-system | `/Applications/bhanu-resume-system` | `codex/windows-resume-recovery-2026-08-21` | based at current `origin/main` | dirty recovery diff; preserved | 69 | 4.1 MB |
 
-**What “mostly hands-off Windows” means:** in a normal week, you should not touch Windows. After a Windows restart, expect a two-minute remote sign-in so Google Drive and 33 jobs return. This cannot be made fully zero-touch in four days while backups depend on Google Drive for desktop. If the laptop loses power and does not turn itself back on, remote desktop cannot turn it on; check the BIOS “power on after AC loss” option if the laptop supports it.
+**What “mostly hands-off Windows” means:** in a normal week, you should not touch Windows. After a Windows restart, expect a two-minute remote sign-in so Google Drive and user-session-dependent jobs return. If the laptop loses power and does not turn itself back on, remote desktop cannot turn it on; check the BIOS “power on after AC loss” option if the laptop supports it.
 
 ## The simple version
 
@@ -66,9 +66,9 @@ That gives every important thing the right protection:
 
 **Important:** a Git clone is a one-time download. GitHub Desktop does not silently pull forever. On the Mac you will fetch/pull before starting work, commit and push your branch, then merge the pull request on GitHub. A merge also does **not** automatically update the Windows runner. Windows deployments remain a deliberate, tested release step; scheduled jobs keep running the last approved version until that happens.
 
-## Current readiness verdict
+## Historical pre-arrival readiness record (superseded by the checklist above)
 
-**HOLD today. GO is possible before the Mac arrives, but it is not promised.** Status becomes GO only when every required acceptance box has evidence. The hardware/power setup is good, the repositories all have GitHub remotes, and the main database backup has a proven restore. The remaining blockers are operational, not architectural.
+This section preserves the August 15 baseline for audit history. Its counts and verdict are not current; use the dated continuation checklist above for operational decisions.
 
 | Area | Live finding | Verdict | Required outcome |
 |---|---|---:|---|
@@ -131,7 +131,7 @@ The rows are deliberately sequential. Do not skip a dependency just because a la
 | Angel Memos | `master`; one dirty definitions file | Commit or consciously leave in archive; recreate Google/Chrome authorization on Mac | Mac-ready after path/config fix |
 | Blog Engine | `main`; one dirty definitions file | Commit or consciously leave in archive; move WordPress secret/config to Mac-local config | Mac-ready; scheduled report lane may stay Windows |
 | HuntDesk | `main`; two dirty instruction/definition files; local database is ignored | Commit/resolve docs; copy database only through verified backup; recreate external Resume paths | Manual Mac app; no auto-start |
-| MyClaw | `master`; one dirty weekly-review log | Decide whether the log is official history or backup-only | Edit on Mac; Telegram/scheduled service stays Windows initially |
+| MyClaw | Mac checkout is dirty and behind one clean Windows state commit; preserved without overwrite | Reconcile the preserved state after the scheduler hardening branch passes review | Develop on Mac; move only the two verified weekly/monthly state jobs through a controlled cutover |
 | Reading Companion | Clean `main`; local captures/jobs/sessions/threads are ignored | Confirm those local records are in the workspace archive; do not assume GitHub has them | Core Node work on Mac; Android setup later |
 | Wealthplan | Clean `main`, origin present | Export/backup ignored plans and scenario state; make legacy database path configurable | Mac-ready after config |
 | Harness | Clean `main` | Replace remaining Windows CLI path assumptions before first Mac use | Mac-ready after short adapter fix |
@@ -155,7 +155,7 @@ Do not migrate these just because the Mac is newer:
 | Earnings Summary's scheduled fleet and exact SQLite runtime | It is built around Windows Task Scheduler and an exact tested SQLite/runtime arrangement that a normal Mac install cannot reproduce today | Monitor by saved health results; deploy only approved releases |
 | Portfolio Tracker API and live `portfolio.db` | Earnings reads this local Windows API; one machine must own the live database writer | Remote desktop only for recovery or an approved release |
 | Repository-maintenance backups | The source folders and Google Drive mount are on Windows | Weekly archive plus verification alert |
-| MyClaw Telegram poller plus weekly/monthly state jobs (temporary) | They are one stateful, single-consumer service; Mac sleep, secrets, offsets, dependencies, and launchd are not yet cut over | Develop on Mac, but keep all three runtime jobs together on Windows until a stop-transfer-start acceptance run |
+| MyClaw weekly/monthly state jobs (temporary) | They mutate shared Git-tracked memory and must remain serialized on one clean canonical checkout | Move both together only after scheduler hardening, state reconciliation, and a stop-Windows-before-start-Mac canary; no Telegram task is registered |
 
 HuntDesk is not on this list: it is a manual Mac application and must not be scheduled. Date Suggester is also not a permanent Windows responsibility; migrate its weekly job only after fresh Mac OAuth, portability, stop-old-before-start-new, wake/catch-up, and one no-duplicate canary digest; remove emailed URI controls unless a Mac handler is proven. Windows Git cleanup and Claude-memory streamlining retire after Windows development freezes. Design Conformance remains an on-demand skill. Morning Markets Brief is paused/dormant on both known hosts with an owner decision not to resume; archive/delete its definitions later if permanent retirement is desired.
 
