@@ -1,54 +1,55 @@
 ---
 name: model-frontier
-description: Pick an LLM against the dated cross-provider cost/performance frontier instead of from memory. Use for model cost comparisons, cheapest-at-parity routing, annual cost estimates, per-purpose model selection, or /refresh-frontier. Covers current Anthropic Claude, OpenAI GPT/Codex, and Google Gemini tiers.
+description: Pick a hosted or open-weight LLM/runtime candidate against a dated cost and capability frontier instead of from memory. Use for model cost comparisons, cheapest-at-parity routing, annual cost estimates, per-purpose model selection, or /refresh-frontier.
 ---
 
 # Model Frontier
 
-`REFERENCE.md` is the dated, blended cost-per-MTok table across Anthropic, OpenAI, and Google, ordered cheapest → most expensive. Read it before answering a price/routing question. A stale row is evidence to refresh, not authority.
+`REFERENCE.md` is the dated candidate table across the providers and runtimes actually evaluated. Read it before answering a price or routing question. A stale row is evidence to refresh, not authority.
 
-This skill is the procedure; `REFERENCE.md` is the data. Shared call governance lives in `llm-ops`; review rigor and brand-blind judging live in `judging`. Do not restate those contracts here.
+This procedure owns candidate economics. Shared call governance lives in `llm-ops`; evaluation depth lives in `llm-ops.EVALS.md`; independent task judging lives in `judging`. Do not use one purpose's receipt as evidence for another.
 
-## How to read the reference
+## Candidate records
 
-Each row is `{model id in code, provider, input $/MTok, output $/MTok, blended $/MTok, context, tier bucket, last-verified, source}`. Sort key is **blended $/MTok**. The `model id in code` column is the exact string you put in `LLM_MODELS` / `model_pin_overrides` / a `model=` arg — copy it verbatim, don't reconstruct it.
+Hosted rows record the exact model identifier, provider/runtime, input and output prices, declared context, availability, verification date, and primary source. Open-weight rows bind model, runtime, quantization, hardware, throughput, tail latency, energy or hosting cost, amortized hardware assumptions where material, availability, failure behavior, verification date, and sources.
 
-## Blended-cost formula (the sort key)
+Application code owns its routing field names. This shared procedure never assumes a project registry such as `LLM_MODELS` or `model_pin_overrides`.
 
-Output tokens cost more per token but a typical call reads far more than it writes, so weight input 6:1 over output (matches earnings-summary `model_ladder.blended_usd_per_mtok` and reproduces its Haiku anchor):
+## Search-order economics
 
+The dated reference may publish a clearly labeled input/output weighting for rough hosted-model search ordering:
+
+```text
+blended_usd_per_mtok =
+  (input_weight * input_usd_per_mtok + output_weight * output_usd_per_mtok)
+  / (input_weight + output_weight)
 ```
-blended_usd_per_mtok = (6 * input_usd_per_mtok + 1 * output_usd_per_mtok) / 7
-```
 
-This is a ranking heuristic, not a billing estimate. For an actual cost projection of one purpose, use its real measured input/output token split (see the annualized example in `REFERENCE.md`), not the blended figure.
+That heuristic is not a billing estimate or a universal workload model. For a real purpose, use its measured input/output split and attempt rate. For open-weight candidates, use total runtime economics rather than inventing a token price.
 
-## Cheapest-at-parity selection procedure
+## Cheapest-at-parity selection
 
-1. Identify the **incumbent** model for the purpose (what it routes to today) and find its blended row.
-2. Take every row **strictly cheaper** than the incumbent, in ascending blended order — that's the search order.
-3. For each candidate cheapest-first: run the purpose's eval (golden set for classifiers/structured output; rubric or pairwise LLM-judge for prose/judgment). Stop at the first candidate that holds parity.
-4. Switch only on parity + cross-judge agreement + a minimum sample, and auto-demote on regression (per `AGENTS.md`). A cheaper model that fails parity is not a candidate — keep the incumbent.
-5. Token efficiency is a secondary signal: flag a candidate that uses >1.5× the incumbent's output tokens as a cost headwind even when quality holds; note <0.8× as extra savings. Never gate the switch on it alone — per-token price usually dominates.
+1. Identify the incumbent runtime/model tuple for the named purpose and its measured workload, quality contract, latency, failures, and cost basis.
+2. Order candidates with a credible lower total cost for that purpose. Hosted blended cost is only a search heuristic; open-weight cost includes runtime and hardware economics.
+3. Evaluate candidates cheapest-first against the same representative purpose corpus, schema, failure contract, and owner-ratified threshold. Keep model/provider identities hidden from semantic graders when feasible.
+4. Promote only when quality and failure behavior hold at parity and the economic improvement survives real token/runtime usage. Keep the incumbent on insufficient or conflicting evidence.
+5. Store a promotion as reversible routing data and continue monitoring. A later regression clears or rolls back the override through the owning LLM procedure.
 
-**Default when you cannot run an eval:** recommend the incumbent, not the cheaper model. Cost-driven downgrades without a parity check are how silent quality regressions ship.
+Exploration smoke tests can justify more exploration; they cannot authorize production promotion or qualify a blocking Judge.
 
-## Authoritative sources at refresh time
+## Sources and refresh
 
-- Claude: current official Anthropic model and pricing pages.
-- OpenAI: current official model guidance/model pages on `developers.openai.com`.
-- Gemini: Google's official pricing page at `https://ai.google.dev/gemini-api/docs/pricing`.
-- A runtime-native provider skill may help retrieve those sources, but no installed skill name is assumed. Verify every changed row directly; mark unconfirmed fields `(verify)`.
+- Hosted candidate: current official provider model, capability, availability, and pricing documentation.
+- Open-weight candidate: publisher's canonical model card and license plus the selected runtime's official documentation; measure the actual runtime/model/quantization/hardware tuple locally when economics or performance matters.
+- Secondary benchmarks may identify candidates but never replace current primary documentation or representative local evaluation.
 
-## Refresh cadence
-
-Monthly, **and** on any model launch from either provider (a new tier reorders the frontier). `/refresh-frontier` re-runs the two sources above, recomputes blended values, re-sorts, and restamps `REFERENCE.md` with today's date. Bump the `last-verified` date only on rows you actually re-confirmed this pass.
+Refresh on the documented cadence and when a relevant provider, model, runtime, price, license, or hardware assumption changes. `/refresh-frontier` re-verifies only candidates actually under consideration and restamps only rows checked in that pass.
 
 ## Anti-patterns
 
-- Answering "which model is cheapest" from training memory instead of reading `REFERENCE.md`.
-- Recommending a downgrade with no parity eval ("Gemini Flash is 8× cheaper, switch to it") — cheapest-at-*parity*, not cheapest.
-- Inventing a price to one-cent precision when the source was ambiguous — mark `(verify)`.
-- Hardcoding a model per call site instead of routing a *purpose* through the central picker.
-- Treating an unavailable provider skill or a stale local cache as more authoritative than current official documentation.
-- Comparing on input price or output price alone instead of the blended sort key.
+- Selecting from memory or provider reputation.
+- Treating a context window, parameter count, or model launch date as capability evidence.
+- Recommending a downgrade without purpose-specific parity evidence.
+- Comparing open-weight and hosted candidates on token price alone.
+- Hiding runtime, quantization, hardware, latency, or failure differences.
+- Hardcoding a model at call sites rather than routing a named purpose.

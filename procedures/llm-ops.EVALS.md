@@ -10,6 +10,14 @@ Use this reference for new evals, judges, prompt comparisons, or cheaper-model r
 
 Key evals by `(purpose, prompt_version, schema_version, model, reasoning)` so each treatment is attributable. Preserve representative production shapes, including empty, long-context, malformed, and degraded-path cases.
 
+## Calibrate depth to exposure
+
+- **Exploration:** require a typed boundary, deterministic failure behavior, and a small representative smoke set. This authorizes continued exploration only; it cannot promote a production model or qualify a blocking Judge.
+- **Recurring personal use:** maintain a representative corpus, per-call quality/cost/latency/failure evidence, and tested degradation.
+- **External, commercial, or high-risk use:** add owner-ratified thresholds, calibrated graders or Judges, release gates, and profile-appropriate monitoring.
+
+Scale corpus breadth, judge count, optimization effort, and monitoring with recurrence, exposure, economics, and observed risk. Application quality evaluation, cheapest-at-parity promotion, and independent task judging are separate purposes and cannot reuse one another's receipts without an explicit shared evaluation contract.
+
 ## Brand-blind pairwise comparison
 
 Present outputs as Response A and Response B without provider, model, prompt-version, cost, or incumbent labels. Run both slot orders and require position-consistent results. The verdict schema contains `winner: A|B|tie`, confidence or margin, facet scores, and rationale tied to the rubric.
@@ -26,6 +34,8 @@ Default thresholds are starting policy, not universal truth:
 - otherwise `HOLD`.
 
 Write a switch as reversible data, not a code edit. Continue sampling and automatically clear the override when later evidence falls below the gate. Token and cost improvements count only after the quality contract passes.
+
+For open-weight candidates, bind the result to the full runtime/model/quantization/hardware tuple. Compare quality, throughput, tail latency, availability, energy or hosting cost, amortized hardware where material, and operational failure behavior; hosted token price alone is not a meaningful parity measure.
 
 ## Govern the judge
 

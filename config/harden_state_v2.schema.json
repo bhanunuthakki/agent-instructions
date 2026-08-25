@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "internal://harden-state/v2",
+  "title": "Hardening state v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "target_rung", "profile", "fingerprints", "capabilities", "gates"],
+  "properties": {
+    "$schema": {"const": "internal://harden-state/v2"},
+    "target_rung": {"enum": ["L0", "L1", "L2", "L3"]},
+    "profile": {"$ref": "#/$defs/profile"},
+    "fingerprints": {"$ref": "#/$defs/fingerprints"},
+    "capabilities": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/capability"}
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {"$ref": "#/$defs/gate"}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deployment", "identity", "commerce", "surfaces", "data", "llm", "scheduled_work"],
+      "properties": {
+        "deployment": {"enum": ["local", "distributed-client", "hosted-single-customer", "hosted-shared"]},
+        "identity": {"enum": ["none", "single-user", "multi-user", "multi-tenant"]},
+        "commerce": {"enum": ["personal", "free", "paid"]},
+        "surfaces": {"type": "array", "uniqueItems": true, "items": {"enum": ["cli", "api", "web", "native"]}},
+        "data": {"type": "array", "uniqueItems": true, "items": {"enum": ["durable", "external", "sensitive"]}},
+        "llm": {"enum": ["none", "read-only", "tool-using"]},
+        "scheduled_work": {"type": "boolean"}
+      }
+    },
+    "fingerprints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["worktree", "profile", "matrix", "rubrics"],
+      "properties": {
+        "worktree": {"$ref": "#/$defs/sha256"},
+        "profile": {"$ref": "#/$defs/sha256"},
+        "matrix": {"$ref": "#/$defs/sha256"},
+        "rubrics": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "status", "role", "runtime", "model_id", "effort", "qualified_rubrics", "limitations", "receipt_hash"],
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["AVAILABLE", "UNAVAILABLE", "UNCALIBRATED"]},
+        "role": {"enum": ["mechanical-worker", "implementation-worker", "blocking-specialist", "frontier-synthesizer"]},
+        "runtime": {"type": "string", "minLength": 1},
+        "model_id": {"type": "string", "minLength": 1},
+        "effort": {"type": "string", "minLength": 1},
+        "qualified_rubrics": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "limitations": {"type": "array", "items": {"type": "string"}},
+        "receipt_hash": {"type": "string"}
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "applicability", "rationale", "verdict", "verdict_basis", "open_findings", "finding_rules", "evidence", "evidence_hashes", "capability_receipt", "run_at", "fingerprints"],
+      "properties": {
+        "mode": {"enum": ["B", "A", "R"]},
+        "applicability": {"enum": ["APPLICABLE", "N/A"]},
+        "rationale": {"type": "string", "minLength": 1},
+        "verdict": {"enum": ["PASS", "BLOCK", "ADVISORY", "HOLD", "N/A"]},
+        "verdict_basis": {"enum": ["none", "model_receipt", "deterministic_mandatory"]},
+        "open_findings": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "finding_rules": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+        "evidence": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "evidence_hashes": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+        "capability_receipt": {"type": "string"},
+        "run_at": {"type": "string", "format": "date-time"},
+        "fingerprints": {"$ref": "#/$defs/fingerprints"}
+      }
+    }
+  }
+}

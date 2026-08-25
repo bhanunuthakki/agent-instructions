@@ -1,0 +1,6 @@
+{
+  "$schema": "internal://harden-capability-registry/v1",
+  "schema_version": 1,
+  "purpose": "hardening-gate-verdict",
+  "qualifications": []
+}

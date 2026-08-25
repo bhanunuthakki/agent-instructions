@@ -10,9 +10,9 @@ Keep mockup approval separate from production implementation. A prototype may be
 ## Default review loop
 
 1. Inspect the current diff, existing rendered page, active design contract, executable guards, and production import path. Determine whether a mockup is isolated or production-derived.
-2. For a material runnable surface, capture the baseline and exercise the primary task. State the primary user, dominant action, information order, observable friction, and smallest expected improvement under `frontend-quality`.
+2. Use the lightweight `grill-me` route when an unresolved product choice would materially change the design. For a material runnable surface, capture the baseline and exercise the primary task. State the primary user, dominant action, information order, observable friction, and smallest expected improvement under `frontend-quality`.
 3. Preserve truth: identify visible data as live, derived, owner-ratified, draft, stale, unavailable, illustrative, or proposed. For retained or added controls, note user intent, read-only versus mutating behavior, and unresolved behavior.
-4. Compose the fewest existing roles and primitives. Perform the whole-page reduction pass: remove decorative variation, redundant containers, repeated titles/subtitles, and secondary grammars before adding styling.
+4. Record whether the mockup composes an existing registered family or explores a proposed family. Compose the fewest existing roles and primitives. Perform the whole-page reduction pass: remove decorative variation, redundant containers, repeated titles/subtitles, and secondary grammars before adding styling.
 5. Verify the mockup at affected widths and states, including applicable keyboard/focus, overflow, console, and network evidence. Record browser/renderer evidence and explicit gaps.
 
 Use focused structural tests where the repository supports them. Do not modify APIs, persistence, migrations, jobs, or live routes during a mockup-only request.
@@ -27,6 +27,8 @@ For normal personal/local work, hand off:
 - a short Keep / Change / Unknown implementation note with exact seams.
 
 Approval covers only the revision shown. A later material revision reopens visual approval; production implementation still needs separate authorization.
+
+An isolated, non-mergeable mockup may use prototype-only code or CSS only when an authoritative user or project instruction pre-approves that shortcut; otherwise ask once. Label and isolate it, exclude it from production imports and live state, and discard it or recompose the approved direction through the production project's registered masters. Approval never promotes prototype code into production.
 
 ## Escalate only when the handoff is consequential
 

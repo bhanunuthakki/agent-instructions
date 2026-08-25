@@ -1,13 +1,13 @@
 ---
 name: log-redaction
-description: Design guidance for keeping secrets out of logs and exception output (AGENTS.md Universal Safety Rule 4). Use when writing code that calls an HTTP API, redacting secrets in logs, fixing a credential leak in logs/exceptions/tracebacks, or auditing a project for secret leaks. Triggers include "redact secrets", "credential leak in logs", "API key in exception", "leaked token in traceback", "audit for secret leaks".
+description: Keep secrets out of logs, exception output, and network diagnostics. Use when writing code that calls an HTTP API, redacting secrets in logs, fixing a credential leak in logs/exceptions/tracebacks, or auditing a project for secret leaks. Triggers include "redact secrets", "credential leak in logs", "API key in exception", "leaked token in traceback", "audit for secret leaks".
 ---
 
 # Log Redaction
 
-The leak surface is **stringified exceptions**, not your own `print` statements. `requests.HTTPError`, timeouts, and connection errors embed the full request URL — query string intact — in their message. Any `log.error(str(exc))` or uncaught traceback then writes the API key to stderr / disk on the next failure. This skill is the design home for AGENTS.md Universal Safety Rule 4, which carries only the one-line tripwire.
+The leak surface includes **stringified exceptions**, not only explicit `print` statements. `requests.HTTPError`, timeouts, and connection errors can embed the full request URL—query string intact—in their message. Any `log.error(str(exc))` or uncaught traceback can then write a credential to stderr or disk. This procedure owns the implementation details behind the root credential-safety invariant.
 
-**Canonical implementation: `earnings-summary/src/log_redact.py`.** It is the single source of truth — copy it or `sys.path` to it; do not re-derive the regexes. Add new provider param/key names there, not in scattered call sites.
+Use the target repository's existing redaction helper when it has one; otherwise establish one narrow typed helper at that repository's network/logging boundary. A helper from another project may be inspected as an example but is never a cross-project import or canonical dependency. Add provider parameter and key names to the owning project's helper rather than scattering regexes across call sites.
 
 ## The four moves
 

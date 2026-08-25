@@ -1,11 +1,16 @@
 ---
 name: grill-me
-description: Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. Use when the user says “grill me”, “interview me”, “interrogate me”, invokes `/grill-me`, or asks to restart requirements discovery after an under-specified result.
+description: Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision. Use for a lightweight initial clarification round when needed, or for a deeper interview when the user explicitly asks to be grilled or interviewed.
 ---
 
 # Grill Me
 
-The user explicitly wants requirements discovery before a committed deliverable. Inspect the repository and supplied references first, then ask only questions whose answers could change scope, architecture, authority, data, or user-visible behavior.
+Inspect the repository and supplied references first, then ask only questions whose answers could change the outcome, scope, authority, data, user-visible behavior, or another expensive-to-reverse decision.
+
+## Choose the mode
+
+- **Lightweight clarification:** use one concise initial round when an unresolved goal, success condition, scope boundary, or product tradeoff is load-bearing, or when a short answer is likely to avoid materially more user/agent effort. Recommend a default and continue once the branch is resolved.
+- **Deep interview:** use iterative rounds only when the user explicitly invokes `/grill-me`, asks to be interviewed, or asks to restart requirements discovery. Do not silently turn the lightweight route into a prolonged interview.
 
 ## Find the unknowns
 
@@ -20,7 +25,7 @@ Start with the highest-cost-to-reverse unknown. Resolve dependencies before leaf
 
 ## Interview
 
-- Ask one focused round at a time, sized for a real answer.
+- In lightweight mode, ask one concise round. In deep mode, ask one focused round at a time, sized for a real answer.
 - Name a recommended default and its tradeoff when the options are understood.
 - Probe interfaces, state ownership, failure behavior, permissions, data handling, out-of-scope cases, and the proof of success.
 - Do not ask for facts available in the repository or current context.

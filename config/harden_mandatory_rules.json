@@ -1,0 +1,37 @@
+{
+  "$schema": "internal://harden-mandatory-rules/v1",
+  "schema_version": 1,
+  "verifiers": {
+    "tracked-diff-secret-scan": {
+      "kind": "builtin",
+      "subprocesses": [
+        {
+          "executable": "git",
+          "arguments": ["-c", "core.quotepath=false", "diff", "--no-ext-diff", "--no-color", "--unified=0", "--no-renames", "HEAD", "--"],
+          "timeout_seconds": 10,
+          "expected_exits": {"0": "SCAN", "other": "ERROR"},
+          "output_schema": "git-unified-diff-v1"
+        },
+        {
+          "executable": "git",
+          "arguments": ["status", "--porcelain=v1", "-z", "--untracked-files=all"],
+          "timeout_seconds": 10,
+          "expected_exits": {"0": "SCAN", "other": "ERROR"},
+          "output_schema": "git-status-porcelain-v1-z"
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "product.exposed-credential-diff",
+      "owner_rubric": "sec-appsec",
+      "rungs": ["L0", "L1", "L2", "L3"],
+      "profile_selector": {},
+      "severity": "critical",
+      "verifier_id": "tracked-diff-secret-scan",
+      "expected_exit_semantics": {"0": "PASS", "4": "BLOCK", "2": "ERROR"},
+      "evidence_type": "credential-location-without-secret-value"
+    }
+  ]
+}

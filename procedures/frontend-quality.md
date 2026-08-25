@@ -11,8 +11,6 @@ Build the smallest coherent interface that makes the user's primary task easier.
 
 A **material frontend change** adds, removes, rearranges, or materially restyles a visible region, control, hierarchy, navigation path, state, or responsive behavior. Typo-only copy corrections, nonvisual handler changes, and mechanically regenerated mirrors with no rendered delta are not material.
 
-Start personal tools local and single-user by default. Do not introduce authentication, tenancy, billing, support systems, or commercial operations merely because the UI is being improved. A future commercial or multi-tenant transition is deliberate work: use `/harden --full` and the applicable architecture, security, and operations procedures.
-
 For a material change to a runnable existing interface, rendered evidence is part of implementation. For an unrunnable or non-web interface, use the closest renderer, simulator, or device evidence available and report the gap precisely. Never claim visual, hierarchy, responsive, or interaction verification that could not be observed.
 
 ## Start with the task, not the component
@@ -26,6 +24,8 @@ Before choosing cards, grids, accents, or variants, record a concise implementat
 - observed friction and the smallest visible change expected to improve it.
 
 This is working reasoning, not a mandatory questionnaire. Inspect available evidence and make reversible product judgments. Use `grill-me` only when an unresolved product choice would materially change the result; use a mockup when recognition is more useful than prose. Prototype approval never authorizes production changes.
+
+Before composing an established project interface, load the closest project design contract and every executable authority it names. Observe the current page plus its nearest shipped sibling and registered family. Preserve that family's shell, navigation, semantic text roles, controls, density, responsive grammar, and state anatomy. Introduce a new family only when the user task cannot be expressed by an existing family, with a typed rationale and an adversarial continuity test. Exact tokens, recipes, exceptions, and verification commands remain project-owned and must not be copied into this shared procedure.
 
 ## Observe–reason–change–reobserve
 

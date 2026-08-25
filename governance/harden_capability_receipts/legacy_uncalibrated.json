@@ -1,0 +1,9 @@
+{
+  "$schema": "internal://harden-legacy-evaluation-history/v1",
+  "schema_version": 1,
+  "qualifying": false,
+  "source_path": "governance/capability_evaluations.json",
+  "migrated_at": "2026-08-25T00:00:00Z",
+  "note": "The retired registry contained no evaluations. This record preserves that fact and is never a live qualification source.",
+  "evaluations": {}
+}

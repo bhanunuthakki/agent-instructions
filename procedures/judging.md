@@ -8,6 +8,20 @@ description: Route substantive coding and research work through J0-J3 evidence t
 Use the global meanings in `DEFINITIONS.md`. Review tiers describe rigor, not model size. Every
 task begins with deterministic evidence; judgment adds coverage only where the oracle is incomplete.
 Infrastructure, schema, evidence, provider, or budget failure produces `HOLD` or `ABSTAIN`.
+J0-J3 does not classify task size or decide whether to ask the user a question; clarification
+economics belongs to `grill-me` and `agent-operations`. Application model comparison and promotion
+belong to `llm-ops`, even when that evaluation itself uses a governed Judge.
+
+## Rigor budget
+
+J0 is the default when deterministic proof closes the task. Add semantic judgment only for an
+oracle gap, material risk, explicit owner request, or the release boundary defined below. Use the
+cheapest calibrated capability that satisfies the selected tier; model novelty or prestige is not
+a reason to escalate. Before adding an otherwise unrequested second Judge, broad audit, or costly
+evaluation pass solely for extra confidence, confirm the expanded scope with the owner. Do not ask
+for routine J0 proof or a Judge already required by an observed tier signal. Record a budget or
+latency limit when the owner supplies one; exhaustion yields `HOLD`/`ABSTAIN`, never reduced rigor
+disguised as PASS.
 
 Policy `1.1.0` is shadow-only for ordinary statistical enforcement until the owner ratifies a
 Tolerable Error Rate and confidence target for each coding/research stratum. Judge purposes are
@@ -46,6 +60,9 @@ coexist with unresolved risk.
 
 The root agent owns synthesis. Never leak the intended answer into a judge brief. Judges return
 typed evidence and findings; deterministic policy computes the final gate.
+Independence means a separately briefed Judge seat that receives the artifact, evidence, and rubric
+without the implementer's preferred verdict. A different provider or model family is optional unless
+the evaluation design, observed disagreement, risk, or owner explicitly requires that diversity.
 
 ## Receipt and failure contract
 
