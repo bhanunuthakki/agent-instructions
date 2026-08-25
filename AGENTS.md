@@ -41,6 +41,13 @@ Ask only when a missing choice would materially change the result or authorize a
 - Use canonical domain terms from `DEFINITIONS.md`. If a needed concept is undefined or ambiguous, invoke `definitions` before inventing a synonym.
 - `DEFINITIONS.md` at this root owns shared system vocabulary. Project and subtree definition files may add terms but never override an ancestor; an override request means the higher-scope term must be narrowed, qualified, or demoted.
 
+Cross-machine listeners use live network identity, never remembered machine identity:
+
+- `localhost` and `127.0.0.1` always name the machine running the client. Never use either to reach a service on another Mac, Windows host, VM, or container.
+- Do not construct service URLs from Windows computer names, local usernames, cached Tailscale device names or IPs, or remembered MagicDNS suffixes.
+- For a backend fronted by Tailscale Serve, keep the backend loopback-only and take the client-facing HTTPS origin from live `tailscale serve status` on the serving host. A name from `tailscale status` alone is not proof that the active Serve certificate and proxy use that name.
+- After a host rename or identity mismatch, reset and reapply the Serve mapping, update every exact-origin allowlist such as CORS from the new Serve URL, restart the backend, and verify both host-local and cross-machine requests. Do not enable Funnel or a public listener without explicit authorization.
+
 Behavior-changing code uses the `code-change` procedure. Its contract includes a relevant failing test or regression test, strong types and boundary schemas, observable degradation paths, deep-module review, UI-specific references, and repository-appropriate verification.
 
 ## Progressive procedures
