@@ -1,24 +1,24 @@
 # Agent scheduling and quota reference
 
-Use this reference only for multi-agent bursts or recurring jobs that call Claude or Codex.
+Use this reference only for multi-agent bursts or recurring jobs that consume a shared model quota.
 
-## Shared subscription pools
+## Shared capacity
 
-- `claude_cli.py` and interactive Claude sessions share the Claude Pro/Max window.
-- `codex_cli.py` and interactive Codex sessions share ChatGPT/Codex membership usage and credits.
-- Record provider and transport separately in usage ledgers. A subscription avoids per-call API billing but not quota exhaustion.
+- Treat interactive sessions, application calls, scheduled jobs, and delegated workers that use the same account or transport as one capacity pool until measured otherwise.
+- Record provider, transport, purpose, model identifier, and measured usage separately. A subscription changes billing mechanics, not exhaustion risk.
+- The machine or project schedule registry is authoritative for protected windows. This shared reference does not own project-specific times.
 
 ## Before a burst or new recurring job
 
-1. Inspect the machine’s scheduled tasks and relevant repo `cron/` directories for LLM-calling jobs.
-2. Keep 03:00–05:00 America/Los_Angeles clear. The earnings-summary morning pipeline runs at 04:00 and its monthly scenario-prior refresh runs at 03:00.
-3. Run one bounded agent wave per quota window and space waves by at least 6–7 hours.
-4. If the task list cannot be inspected, say so and avoid scheduling into the protected window.
+1. Inspect the machine schedule and the relevant project registry for jobs using the same capacity pool.
+2. Identify protected windows, deadlines, concurrency limits, and the interactive reserve from current evidence.
+3. Estimate the burst by capability role and cap concurrency or stagger work only as much as the measured pool requires.
+4. Assign one writer to each mutable state, cursor, ledger, or output artifact.
+5. If schedule or quota state cannot be inspected, state that uncertainty and avoid creating a collision-prone recurring job.
 
 ## Recurring-job failure behavior
 
 - Treat a transient subscription CLI failure as `defer this item and continue`; record the deferred count and retry on the next run.
 - Fail loudly on setup, schema, authorization, or hard budget errors.
 - Do not let one quota-starved item abort an otherwise independent batch.
-
-Reference implementation: earnings-summary `directives/llm_quota_scheduling.md` and the `attach_conditions` per-item degradation pattern.
+- Emit enough structured state to distinguish completed, deferred, failed, and never-attempted items.

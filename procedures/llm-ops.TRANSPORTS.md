@@ -2,14 +2,11 @@
 
 Use this reference only for LLM calls intentionally backed by this machine’s memberships or their registered metered fallback.
 
-## Model-first dispatch
+## Purpose-first dispatch
 
-Resolve the provider-qualified model from the purpose, then select transport by model family. Current starting roles are:
+Resolve a purpose to one closed capability role from `agent-operations`, then select the least expensive available model with a current representative evaluation receipt for that role. A provider label, release date, parameter count, context window, or vendor benchmark is not qualification evidence.
 
-- Claude workhorse or judgment model through the Claude membership wrapper;
-- GPT-5.6 Luna for bounded mechanical work, Terra for normal execution, and Sol for judgment-heavy work through the Codex membership wrapper.
-
-These are roles, not permanent pins. Verify current model IDs and capability against primary sources and the `model-frontier` procedure.
+Provider-qualified model IDs, prices, and current receipt mappings live in the dated model-frontier adapter. Canonical purpose contracts name roles, not models. An uncalibrated hosted or open-weight model is a candidate only; malformed output or unavailable required capability yields `HOLD`, never a silent pass or weaker enforcement.
 
 ## Membership wrappers
 
@@ -27,17 +24,11 @@ The wrappers reject API-key environment variables that would silently switch bil
 
 Do not substitute the Anthropic or OpenAI SDK for a membership-backed purpose.
 
-## Fallback order
+## Fallback policy
 
-Operational fallback is fixed:
+Operational fallback must be explicit per purpose or in the machine-local transport policy. It may use membership-backed wrappers and an opted-in metered provider, but it must preserve the required capability role, schema, data boundary, and budget. A transport failure does not authorize a model downgrade.
 
-1. Codex membership
-2. Claude membership
-3. OpenRouter metered API, only for purposes that explicitly opt in
-
-A purpose may stop after either membership tier. It may not reorder the chain.
-
-Codex is primary and Claude is the backup — including for web-grounded purposes, which route Codex-first with `web_search="live"` rather than falling to Claude by default. This is the owner's standing rule, restated 2026-08-03; an earlier revision of this file listed Claude first, which contradicted both the implementation and the rule. Fall back to Claude on an *operational* Codex failure, never as a routing preference.
+Record attempted transport, provider, model, receipt ID, failure class, fallback reason, latency, token usage, and incremental cost. Authorization, schema, safety-policy, and hard-budget failures stop; transient capacity failures may try another currently qualified route.
 
 ## OpenRouter exception
 

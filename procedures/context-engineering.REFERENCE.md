@@ -1,6 +1,6 @@
 # Context-engineering source register
 
-Verified 2026-08-03.
+Verified 2026-08-25.
 
 ## Anthropic
 
@@ -9,6 +9,12 @@ Verified 2026-08-03.
 - Applies to: Claude Opus 5 and Fable 5, Claude Code, CLAUDE.md, skills, tools, and agent harnesses.
 - Conclusion: remove duplicated and overly absolute scaffolding; rely more on model judgment; design expressive tool interfaces; use progressive disclosure; keep CLAUDE.md lightweight and focused on repository gotchas; keep skills opinionated but not overconstrained.
 - Evidence gap: Anthropic reports no measurable coding-eval loss after removing over 80% of its own prompt for selected models, but that result is not a universal safe-deletion percentage for this repository.
+
+- Source: [What's new in Claude Opus 5](https://platform.claude.com/docs/en/models/opus-5/whats-new-opus-5)
+- Publisher/access: Anthropic, accessed 2026-08-25.
+- Applies to: Claude Opus 5 agent and coding contexts.
+- Conclusion: Opus 5 proactively checks its work. Repeated generic verification instructions can cause wasteful over-verification; retain explicit verification only when it defines evidence, risk control, or a completion gate.
+- Evidence gap: model initiative does not replace deterministic tests or repository-specific acceptance criteria.
 
 - Source: [A field guide to Claude Fable 5: Finding your unknowns](https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns)
 - Publisher/date/access: Anthropic, published 2026-07-06; accessed 2026-08-03.
@@ -24,7 +30,7 @@ Verified 2026-08-03.
 ## OpenAI
 
 - Source: [GPT-5.6 model guidance](https://developers.openai.com/api/docs/guides/latest-model)
-- Publisher/access: OpenAI, accessed 2026-08-03.
+- Publisher/access: OpenAI, accessed 2026-08-25.
 - Applies to: GPT-5.6 Sol, Terra, and Luna prompting and agent workflows.
 - Conclusion: OpenAI independently recommends leaner prompts, one statement per instruction, concise tool descriptions, explicit autonomy and approval boundaries, outcome-focused prompts, stopping conditions, and representative evals. This directly supports applying the same design direction to GPT-5.6.
 - Evidence gap: OpenAI does not state that Anthropic’s exact prompt-removal percentage transfers to GPT-5.6. Treat cross-provider equivalence as a direction backed by separate guidance, not as a shared benchmark.
@@ -41,3 +47,11 @@ Verified 2026-08-03.
 - Applies to: the `antigravity-preview-05-2026` Gemini API managed-agent preview, whose default model is Gemini 3.6 Flash.
 - Conclusion: AGENTS.md, skills, system instructions, files, and tool selection are distinct additive layers. Use the closest layer for the information instead of duplicating it across all of them.
 - Evidence gap: managed agents are preview-only, have no agent-definition versioning, and do not support subagent nesting. Google does not make Claude’s “remove most of the system prompt” claim. Preserve Gemini-specific structure and critical-instruction placement while removing only demonstrated duplication.
+
+## Open-weight runtimes
+
+- Source: [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent)
+- Publisher/access: Qwen team, accessed 2026-08-25.
+- Applies to: current Qwen-family and compatible open-weight agent runtimes using tool calling or MCP.
+- Conclusion: capable open-weight runtimes can use the same canonical outcome, schema, tool-interface, and progressive-disclosure contracts. Keep runtime adapters thin and validate structured output and tool behavior on representative repository tasks.
+- Evidence gap: tool-calling support, parameter count, or an upstream benchmark does not establish parity for implementation, blocking audit, or synthesis. Qualify each model/runtime pair through the same dated capability receipt used for hosted models; malformed output or a missing required capability yields `HOLD`.

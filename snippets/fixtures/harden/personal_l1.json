@@ -1,0 +1,9 @@
+{
+  "deployment": "local",
+  "identity": "single-user",
+  "commerce": "personal",
+  "surfaces": ["web"],
+  "data": ["durable", "external", "sensitive"],
+  "llm": "read-only",
+  "scheduled_work": true
+}

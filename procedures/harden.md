@@ -1,151 +1,171 @@
 ---
-description: Run the maturity-gated hardening fleet (L0→L3) — audit a project with domain-expert subagents and gate advancement. Usage: /harden [rung] [--deep] [--audit <expert>] [--status] [--full]
+description: Audit product maturity with profile-aware, evidence-backed gates. Usage: /harden [l0|l1|l2|l3] [--deep] [--audit <expert>] [--status] [--full]
 ---
 
-# Hardening Orchestrator
+# Hardening
 
-You are the **conductor** of a maturity-gated fleet of domain-expert **audit/fix subagents** whose criteria are canonical in `procedures/agents/<expert>.md`, taking a project from ideation to limited commercial release. The expertise lives in those agent files; this command is the dispatch logic, matrix, and gate rules.
+Hardening answers one question: **what is safe and sufficiently complete for this product's next real use?** It does not turn a personal tool into speculative SaaS architecture. Maturity is one axis; deployment, identity, commerce, surface, data, and LLM exposure are separate profile facts.
 
-Parse `$ARGUMENTS` into the mode below. With no arguments, default to **quick upgrade to `current_rung + 1`**.
+The orchestrator owns scope, applicability, deduplication, and the final decision. Expert rubrics in `procedures/agents/` own distinct evaluation domains. Audit workers inspect product state and write only the requested report or return structured findings; product mutation requires a separately approved FIX pass.
 
-## Runtimes
+## Modes
 
-The expert **criteria** are tool-neutral files in `procedures/agents/<expert>.md` — every runtime audits against the same criteria; only the dispatch differs.
-
-- **Claude:** Fable 5 orchestrates and dispatches generated expert agents through the Agent tool. Expert files under `~/.claude/agents/` are generated from `procedures/agents/`; edit the procedure, not the copy.
-- **Codex:** Sol orchestrates and dispatches the corresponding expert role through its native collaboration tools, normally overriding workers to Terra. Use Luna only for bounded inventories/extraction, not verdicts.
-- **Other runtimes:** use their native dispatch surface when available. A runtime that genuinely lacks it reads the same expert criteria and runs a sequential guided pass. Worktree-isolated FIX mode may degrade to approved in-place work only when the runtime cannot isolate changes.
-
-## Modes (explicit — no fuzzy phrase-matching)
-
-| Invocation | Action |
+| Invocation | Meaning |
 |---|---|
-| `/harden` | **Quick upgrade** to `current_rung + 1`: the target rung's gates + cheap re-verify (`↻`) of prior blocking gates |
-| `/harden <rung>` (e.g. `/harden l2`) | Quick upgrade straight to a named rung |
-| `/harden --deep` · `/harden --deep <rung>` | **Robust re-run** — full re-audit of every gate `L0..target`, ignoring cached state |
-| `/harden --audit <expert>` | Run a single expert against current state |
-| `/harden --status` | Read `.harden/state.json`, run cheap checks only, report blockers — **no fixes** |
-| `/harden --full` | Override the personal-project L1 cap (see below) and allow L2/L3 multi-tenant/commercial gates |
+| `/harden` | Assess the next rung using reusable evidence whose fingerprints still match |
+| `/harden <rung>` | Assess the named rung |
+| `/harden --deep [rung]` | Re-run every applicable gate through the target rung |
+| `/harden --audit <expert>` | Run one applicable expert; do not change rung |
+| `/harden --status` | Validate state, applicability, evidence freshness, and blockers; no fixes |
+| `/harden --full` | Assess through L3; it does not imply multi-tenancy or any other profile |
 
-## Personal-project default (L1 cap)
+## Maturity and product profile
 
-Most of this user's projects are personal/single-user local tools (earnings-summary, huntdesk, portfolio-tracker). **Unless `--full` is passed or the project clearly targets multi-tenant/commercial release, cap the target at L1** and skip the L2/L3 gates (tenant isolation, payments, dunning, marketing, support). When you cap, say so in one line and note `--full` unlocks the rest. L2+ assumes a real multi-tenant SaaS.
+- **L0 — decision:** the problem, intended user, value, constraints, and kill criteria justify work.
+- **L1 — dependable personal release:** the primary workflow works end to end and durable local state is recoverable.
+- **L2 — external beta:** real users or dependent systems can use it safely with bounded operations.
+- **L3 — limited commercial release:** the selected distribution and revenue model are supportable, legal, measurable, and reversible.
 
-## Rungs
+Record the profile before selecting gates:
 
-- **L0 Ideation** — decide if/what to build.
-- **L1 MVP / Prototype** — works end-to-end for one tenant.
-- **L2 Multi-tenant Beta** — safe to admit multiple real tenants.
-- **L3 Limited Commercial Release** — sellable, supportable, legal, monetized.
+| Axis | Allowed values |
+|---|---|
+| `deployment` | `local`, `distributed-client`, `hosted-single-customer`, `hosted-shared` |
+| `identity` | `none`, `single-user`, `multi-user`, `multi-tenant` |
+| `commerce` | `personal`, `free`, `paid` |
+| `surfaces` | any of `cli`, `api`, `web`, `native` |
+| `data` | any of `durable`, `external`, `sensitive` |
+| `llm` | `none`, `read-only`, `tool-using` |
+| `scheduled_work` | `false`, `true` |
 
-## Matrix
+Infer these facts from the repository when evidence is clear. Ask only when a missing fact changes an applicable blocking gate. A paid single-user desktop product can reach L3 without tenancy. A local tool can require operations readiness because it has scheduled jobs or irreplaceable state.
 
-`B` blocking · `A` advisory · `↻` re-verify · `—` n/a. Each expert first appears at its *cheapest useful* rung (shift-left).
+## Active gate matrix
+
+`B` selects blocking requirements introduced or materially tightened at that rung, `A` is advisory, `R` re-verifies the prior blocking contract with the same blocking force, and `—` is not selected by maturity alone. An `R` cell cannot hide newly stricter criteria; use `B` when the target rung adds them. Profile rules below can make a cell `N/A` or elevate a risk-triggered gate.
 
 | Expert | L0 | L1 | L2 | L3 |
-|---|:--:|:--:|:--:|:--:|
+|---|:---:|:---:|:---:|:---:|
 | idea-evaluator | B | — | — | — |
-| finops-pricing | A | — | — | B |
-| architecture-reviewer | A | B | ↻ | ↻ |
-| legal-compliance | A | — | B | B |
-| data-engineer | — | B | ↻ | — |
-| llm-evals-orchestrator | — | B | ↻ | ↻ |
-| qa-test-strategy | — | B | ↻ | ↻ |
-| sec-appsec | — | A | B | ↻ |
-| sec-llm | — | A | B | — |
-| backend-multitenancy | — | A | B | — |
-| infra-devops | — | A | B | — |
-| infra-sre | — | A | B | ↻ |
-| ux-design | — | B | — | B |
-| frontend-web | — | A | — | B |
-| api-surface-designer | — | A | ↻ | B |
-| sec-tenant-isolation | — | — | B | — |
-| sec-authz | — | — | B | — |
-| product-analytics-growth | — | — | A | B |
-| customer-support | — | — | A | B |
-| notifications-email | — | — | A | B |
-| docs-devex | — | — | A | B |
+| product-feature | A | B | R | R |
+| architecture-reviewer | A | B | R | R |
+| data-foundation | — | B | R | R |
+| qa-test-strategy | — | B | R | B |
+| ux-design | — | B | R | B |
+| frontend-web | — | B | R | B |
+| llm-evals-orchestrator | — | B | R | R |
+| sec-appsec | — | B | R | R |
+| sec-authz | — | B | R | R |
+| sec-llm | — | B | R | R |
+| api-surface-designer | — | A | B | R |
+| legal-compliance | A | A | B | R |
+| operations-readiness | — | B | B | R |
+| tenant-boundaries | — | — | B | R |
+| product-analytics | — | — | A | B |
+| docs-support-readiness | — | B | B | R |
+| finops-pricing | A | A | A | B |
 | payments | — | — | — | B |
-| content-marketing | — | — | — | A |
 
-**On-demand (not rung-gated):** `tool-selector`, `api-mcp-ingestor` — invoke whenever a build/buy or external-integration decision arises, at any rung.
+### Applicability
 
-**Solo-builder note:** `infra-devops` (deploy mechanics) and `infra-sre` (observability/SLO/DR) are adjacent — for a one-person project run them as a single "infra" pass (dispatch both, treat their findings as one operational report). Keep prompt-secret hygiene owned by `sec-llm`; `llm-evals-orchestrator` cross-references it rather than re-auditing it.
+- `data-foundation`: durable, external, or sensitive data.
+- `ux-design`: a human-facing `web`, `native`, or interactive `cli` surface. A non-interactive library or API is `N/A`.
+- `frontend-web`: `web` only. Native and CLI implementation evidence stays with `ux-design` and `qa-test-strategy`.
+- `llm-evals-orchestrator` and `sec-llm`: `llm != none`.
+- `sec-authz`: `identity != none`, **or** a non-local deployment exposes a `web` or product-owned `api` surface. The latter requires an explicit access-control decision even when the profile currently says `identity: none`; do not silently treat remote mutation or product access as public. A truly local identity-free tool is `N/A`.
+- `api-surface-designer`: a product-owned API, webhook, plugin, or MCP surface; consuming a vendor API alone does not qualify.
+- `operations-readiness`: durable state, scheduled work, distribution, or hosting. For local products it covers backup, restore, export, upgrades, and scheduler failure rather than cloud ceremony.
+- `tenant-boundaries`: `identity == multi-tenant` only.
+- `product-analytics`: external beta or commercial release. Direct qualitative learning or privacy-preserving aggregates can satisfy the outcome when event analytics is disproportionate.
+- `payments`: `commerce == paid` and the product handles payment, billing, licensing, or entitlement state. It does not require subscriptions.
+- `finops-pricing`: advisory for personal/free work; blocking at L3 only when `commerce == paid`.
+- `legal-compliance`: risk-triggered by external or sensitive data, external users, distribution, or payment; obligations, not a SaaS checklist, determine scope.
+- `docs-support-readiness`: any L1+ product. Personal tools need setup, health, backup, restore, and recovery guidance; external products add user support and incident communication proportional to reach.
 
-### Overlap ownership
+Rung-independent mandatory safety findings block advancement regardless of an `A` cell: exposed credentials, likely irreversible data loss without informed confirmation/recovery, known cross-principal data access, unsafe execution of untrusted input, or a legal prohibition on the intended use.
 
-Assign one owner to each finding and cross-reference supporting reports rather
-than filing duplicates:
+`tool-selector` and `external-integration` are standalone procedures, not maturity gates. Use them when a build/buy choice or a new external capability actually arises.
 
-- `sec-appsec` owns general application vulnerabilities, secret hygiene,
-  dependency risk, injection, and abuse controls.
-- `sec-authz` owns identity, sessions, authorization policy, IDOR, and key
-  lifecycle; `sec-tenant-isolation` owns proof that tenant boundaries hold
-  across every storage and compute path.
-- `sec-llm` owns prompt injection, untrusted model output, tool agency, and LLM
-  data exfiltration. `llm-evals-orchestrator` owns response quality, structured
-  contracts, cost/latency telemetry, routing evals, and regression detection.
-- `data-engineer` owns data quality, provenance, lineage, and lifecycle;
-  `backend-multitenancy` owns tenant-context propagation and tenant-ready
-  schema shape.
+## Exclusive ownership
 
-### Applicability before dispatch
+Create one primary finding and cross-reference it elsewhere:
 
-Record a one-line rationale for every selected or skipped expert. The matrix gives the earliest useful rung; it does not make an irrelevant gate mandatory.
+- `product-feature`: user-visible behavior, state transitions, non-goals, acceptance, rollout, and kill criteria.
+- `architecture-reviewer`: module boundaries, dependency direction, state ownership, and failure shape.
+- `data-foundation`: schema, identity/time semantics, migrations, provenance, data quality, retention implementation, backup/export data semantics.
+- `qa-test-strategy`: test portfolio, representative scenarios, fixtures, and regression/load execution; CI mechanics belong to operations.
+- `ux-design`: task clarity, information architecture, interaction semantics, accessibility, and shared rendered-task judgment.
+- `frontend-web`: web implementation, responsiveness, browser states, and rendered performance; reuse UX captures.
+- `sec-appsec`: application vulnerabilities, credential material/storage/logging, dependency risk, injection, and abuse ceilings.
+- `sec-authz`: identity, sessions, authorization policy, object access, and identity/signing-key lifecycle.
+- `tenant-boundaries`: proof that multi-tenant separation holds across storage, cache, jobs, search, files, and compute.
+- `sec-llm`: prompt injection, untrusted model output, tool authority, and model-mediated exfiltration.
+- `llm-evals-orchestrator`: output quality/contracts, routing evals, and per-call quality/cost/latency/failure evidence.
+- `api-surface-designer`: product-owned external contract, compatibility, errors, idempotency, quotas, and webhook contract.
+- `legal-compliance`: applicable obligations, rights, consent, disclosure, and retention/deletion requirements.
+- `operations-readiness`: build/release mechanics, runtime health, resource telemetry, restore/rollback, incidents, and distribution/update safety.
+- `product-analytics`: learning questions, event meaning, activation/retention measures, and experiment interpretation.
+- `docs-support-readiness`: setup/recovery/user/API documentation, support intake, escalation, and feedback routing.
+- `finops-pricing`: consolidated cost economics, pricing, packaging, and margin.
+- `payments`: provider-specific payment lifecycle, reconciliation, refunds/disputes, tax handoff, and entitlement transitions.
+- `idea-evaluator`: whether to build at all.
 
-- No LLM calls → skip `llm-evals-orchestrator` and `sec-llm`.
-- No persistent or externally sourced data → skip `data-engineer`.
-- No deployed service or scheduled production workload → skip `infra-devops` and `infra-sre`.
-- No external users or public API → skip customer, growth, notification, payments, and public API gates.
-- Documentation/research repositories use source quality, freshness, licensing, and consistency checks; do not force application scaffolds onto them.
-- Native/mobile/XR work uses platform accessibility, permissions, privacy, device performance, and simulator-versus-device evidence; web-only checks are n/a unless a web client exists.
+## Evidence and verdicts
 
-### External practice before dispatch
+Run deterministic checks first. External-practice research is required only for a consequential drift-sensitive seam owned by the selected expert; one scoped research pass may feed several reports. `frontend-quality` owns the shared rendered task/reduction evidence consumed by UX and frontend gates. Browser or renderer evidence is required for material rendered-interface judgments. Do not grade absent harness capability as a product defect.
 
-Read `procedures/external-practice.md` and run it over the named codebase scope before every upgrade, deep run, or single-expert audit. Attach each inventory row to one owning expert. If no seam qualifies, record `none` with the scope rationale.
+Each selected gate returns exactly one verdict:
 
-**Model tiers:** Fable (Claude) or Sol (Codex) is the orchestrator and final reviewer. Fleet agents default to the workhorse tier (Sonnet/Terra). Mechanical pre-scans may use Haiku/Luna, but a blocking verdict requires workhorse review. Improve a failed brief before escalating model tier.
+- `PASS`: applicable blocking requirements are evidenced and no finding remains open.
+- `BLOCK`: an evidenced product finding prevents the target outcome.
+- `ADVISORY`: the advisory review is evidenced and has no unresolved finding in the receipt; proposed future improvements belong in out-of-scope notes, not `open_findings`.
+- `HOLD`: required evidence, tool capability, specialist calibration, or valid structured output is unavailable.
+- `N/A`: the profile makes the gate irrelevant, with a recorded rationale.
 
-## Generative scaffolds (build-it-right-first, not just grade-it-after)
+At a `B` or `R` cell, only `PASS` advances. `BLOCK` and `HOLD` stop advancement. At an `A` cell, `ADVISORY` or `PASS` is acceptable; `HOLD` still pauses the overall run because the selected review did not complete, and a mandatory safety finding still blocks. Never silently downgrade a missing worker, malformed report, failed source check, or unavailable renderer into a pass.
 
-Before auditing a gate on a greenfield project, prefer to **generate** the secure baseline, then audit it:
-- auth → `scaffold-auth` skill (verified by `sec-authz`)
-- tenant schema / RLS / migrations → `scaffold-tenant-schema` skill (verified by `sec-tenant-isolation`, `backend-multitenancy`, `data-engineer`)
-- design system → `scaffold-design-system` skill (verified by `ux-design`)
-- LLM governance → `llm-ops` skill (verified by `llm-evals-orchestrator`)
+`PASS` and `ADVISORY` require an empty `open_findings` list. Any unresolved finding uses `BLOCK` when it prevents the target, otherwise `HOLD` until it is dispositioned or moved to a non-finding future note.
 
-## Dispatch protocol
+## Run protocol
 
-1. Read `.harden/state.json` (create at `L0` if absent, conforming to the schema below). Resolve the target rung and its gate set from the matrix, applying the L1 cap unless `--full`.
-2. Run the external-practice check, record its inventory, and attach each routed row to its owning expert's brief.
-3. Apply the applicability rules, then load only the selected expert rubrics and dispatch them through the runtime's native subagent tool. For a user-facing rendered interface, also give `ux-design` and `frontend-web` the `frontend-quality` contract. Default to depth 1 and no more than three concurrent workers. Honor `Depends on`; hard-ordered: `data-engineer → backend-multitenancy`; `sec-authz` + `backend-multitenancy → sec-tenant-isolation`; `legal-compliance → payments`.
-4. Each expert runs **AUDIT mode**: product code and state are read-only; `docs/hardening/<rung>/<expert>.md` is the sole permitted write. Treat the rubric as evaluation criteria, not a forced step order. It returns the same report and verdict to the orchestrator.
-5. **Gate logic:** at a `B` cell, any open `critical`/`high` finding ⇒ rung **BLOCKED**. `A`/`↻` cells log findings, never block. Advancing requires every `B` gate at the target rung = `PASS`.
-6. The Fable/Sol orchestrator checks applicability, deduplicates overlapping findings, reviews every blocking verdict, and presents the consolidated result. **Wait for explicit approval before any product change.**
-7. On approval: create a git **worktree**, dispatch the relevant experts in **FIX mode** to apply approved fixes there, then re-audit to confirm green. Never fix on the working branch. (On this machine, remove worktrees with PowerShell `Remove-Item -Force`, not `git worktree remove` — Drive sync breaks it.)
-8. Update `.harden/state.json`.
+1. Resolve `target_rung` and the profile JSON. Before spending a worker turn, run `python <harden-package>/runtime/harden_state.py preflight --repo <project> --package-root <harden-package> --runtime <runtime> --profile-json <profile-json> --rung <rung>`. Exit `4` is an evidenced product `BLOCK`, exit `3` is a harness/capability `HOLD`, exit `2` is an operator or package error, and only exit `0` authorizes specialist dispatch. Preflight may run only the exact local subprocesses closed in the applicable mandatory verifier; each command, arguments, timeout, output schema, and exit semantics must match its registered record.
+2. Validate any reusable `.harden/state.json` with the same packaged runtime: `python <harden-package>/runtime/harden_state.py validate --repo <project> --package-root <harden-package>`. A malformed or fingerprint-mismatched state is stale evidence, not reusable evidence.
+3. Select every matrix row, recording `APPLICABLE` or `N/A` plus one-sentence rationale.
+4. Load only selected rubrics. Use `agent-operations` to assign capability roles; model/provider names do not qualify a worker. A blocking specialist must be calibrated for the rubric. Missing capability yields `HOLD`.
+5. Audit product files read-only. Commands with possible writes, external effects, test databases, caches, or generated artifacts need an isolated copy or explicit scope. The only ordinary audit write is the named draft report path.
+6. Each report records evidence IDs, observed result, reproduction/verification command when safe, severity, owner, confidence, and fix. Severity is: `critical` immediate compromise/loss/prohibition; `high` blocks the target workflow or safety boundary; `medium` material but bounded degradation; `low` improvement; `info` context.
+7. Deduplicate by owner, review every `BLOCK`/`HOLD`, apply gate logic, and present approved fix batches. Do not mutate product code until the user authorizes remediation.
+8. FIX mode uses an isolated worktree by default. In-place fallback requires explicit approval for that exact repository and change set. Re-run deterministic evidence and the owning gate after a fix.
+9. Write state v2 only after reports are complete. Validate it again before claiming advancement.
 
-## Output contract
+## State v2
 
-- **Report** (`docs/hardening/<rung>/<expert>.md`): verdict, findings table (`severity | location | finding | fix`), checklist results, external-practice evidence, out-of-scope notes. Severity ∈ {critical, high, medium, low, info}. Stamp with today's date.
-- **External-practice evidence:** include every inventory row routed to this expert and, for each, the source title + URL, publisher, published/updated date when available, access date, applicable product/version, conclusion, and uncertainty/evidence gap. If no row was routed, state `none` and the scope rationale. A URL list without an applicability conclusion does not satisfy the check.
-- **State** (`.harden/state.json`) — conform to this schema:
+State is a cache index, never proof by itself. `snippets/harden_state.py` is the executable schema and fingerprint authority. A reusable gate receipt is anchored to:
 
-```json
-{
-  "$schema": "internal://harden-state/v1",
-  "current_rung": "L0|L1|L2|L3",
-  "is_multitenant_target": false,
-  "gates": {
-    "<rung>": {
-      "<expert>": {
-        "verdict": "PASS|BLOCK|ADVISORY",
-        "open_findings": 0,
-        "last_run": "YYYY-MM-DD"
-      }
-    }
-  }
-}
-```
+- the exact product worktree excluding hardening reports/state;
+- the profile;
+- the active matrix contract;
+- the selected expert rubric set and shared capability-evaluation registry/receipts.
 
-Validate the file against this shape on read; if malformed, halt and report rather than guessing. Quick runs skip already-passed checks (idempotent); `--deep` ignores the cache.
+The state field is `target_rung`: it names the rung being proved, not a previously achieved rung.
+
+Any mismatch invalidates cached `PASS`/`ADVISORY` receipts. A quick run may reuse only a receipt whose four fingerprints match and whose evidence paths still exist with the recorded SHA-256 content hashes. `--deep` ignores reuse. Store unresolved finding IDs, evidence paths plus hashes, capability receipt, applicability rationale, and UTC timestamp. Do not infer omitted fields.
+
+Each capability receipt names one canonical `agent-operations` role, status, identity, purpose, runtime, model identifier, effort, shared evaluation identifier and receipt hash, evaluation and expiry timestamps, exact qualified rubric IDs, and limitations. `PASS`/`ADVISORY` requires an available, unexpired `blocking-specialist` or `frontier-synthesizer` receipt whose ID and hash resolve through `config/harden_capability_registry.json` to a typed receipt under `receipts/`, with its raw outputs and deterministic score under `evidence/<receipt-id>/`. The receipt binds the role/runtime/model/effort and rubrics to a versioned dataset hash, policy hash, rubric hashes, raw-output hash, metric thresholds, measured passing result, and expiry; every duplicated state field must match exactly. The shared registry starts empty until a real evaluation is registered. A project-authored file, provider name, generic worker label, or self-asserted availability is not calibration evidence.
+
+Qualification requests include the complete current text of the case's named rubric. Every retained raw case result binds the case ID, full dataset-case hash, blind input hash, rubric ID and hash, rubric-package hash, exact request payload and request hash. The scorer and receipt validator independently reconstruct those bindings and reject missing, duplicate, extra, or mismatched cases before accepting metrics. A receipt cannot qualify a rubric that is absent from the scored raw bindings. Long-context cases must also satisfy the policy's minimum retained character count and structured-section count; a label alone is not coverage.
+
+The v2 verdict vocabulary is `PASS | BLOCK | ADVISORY | HOLD | N/A`; the state and scenario tests reject other values.
+
+## Generative counterparts
+
+- feature contract → `product-feature`
+- local-first data baseline → `data-foundation`
+- auth → `scaffold-auth`, then `sec-authz`
+- multi-tenant storage → `scaffold-tenant-schema`, then `tenant-boundaries`
+- deployment/distribution → `scaffold-deploy`, then `operations-readiness`
+- design foundation → `scaffold-design-system`, then `ux-design` and rendered evidence
+- LLM call → `llm-ops`, then `llm-evals-orchestrator` and `sec-llm`
+- secrets → `scaffold-secrets`, then `sec-appsec`
+
+Scaffolds establish contracts after inspecting the repository and chosen profile. They must not inject a framework, provider, tenant column, public deployment, analytics stack, or billing model merely because one is common.

@@ -5,12 +5,12 @@ description: After an LLM writes or edits code, explain the outcome, impact, ris
 
 # explain-change
 
-The user's code is largely LLM-written and they can't easily tell when it's subtly wrong. Give them a review **they can act on without reading the code.** Plain language, no jargon, honest about uncertainty.
+Give the owner a review they can act on without reading the code. Use plain language, introduce technical detail only when it changes the decision, and stay honest about uncertainty.
 
 Look at the actual diff first (`git diff` / the edits just made). Scale the response to the consequence and uncertainty of the work, not the number of files:
 
 - For a tiny, low-risk, well-verified change, a **TL;DR alone is enough**. It must state the outcome, changed path or surface, validation, and any remaining uncertainty. Do not add empty sections or a ceremonial scorecard.
-- For a material change, use the sections below. Combine or omit a section when doing so makes the result clearer without hiding material impact, risk, or missing proof.
+- For a material change, use the sections below. Lead with the user-experience effect, the largest architecture/performance/maintenance tradeoff, any compounding debt or exit cost, rollback/recovery, and verified versus unverified risk. Combine or omit a section when doing so makes the result clearer without hiding those decisions.
 
 ## 1. TL;DR
 
@@ -40,4 +40,5 @@ State the checks actually run and their results, behavior not verified, and conc
 - Be honest about what you're unsure of — "I'm not certain X handles the empty case" beats false confidence. The user is trusting this verdict instead of reading the code.
 - Don't grade your own prose or restate the request. Describe the *effect on the running system*.
 - Prefer decision-relevant implications over exhaustive implementation detail. Do not repeat the same fact across the TL;DR, scorecard, and later sections.
+- Surface unusually large or compounding debt even when the immediate diff is small.
 - This is distinct from `/code-review` (which hunts for bugs) and the hardening audits (which gate on security): this is **comprehension + risk for a non-expert owner.** Hand off to those when the surface warrants it.

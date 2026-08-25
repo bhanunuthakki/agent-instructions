@@ -1,0 +1,41 @@
+{
+  "$schema": "internal://harden-eval-policy/v1",
+  "schema_version": 1,
+  "purpose": "hardening-gate-verdict",
+  "dataset_version": "2026-08-25.v1",
+  "scorer_version": "1.1.0",
+  "qualification_ttl_days": 90,
+  "ratified": false,
+  "ratified_at": null,
+  "ratifier": null,
+  "corpus_requirements": {
+    "minimum_cases_per_rubric": 2,
+    "minimum_long_context_characters": 16000,
+    "minimum_long_context_sections": 16,
+    "required_shapes": [
+      "adversarial",
+      "conflicting-evidence",
+      "degraded",
+      "empty",
+      "long-context",
+      "malformed",
+      "normal"
+    ]
+  },
+  "roles": {
+    "blocking-specialist": {
+      "minimum_overall_accuracy": 0.9,
+      "minimum_block_recall": 1.0,
+      "minimum_hold_abstain_accuracy": 0.9,
+      "minimum_schema_validity": 1.0,
+      "minimum_rubric_coverage": 1.0
+    },
+    "frontier-synthesizer": {
+      "minimum_overall_accuracy": 0.9,
+      "minimum_block_recall": 1.0,
+      "minimum_hold_abstain_accuracy": 0.9,
+      "minimum_schema_validity": 1.0,
+      "minimum_rubric_coverage": 1.0
+    }
+  }
+}

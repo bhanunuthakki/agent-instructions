@@ -34,8 +34,10 @@ Omit a field only when it adds no information. A definition that merely repeats 
 ## Decision rules
 
 - Use existing canonical identifiers verbatim in code, schemas, commits, and PRs.
-- When a new concept is local and obvious, name it consistently without blocking work on a vocabulary ceremony.
-- When the name crosses modules, persistence, APIs, or user decisions—or overlaps an existing term—propose the definition before propagating it.
+- Provisional language is allowed during discovery and isolated mockups. Mark it provisional when someone could mistake it for a ratified product state.
+- Before a term becomes a code symbol, typed state, schema/API field, persisted value, canonical UI status, or governing directive concept, ratify it in the effective definition chain.
+- When a new non-durable concept is local and obvious, name it consistently without blocking exploration on a vocabulary ceremony.
+- When the name crosses modules, persistence, APIs, or durable user decisions—or overlaps an existing term—propose the definition before propagating it.
 - Surface ambiguity instead of silently picking whichever synonym appears first.
 - Load only the effective definition chain for the task. Cross-project work loads the global file plus the provider and consumer chains, never every glossary.
 - Treat same-spelling local concepts across projects as qualified terms, not evidence that their meanings should be merged.

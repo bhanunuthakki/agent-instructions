@@ -7,12 +7,12 @@ load in *either* CLI:
   - CLAUDE.md  importing the local rulebook (Claude Code only reads CLAUDE.md up the tree)
   - GEMINI.md  importing AGENTS.md           (Gemini reads GEMINI.md natively)
 
-For every git repo, point core.hooksPath at the shared githooks dir so the credential-scan
-(pre-commit) and toolchain (pre-push) gates fire for both CLIs.
+For every git repo, point core.hooksPath at the shared githooks dir so the credential scan
+(pre-commit) and repository-owned validation composition (pre-push) fire for both CLIs.
 
 The procedures/ graph runs procedures -> runtime-native artifacts (see CANONICAL note below):
-regenerate the Claude skills / the /harden command / the agent fleet and the Codex skills FROM the
-canonical procedures/, regenerate the GEMINI.md skill-mimic trigger table, and regenerate the
+regenerate the Claude skills / the /harden command / the agent fleet, Codex skills, and Antigravity
+skills FROM the canonical procedures/, keep GEMINI.md's routing marker compact, and regenerate the
 inventory tables inside AGENTS_GUIDE.md's
 <!-- BEGIN/END --> markers so the human map can never silently drift from the filesystem.
 
@@ -70,6 +70,7 @@ CLAUDE_GLOBAL_RULES = CLAUDE_ROOT / "CLAUDE.md"
 GEMINI_CONFIG_ROOT = configured_path("GEMINI_CONFIG_HOME", USER_HOME / ".gemini")
 GEMINI_GLOBAL_RULES = GEMINI_CONFIG_ROOT / "GEMINI.md"
 ANTIGRAVITY_SKILLS_DIR = ROOT_REPO / "antigravity" / "skills"
+DIRECT_HARDEN_PACKAGE_DIR = ROOT_REPO / "runtime" / "harden"
 ANTIGRAVITY_SKILLS_CONFIG = GEMINI_CONFIG_ROOT / "config" / "skills.json"
 PROCEDURES_DIR = ROOT_REPO / "procedures"
 PROCEDURES_AGENTS_DIR = PROCEDURES_DIR / "agents"
@@ -80,14 +81,17 @@ OUR_SKILLS = [
     "agent-operations",
     "code-change",
     "context-engineering",
+    "data-foundation",
     "frontend-quality",
     "external-practice",
     "grill-me",
+    "iteration-shortcut",
     "definitions",
     "judging",
     "llm-ops",
     "model-frontier",
     "mockup-review",
+    "product-feature",
     "log-redaction",
     "explain-change",
     "linear-pr-sync",
@@ -104,6 +108,23 @@ CODEX_ONLY_SKILLS = ["harden"]
 # never an arbitrary user skill or a directory tree.
 RETIRED_GENERATED_SKILLS = frozenset({"design-conformance-audit"})
 RETIRED_PROCEDURE_NAMES = frozenset({"design-conformance-audit.md"})
+RETIRED_GENERATED_AGENTS = frozenset(
+    {
+        "RETIRED",
+        "api-mcp-ingestor",
+        "backend-multitenancy",
+        "content-marketing",
+        "customer-support",
+        "data-engineer",
+        "docs-devex",
+        "infra-devops",
+        "infra-sre",
+        "notifications-email",
+        "product-analytics-growth",
+        "sec-tenant-isolation",
+        "tool-selector",
+    }
+)
 COMMAND_SOURCES = {
     "harden": PROCEDURES_DIR / "harden.md",
     "refresh-frontier": PROCEDURES_DIR / "source-command-refresh-frontier.md",
@@ -126,6 +147,34 @@ GUIDE_MARKERS = ("skills", "commands", "agents", "procedures", "projects")
 # A healthy project CLAUDE.md/GEMINI.md is a thin @import wrapper. More than this much prose
 # (beyond the title + import line) suggests a one-off leaked into the wrapper instead of the rulebook.
 WRAPPER_MAX_CHARS = 500
+
+HARDEN_PACKAGE_CONFIGS = (
+    "harden_state_v2.schema.json",
+    "harden_mandatory_rules.json",
+    "harden_eval_policy.json",
+    "harden_capability_registry.json",
+)
+HARDEN_ACTIVE_RUBRICS = (
+    "idea-evaluator",
+    "product-feature",
+    "architecture-reviewer",
+    "data-foundation",
+    "qa-test-strategy",
+    "ux-design",
+    "frontend-web",
+    "llm-evals-orchestrator",
+    "sec-appsec",
+    "sec-authz",
+    "sec-llm",
+    "api-surface-designer",
+    "legal-compliance",
+    "operations-readiness",
+    "tenant-boundaries",
+    "product-analytics",
+    "docs-support-readiness",
+    "finops-pricing",
+    "payments",
+)
 
 # Temporary reconciliation/worktree directories are not projects. Explicitly archived
 # prototypes stay in the workspace backup but do not receive active-project wrappers or
@@ -194,6 +243,8 @@ def project_dirs() -> list[Path]:
     alone is not a project signal. The instruction repository is handled separately by main().
     """
     out: list[Path] = []
+    if not SCRATCH.is_dir():
+        return out
     for child in sorted(SCRATCH.iterdir()):
         if (
             not child.is_dir()
@@ -295,6 +346,101 @@ def first_sentence(desc: str, cap: int = 150) -> str:
     return desc
 
 
+def build_harden_package_artifacts(package_root: Path) -> dict[Path, str]:
+    """Build one self-contained hardening package from tracked canonical sources."""
+    out: dict[Path, str] = {}
+    source = PROCEDURES_DIR / "harden.md"
+    if source.is_file():
+        skill = source.read_text(encoding="utf-8", errors="replace")
+        skill = skill.replace("`procedures/agents/`", "`rubrics/`")
+        skill = skill.replace("snippets/harden_state.py", "runtime/harden_state.py")
+        skill = skill.replace(
+            "--instructions-root <agent-instructions>",
+            "--package-root <package-root>",
+        )
+        out[package_root / "SKILL.md"] = skill
+    runtime = ROOT_REPO / "snippets" / "harden_state.py"
+    if runtime.is_file():
+        out[package_root / "runtime" / "harden_state.py"] = runtime.read_text(
+            encoding="utf-8", errors="replace"
+        )
+    for name in HARDEN_ACTIVE_RUBRICS:
+        rubric = PROCEDURES_AGENTS_DIR / f"{name}.md"
+        if rubric.is_file():
+            out[package_root / "rubrics" / f"{name}.md"] = rubric.read_text(
+                encoding="utf-8", errors="replace"
+            )
+    for name in HARDEN_PACKAGE_CONFIGS:
+        config = ROOT_REPO / "config" / name
+        if config.is_file():
+            out[package_root / "config" / name] = config.read_text(
+                encoding="utf-8", errors="replace"
+            )
+    cases = ROOT_REPO / "evals" / "harden" / "cases.jsonl"
+    if cases.is_file():
+        out[package_root / "evals" / "cases.jsonl"] = cases.read_text(
+            encoding="utf-8", errors="replace"
+        )
+
+    registry_path = ROOT_REPO / "config" / "harden_capability_registry.json"
+    if registry_path.is_file():
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        for entry in registry.get("qualifications", []):
+            receipt_id = entry.get("receipt_id") if isinstance(entry, dict) else None
+            if not isinstance(receipt_id, str) or not receipt_id:
+                raise RuntimeError(
+                    "harden capability registry contains an invalid receipt entry"
+                )
+            receipt = (
+                ROOT_REPO
+                / "governance"
+                / "harden_capability_receipts"
+                / f"{receipt_id}.json"
+            )
+            raw_outputs = (
+                ROOT_REPO
+                / "governance"
+                / "harden_capability_evidence"
+                / receipt_id
+                / "per_case_outputs.jsonl"
+            )
+            score = raw_outputs.with_name("score.json")
+            for source_path, target in (
+                (receipt, package_root / "receipts" / f"{receipt_id}.json"),
+                (
+                    raw_outputs,
+                    package_root
+                    / "evidence"
+                    / receipt_id
+                    / "per_case_outputs.jsonl",
+                ),
+                (score, package_root / "evidence" / receipt_id / "score.json"),
+            ):
+                if not source_path.is_file():
+                    raise RuntimeError(
+                        "registered harden capability dependency is missing: "
+                        f"{source_path}"
+                    )
+                out[target] = source_path.read_text(
+                    encoding="utf-8", errors="replace"
+                )
+    return out
+
+
+def harden_command_adapter() -> str:
+    """Keep Claude's command thin; the package owns the executable workflow."""
+    return (
+        "---\n"
+        "description: Run profile-aware, evidence-backed product hardening\n"
+        "---\n\n"
+        "Load the generated `harden` skill package completely, starting with "
+        "`../skills/harden/SKILL.md`. Run its deterministic preflight from "
+        "`../skills/harden/runtime/harden_state.py` before dispatching any audit worker. "
+        "Treat the package as generated; edit canonical `procedures/`, `config/`, "
+        "`evals/harden/`, or `snippets/harden_state.py` instead.\n"
+    )
+
+
 def build_claude_artifacts() -> dict[Path, str]:
     """Pure: every Claude artifact path -> the exact content it SHOULD have, taken VERBATIM from its
     canonical procedures/ source (identity copy; only the directory layout is remapped). This is the
@@ -320,14 +466,19 @@ def build_claude_artifacts() -> dict[Path, str]:
     # Commands: one canonical source per command, shared byte-for-byte with Codex.
     for command, source in COMMAND_SOURCES.items():
         if source.exists():
-            out[COMMANDS_DIR / f"{command}.md"] = source.read_text(
-                encoding="utf-8", errors="replace"
+            out[COMMANDS_DIR / f"{command}.md"] = (
+                harden_command_adapter()
+                if command == "harden"
+                else source.read_text(encoding="utf-8", errors="replace")
             )
 
     # Agent fleet: procedures/agents/<expert>.md -> agents/<expert>.md
     if PROCEDURES_AGENTS_DIR.exists():
         for ag in sorted(PROCEDURES_AGENTS_DIR.glob("*.md")):
+            if ag.stem in RETIRED_GENERATED_AGENTS:
+                continue
             out[AGENTS_DIR / ag.name] = ag.read_text(encoding="utf-8", errors="replace")
+    out.update(build_harden_package_artifacts(SKILLS_DIR / "harden"))
     return out
 
 
@@ -353,6 +504,7 @@ def build_codex_skill_artifacts() -> dict[Path, str]:
         out[CODEX_SKILLS_DIR / skill_name / "SKILL.md"] = source.read_text(
             encoding="utf-8", errors="replace"
         )
+    out.update(build_harden_package_artifacts(CODEX_SKILLS_DIR / "harden"))
     return out
 
 
@@ -366,6 +518,12 @@ def build_antigravity_skill_artifacts() -> dict[Path, str]:
         out[ANTIGRAVITY_SKILLS_DIR / name / "SKILL.md"] = proc.read_text(
             encoding="utf-8", errors="replace"
         )
+        for sibling in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
+            sibling_name = sibling.name[len(name) + 1 :]
+            content = sibling.read_text(encoding="utf-8", errors="replace")
+            out[ANTIGRAVITY_SKILLS_DIR / name / sibling_name] = content
+            out[ANTIGRAVITY_SKILLS_DIR / name / sibling.name] = content
+    out.update(build_harden_package_artifacts(ANTIGRAVITY_SKILLS_DIR / "harden"))
     return out
 
 
@@ -403,11 +561,17 @@ def build_global_rulebook_artifacts() -> dict[Path, str]:
     }
     # On Windows the canonical source checkout itself normally is ~/.gemini. Do not
     # replace the source GEMINI.md with an embedded generated copy in that layout.
-    out[GEMINI_GLOBAL_RULES] = (
-        gemini
-        if GEMINI_GLOBAL_RULES.resolve() == GEMINI_MD.resolve()
-        else banner + agents + "\n\n" + _without_local_import(gemini) + "\n"
-    )
+    if GEMINI_GLOBAL_RULES.resolve() == GEMINI_MD.resolve():
+        out[GEMINI_GLOBAL_RULES] = gemini
+    else:
+        fallback = (
+            "\nCanonical procedure root for manual fallback: "
+            f"`{PROCEDURES_DIR}`. Resolve `procedures/<name>.md` references against "
+            "that directory.\n"
+        )
+        out[GEMINI_GLOBAL_RULES] = (
+            banner + agents + "\n\n" + _without_local_import(gemini) + fallback
+        )
     return out
 
 
@@ -456,7 +620,11 @@ def materialize_claude_artifacts(dry: bool) -> list[str]:
         for n in OUR_SKILLS
         if not (PROCEDURES_DIR / f"{n}.md").exists()
     ]
-    return actions + materialize_retired_skill_artifacts("claude", dry)
+    return (
+        actions
+        + materialize_retired_skill_artifacts("claude", dry)
+        + materialize_retired_agent_artifacts(dry)
+    )
 
 
 def materialize_codex_skill_artifacts(dry: bool) -> list[str]:
@@ -504,6 +672,35 @@ def materialize_antigravity_skill_artifacts(dry: bool) -> list[str]:
     return actions + materialize_retired_skill_artifacts("antigravity", dry)
 
 
+def materialize_direct_harden_package(dry: bool) -> list[str]:
+    """Write the tracked Gemini/direct package from the same canonical graph."""
+    actions: list[str] = []
+    for path, content in build_harden_package_artifacts(
+        DIRECT_HARDEN_PACKAGE_DIR
+    ).items():
+        data = content.encode("utf-8")
+        existing = path.read_bytes() if path.exists() else None
+        if existing == data:
+            continue
+        actions.append(("write " if existing is None else "update ") + str(path))
+        if not dry:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+    return actions
+
+
+def detect_direct_harden_package_drift() -> list[str]:
+    drift: list[str] = []
+    for path, expected in build_harden_package_artifacts(
+        DIRECT_HARDEN_PACKAGE_DIR
+    ).items():
+        if not path.is_file() or path.read_bytes() != expected.encode("utf-8"):
+            drift.append(
+                f"{path}: hardening package drift — run sync to regenerate"
+            )
+    return drift
+
+
 def retired_skill_artifact_paths(runtime: str) -> tuple[Path, ...]:
     """Return the exact generated files a retirement is allowed to prune."""
     roots = {
@@ -535,6 +732,32 @@ def detect_retired_skill_artifact_drift(runtime: str) -> list[str]:
     return [
         f"{path}: RETIRED generated artifact still present — run sync to prune exact target"
         for path in retired_skill_artifact_paths(runtime)
+        if path.exists()
+    ]
+
+
+def retired_agent_artifact_paths() -> tuple[Path, ...]:
+    """Return the exact generated Claude agent files a retirement may prune."""
+    return tuple(AGENTS_DIR / f"{name}.md" for name in sorted(RETIRED_GENERATED_AGENTS))
+
+
+def materialize_retired_agent_artifacts(dry: bool) -> list[str]:
+    actions: list[str] = []
+    for path in retired_agent_artifact_paths():
+        if not path.exists():
+            continue
+        actions.append(f"remove retired {path}")
+        if not dry:
+            if not path.is_file():
+                raise RuntimeError(f"retired generated target is not a file: {path}")
+            path.unlink()
+    return actions
+
+
+def detect_retired_agent_artifact_drift() -> list[str]:
+    return [
+        f"{path}: RETIRED generated agent still present — run sync to prune exact target"
+        for path in retired_agent_artifact_paths()
         if path.exists()
     ]
 
@@ -571,7 +794,11 @@ def detect_artifact_drift() -> list[str]:
                     f"{rel_claude(p)}: ORPHAN (no procedures/agents/ source) — "
                     f"add the procedure or delete the agent"
                 )
-    return drift + detect_retired_skill_artifact_drift("claude")
+    return (
+        drift
+        + detect_retired_skill_artifact_drift("claude")
+        + detect_retired_agent_artifact_drift()
+    )
 
 
 def detect_codex_skill_drift() -> list[str]:
@@ -857,8 +1084,16 @@ def detect_semantic_drift(
             if not resolved.exists():
                 findings.append(f"{path}: missing Markdown target {target!r}")
 
+        for target in re.findall(r"`(procedures/[^`\s]+\.md(?:#[^`]*)?)`", text):
+            raw_path = target.partition("#")[0]
+            if any(char in raw_path for char in "*<>"):
+                continue
+            resolved = (ROOT_REPO / raw_path).resolve()
+            if not resolved.exists():
+                findings.append(f"{path}: missing backticked procedure target {target!r}")
+
     frontier = PROCEDURES_DIR / "model-frontier.REFERENCE.md"
-    if docs is None and frontier.exists():
+    if frontier.exists():
         text = frontier.read_text(encoding="utf-8", errors="replace")
         match = re.search(r"Next review:\s*(\d{4}-\d{2}-\d{2})", text)
         if not match:
@@ -875,28 +1110,12 @@ def _md_table(header: tuple[str, str], rows: list[tuple[str, str]]) -> str:
 
 
 def build_gemini_triggers() -> str:
-    """Pure: compact Gemini procedure registry derived from canonical procedures/.
-
-    Trigger descriptions already live in frontmatter. Repeating them in always-loaded GEMINI.md
-    wastes context and can drift, so this table is navigation only.
-    """
-    entries = [(n, PROCEDURES_DIR / f"{n}.md") for n in sorted(OUR_SKILLS)]
-    entries.append(("harden", PROCEDURES_DIR / "harden.md"))
-    rows: list[tuple[str, str]] = []
-    for name, p in entries:
-        if not p.exists():
-            continue
-        target = f"`procedures/{name}.md`"
-        if name == "model-frontier":
-            target += " (+ `model-frontier.REFERENCE.md`)"
-        if name == "harden":
-            target += " (+ `procedures/agents/`)"
-        rows.append((f"**{name}**", target))
-    return _md_table(("Trigger", "Procedure"), rows)
+    """Pure: one provider-neutral pointer; AGENTS.md owns procedure routing."""
+    return "Procedure routing is inherited from `AGENTS.md`."
 
 
 def materialize_gemini_triggers(dry: bool) -> list[str]:
-    """Regenerate GEMINI.md's trigger table inside its markers (prose preserved). Auto-fixed in SYNC."""
+    """Keep GEMINI.md's routing marker compact and inherited from AGENTS.md."""
     if not GEMINI_MD.exists():
         return ["SKIP GEMINI.md (not found)"]
     current = GEMINI_MD.read_text(encoding="utf-8", errors="replace")
@@ -912,11 +1131,11 @@ def materialize_gemini_triggers(dry: bool) -> list[str]:
         return []
     if not dry:
         GEMINI_MD.write_bytes(updated.encode("utf-8"))
-    return ["GEMINI.md: regenerated skill-mimic trigger table from procedures/"]
+    return ["GEMINI.md: restored compact inherited procedure routing marker"]
 
 
 def detect_gemini_drift() -> list[str]:
-    """The Gemini trigger table fell out of sync with procedures/ (or lost its markers)."""
+    """The Gemini routing marker expanded or lost its canonical pointer."""
     if not GEMINI_MD.exists():
         return []
     current = GEMINI_MD.read_text(encoding="utf-8", errors="replace")
@@ -926,7 +1145,8 @@ def detect_gemini_drift() -> list[str]:
         return [f"GEMINI.md: {exc}"]
     if _norm(updated) != _norm(current):
         return [
-            "GEMINI.md: trigger table stale vs procedures/ — run /sync-agent-stubs to regenerate"
+            "GEMINI.md: routing marker is not the compact AGENTS.md pointer — run "
+            "/sync-agent-stubs to regenerate"
         ]
     return []
 
@@ -967,14 +1187,16 @@ def build_guide_sections() -> dict[str, str]:
         if PROCEDURES_AGENTS_DIR.exists()
         else []
     ):
+        if md.stem in RETIRED_GENERATED_AGENTS:
+            continue
         desc = parse_frontmatter(md.read_text(encoding="utf-8", errors="replace")).get(
             "description", ""
         )
         agent_rows.append((f"`{md.stem}`", first_sentence(desc)))
     agents = (
         f"**{len(agent_rows)} audit agents** — criteria canonical in `procedures/agents/`, generated "
-        f"into `~/.claude/agents/` for Claude's `/harden` dispatch (most are SaaS-grade and won't "
-        f"fire on personal tools — that's the L1 cap).\n\n"
+        f"into `~/.claude/agents/` for Claude's `/harden` dispatch. Profile and capability "
+        f"applicability keep personal tools local-first without weakening commercial gates.\n\n"
         + _md_table(("Agent", "Audits"), agent_rows)
     )
 
@@ -984,7 +1206,11 @@ def build_guide_sections() -> dict[str, str]:
         else []
     )
     agent_files = (
-        sorted(p.name for p in PROCEDURES_AGENTS_DIR.glob("*.md"))
+        sorted(
+            p.name
+            for p in PROCEDURES_AGENTS_DIR.glob("*.md")
+            if p.stem not in RETIRED_GENERATED_AGENTS
+        )
         if PROCEDURES_AGENTS_DIR.exists()
         else []
     )
@@ -1138,6 +1364,11 @@ def includes_machine_specific_inventory(argv: list[str]) -> bool:
     return "--artifacts-only" not in argv
 
 
+def includes_guide_validation(argv: list[str]) -> bool:
+    """Checks always validate the tracked human map, even without project mutation."""
+    return "--check" in argv
+
+
 def main() -> None:
     dry = "--dry-run" in sys.argv
     check = (
@@ -1146,6 +1377,7 @@ def main() -> None:
     readonly = dry or check
     project_wiring = includes_project_wiring(sys.argv)
     machine_inventory = includes_machine_specific_inventory(sys.argv)
+    guide_validation = includes_guide_validation(sys.argv)
     if project_wiring and not SCRATCH.exists():
         print(f"scratch parent not found: {SCRATCH}")
         sys.exit(1)
@@ -1207,6 +1439,14 @@ def main() -> None:
     if readonly:
         drift += detect_antigravity_skill_drift()
 
+    direct_harden_actions = materialize_direct_harden_package(readonly)
+    if direct_harden_actions:
+        print("[Gemini/direct hardening package — generated from canonical sources]")
+        for action in direct_harden_actions:
+            print(f"  - {action}")
+    if readonly:
+        drift += detect_direct_harden_package_drift()
+
     if machine_inventory:
         guide_actions = materialize_guide(readonly)
         if guide_actions:
@@ -1215,12 +1455,14 @@ def main() -> None:
             )
             for a in guide_actions:
                 print(f"  - {a}")
-        if readonly:  # in SYNC mode the guide tables are regenerated (auto-fixed)
-            drift += detect_guide_drift()
+    if readonly and (machine_inventory or guide_validation):
+        # `--check --artifacts-only` is the instruction-repo pre-push path. It must
+        # still catch a stale tracked guide even though it does not rewrite projects.
+        drift += detect_guide_drift()
 
     gemini_actions = materialize_gemini_triggers(readonly)
     if gemini_actions:
-        print("[GEMINI.md — skill-mimic trigger table regenerated from procedures/]")
+        print("[GEMINI.md — compact routing marker inherited from AGENTS.md]")
         for a in gemini_actions:
             print(f"  - {a}")
     if readonly:  # in SYNC mode the trigger table is regenerated (auto-fixed)

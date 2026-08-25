@@ -11,6 +11,7 @@
 !/MAC_MIGRATION_PLAN.md
 !/AGENT_SYSTEM_ADVERSARIAL_REVIEW_2026-07-21.md
 !/DEFINITIONS.md
+!/requirements-test.lock
 !/procedures/
 !/snippets/
 !/githooks/
@@ -26,6 +27,10 @@
 !/config/judge_registries/
 /config/judge_registries/*
 !/config/judge_registries/1.1.0.json
+!/config/harden_state_v2.schema.json
+!/config/harden_mandatory_rules.json
+!/config/harden_eval_policy.json
+!/config/harden_capability_registry.json
 !/evals/
 /evals/*
 !/evals/agent_system/
@@ -33,11 +38,23 @@
 !/evals/agent_system/routing_cases.jsonl
 !/evals/frontend_quality/
 !/evals/frontend_quality/shadow_cases.json
+!/evals/harden/
+/evals/harden/*
+!/evals/harden/cases.jsonl
+!/evals/harden/run_capability_eval.py
+!/evals/harden/score_capability_eval.py
 !/governance/
 /governance/*
 !/governance/judge_ledger.jsonl
 !/governance/judge_issuance.jsonl
 !/governance/judge_outcomes.jsonl
+!/governance/harden_capability_receipts/
+/governance/harden_capability_receipts/*
+!/governance/harden_capability_receipts/.gitkeep
+!/governance/harden_capability_receipts/legacy_uncalibrated.json
+!/governance/harden_capability_evidence/
+/governance/harden_capability_evidence/*
+!/governance/harden_capability_evidence/.gitkeep
 
 # Caches inside tracked dirs
 __pycache__/
