@@ -1,10 +1,10 @@
 # Canonical Windows-to-Mac migration plan
 
 **Mac arrival:** Wednesday, August 19, 2026  
-**Plan generated from a live scan:** August 15, 2026; refreshed August 23, 2026
+**Plan generated from a live scan:** August 15, 2026; refreshed August 24, 2026
 **Operating decision:** all development occurs on the Mac. Windows remains a production-only runner for Earnings, Portfolio, and Windows-resident backups. MyClaw is retired; Date Suggester and HuntDesk are Mac-owned.
 
-## Authoritative pending items — August 23, 2026
+## Authoritative pending items — August 24, 2026
 
 This is the only active migration follow-up list. Everything not listed here is complete,
 retired, an intentional operating split, or ordinary project backlog. Historical
@@ -46,7 +46,7 @@ This section is the current sequential checklist. It supersedes older Windows-er
 | 12 | DONE | Live Windows inspection found 44 tasks in `\earnings-summary\`: all 42 Task-Scheduler-owned manifest tasks, plus two healthy repo-maintenance tasks stored in that folder. `refresh_scenario_priors` exists and is Ready. The 43rd manifest lane, `capture_poller`, intentionally runs as the healthy `es-poller` Windows service instead of a scheduled task. Running the verifier from the clean production `runtime` checkout reports: `OK All 43 tasks parsed, registered and enabled`. The scratch checkout's 35 wrong-root findings are the expected guard against auditing/deploying from scratch. Morning Markets Brief is unrelated. |
 | 13 | DONE | HuntDesk is manual-only and Mac-owned; it is not scheduled on either host. The authoritative Windows database was copied quiescently through Drive with an exact SHA-256 match, migrated from schema 18 to 20 in isolation, and reconciled with the newer Mac portfolio-list data, 21 newer role observations, and one explicit role decision. The promoted Mac database passes `integrity_check` and `foreign_key_check`, retains local and Drive rollback snapshots, and serves HTTP 200. The authoritative Mac source, including the v20 work and Mac path/typecheck repair, passes all 456 tests and is pushed at `1ee4c24`. Windows retains only its untouched rollback source/database copy and must not be used for future HuntDesk development. |
 | 14 | RETIRED | The owner chose not to retain MyClaw functionality. Both verified Windows jobs, `weekly_review` and `monthly_curate`, are disabled; no Mac replacement was activated and no Telegram task exists. The repository is preserved as rollback/history rather than deleted. The previously merged hardening remains useful if the project is revived. |
-| 15 | DONE | Date Suggester is now Mac-owned. Fresh official Google OAuth granted the four required scopes; the no-email canary passed. Commit `17dc68e` makes the Windows-trained sklearn model degrade safely on Mac; all 431 tests pass. The verified Windows-completed August 16 slot was seeded before cutover, `DateSuggester_Weekly` is disabled on Windows, and the Mac Sunday 09:00 LaunchAgent is loaded. Its RunAtLoad canary skipped the seeded slot, exited 0, and wrote no stderr, proving duplicate suppression. Canary-refreshed personal learning-state changes remain local and unpushed pending a separate data-publication decision. The Windows-only URI handler remains retired unless separately requested. |
+| 15 | DONE | Date Suggester is now Mac-owned. Fresh official Google OAuth granted the four required scopes; the no-email canary passed. Commit `17dc68e` makes the Windows-trained sklearn model degrade safely on Mac; all 431 tests pass. The verified Windows-completed August 16 slot was seeded before cutover, `DateSuggester_Weekly` is disabled on Windows, and the Mac Sunday 09:00 LaunchAgent is loaded. Its RunAtLoad canary skipped the seeded slot, exited 0, and wrote no stderr, proving duplicate suppression. The owner decided the four personal learning-state files remain private, local, and snapshot-backed; do not publish them to Git without a new explicit decision. The Windows-only URI handler remains retired unless separately requested. |
 
 ### Historical Mac repository inventory — August 21 snapshot
 
