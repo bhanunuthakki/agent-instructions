@@ -9,8 +9,10 @@ Run:  python -m pytest C:\\Users\\Bhanu\\.gemini\\snippets\\test_guide_generatio
 
 from __future__ import annotations
 
+import json
 import os
 import sys
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -367,6 +369,33 @@ def test_generated_project_wrappers_are_import_only() -> None:
     assert s.GEMINI_STUB == "# Gemini\n\n@./AGENTS.md\n"
 
 
+def test_sync_regenerates_gemini_before_exporting_global_rulebooks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A global Gemini rulebook must include the current generated trigger table."""
+    calls: list[str] = []
+
+    monkeypatch.setattr(s.sys, "argv", ["sync_agent_stubs.py", "--artifacts-only"])
+    monkeypatch.setattr(s, "materialize_claude_artifacts", lambda _dry: [])
+    monkeypatch.setattr(s, "materialize_codex_skill_artifacts", lambda _dry: [])
+    monkeypatch.setattr(s, "materialize_antigravity_skill_artifacts", lambda _dry: [])
+    monkeypatch.setattr(
+        s,
+        "materialize_gemini_triggers",
+        lambda _dry: calls.append("gemini") or [],
+    )
+    monkeypatch.setattr(
+        s,
+        "materialize_global_rulebook_artifacts",
+        lambda _dry: calls.append("global") or [],
+    )
+    monkeypatch.setattr(s, "materialize_mcp_configs", lambda _dry: [])
+
+    s.main()
+
+    assert calls == ["gemini", "global"]
+
+
 def test_legacy_generated_wrapper_is_refreshable(tmp_path: Path) -> None:
     wrapper = tmp_path / "CLAUDE.md"
     wrapper.write_text(
@@ -441,6 +470,20 @@ def test_codex_skill_artifacts_are_identity_copies_of_procedures() -> None:
         assert arts[target] == ref.read_text(encoding="utf-8", errors="replace")
 
 
+def test_antigravity_skill_artifacts_are_identity_copies_of_procedures() -> None:
+    arts = s.build_antigravity_skill_artifacts()
+    for name in [*s.OUR_SKILLS, *s.CODEX_ONLY_SKILLS]:
+        src = s.PROCEDURES_DIR / f"{name}.md"
+        if src.exists():
+            target = s.ANTIGRAVITY_SKILLS_DIR / name / "SKILL.md"
+            assert arts[target] == src.read_text(encoding="utf-8", errors="replace")
+    assert s.build_antigravity_skill_config() == (
+        '{\n'
+        '  "entries": [\n'
+        f'    {{\n      "path": "{s.ANTIGRAVITY_SKILLS_DIR}"\n    }}\n'
+        '  ]\n'
+        '}\n'
+    )
 def test_progressive_disclosure_skills_are_generated_for_both_runtimes() -> None:
     names = {
         "agent-operations",
@@ -449,6 +492,8 @@ def test_progressive_disclosure_skills_are_generated_for_both_runtimes() -> None
         "external-practice",
         "linear-pipeline-hygiene",
         "linear-pr-sync",
+        "mockup-review",
+        "frontend-quality",
     }
     assert names <= set(s.OUR_SKILLS)
     claude = s.build_claude_artifacts()
@@ -458,6 +503,148 @@ def test_progressive_disclosure_skills_are_generated_for_both_runtimes() -> None
         assert source.exists()
         assert s.SKILLS_DIR / name / "SKILL.md" in claude
         assert s.CODEX_SKILLS_DIR / name / "SKILL.md" in codex
+
+
+def test_frontend_quality_has_one_canonical_route_and_no_stale_global_owner() -> None:
+    procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
+    agents = s.AGENTS_MD.read_text(encoding="utf-8")
+    assert procedure.count("# Frontend Quality") == 1
+    assert agents.count("`procedures/frontend-quality.md`") == 1
+    assert "Frontend Correctness" not in agents
+    assert "frontend-quality" in s.OUR_SKILLS
+    assert "design-conformance-audit" not in s.OUR_SKILLS
+
+
+def test_frontend_workflows_route_to_the_canonical_quality_owner() -> None:
+    for relative in (
+        "procedures/code-change.md",
+        "procedures/code-change.FRONTEND.md",
+        "procedures/scaffold-design-system.md",
+        "procedures/mockup-review.md",
+        "procedures/harden.md",
+        "procedures/agents/ux-design.md",
+        "procedures/agents/frontend-web.md",
+    ):
+        assert "frontend-quality" in (s.ROOT_REPO / relative).read_text(encoding="utf-8"), relative
+    stale = [
+        path
+        for path in s.PROCEDURES_DIR.rglob("*.md")
+        if "Frontend Correctness" in path.read_text(encoding="utf-8", errors="replace")
+    ]
+    assert stale == []
+
+
+def test_frontend_quality_shadow_cases_cover_restraint_and_trajectories() -> None:
+    path = s.ROOT_REPO / "evals" / "frontend_quality" / "shadow_cases.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["mode"] == "shadow"
+    assert "unproven" in payload["coverage_claim"]
+    assert {case["id"] for case in payload["restraint_pairs"]} == {
+        "container-economy", "semantic-rail", "type-economy", "structural-list", "subtitle-value"
+    }
+    assert {case["id"] for case in payload["task_trajectories"]} == {
+        "material-existing-redesign", "small-visual-adjustment", "greenfield-scaffold", "nonvisual-frontend-behavior", "unrunnable-preview"
+    }
+    for case in payload["restraint_pairs"]:
+        assert set(case) == {"id", "surface", "variant_a", "variant_b", "expected_rubric"}
+        assert case["expected_rubric"]["preferred_variant"] in {"a", "b"}
+    for case in payload["task_trajectories"]:
+        assert set(case) == {"id", "prompt", "expected_rubric"}
+        assert isinstance(case["expected_rubric"]["material"], bool)
+
+
+def test_frontend_quality_shadow_runner_has_a_schema_checked_dry_run(
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runner_path = s.ROOT_REPO / "evals" / "frontend_quality" / "run_shadow_eval.py"
+    spec = spec_from_file_location("frontend_quality_shadow", runner_path)
+    assert spec and spec.loader
+    runner = module_from_spec(spec)
+    spec.loader.exec_module(runner)
+
+    valid = {
+        "case_id": "case",
+        "material": True,
+        "ux_hypothesis": "task first",
+        "rendered_evidence": "preview",
+        "reduction_pass": "removed a box",
+        "verification_gap": "none",
+        "verdict": "PASS",
+        "findings": [], "contract_flags": ["baseline-render"], "type": "task_trajectory",
+    }
+    assert runner.validate_response(valid, {"id": "case", "prompt": "x"}) == valid
+    advisory = {**valid, "verdict": "ADVISORY"}
+    assert runner.validate_response(advisory, {"id": "case", "prompt": "x"}) == advisory
+    with pytest.raises(ValueError, match="case case: invalid verdict"):
+        runner.validate_response({**valid, "verdict": "UNKNOWN"}, {"id": "case", "prompt": "x"})
+    with pytest.raises(ValueError, match="response schema"):
+        runner.validate_response({"case_id": "case"}, {"id": "case", "prompt": "x"})
+    pair = {"id": "pair", "surface": "test", "variant_a": "a", "variant_b": "b", "expected_rubric": {"preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["decorative-accent"]}}
+    pair_response = {"case_id": "pair", "type": "restraint_pair", "preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["decorative-accent"], "reason": "less clutter"}
+    assert runner.score_case(pair, runner.validate_response(pair_response, pair))["status"] == "MATCH"
+    pair_prompt = runner.prompt_for(pair)
+    trajectory_prompt = runner.prompt_for({"id": "case", "prompt": "x"})
+    assert "expected_rubric" not in pair_prompt
+    assert '"preferred_variant": "a"' not in pair_prompt
+    assert "preferred_variant (a|b)" in pair_prompt
+    assert "redundant-container" in pair_prompt
+    assert "verdict (PASS|BLOCK|ADVISORY|HOLD|ABSTAIN)" in trajectory_prompt
+    assert runner.MATERIALITY_DEFINITION in trajectory_prompt
+    assert "baseline-render" in trajectory_prompt
+    with pytest.raises(ValueError, match="case pair: invalid pair flag"):
+        runner.validate_response({**pair_response, "variant_b_flags": ["unknown"]}, pair)
+    with pytest.raises(ValueError, match="case case: invalid trajectory contract flag"):
+        runner.validate_response({**valid, "contract_flags": ["unknown"]}, {"id": "case", "prompt": "x"})
+    assert runner.receipt_target("run-one") != runner.receipt_target("run-two")
+    monkeypatch.setattr(sys, "argv", ["run_shadow_eval.py", "--limit", "1"])
+    runner.main()
+    assert json.loads(capsys.readouterr().out)["selected"] == ["container-economy"]
+
+
+def test_retired_generated_skill_is_exactly_detected_and_pruned(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    roots = {
+        "SKILLS_DIR": tmp_path / "claude",
+        "CODEX_SKILLS_DIR": tmp_path / "codex",
+        "LEGACY_CODEX_SKILLS_DIR": tmp_path / "legacy-codex",
+        "ANTIGRAVITY_SKILLS_DIR": tmp_path / "antigravity",
+    }
+    for name, root in roots.items():
+        monkeypatch.setattr(s, name, root)
+    retired = roots["SKILLS_DIR"] / "design-conformance-audit" / "SKILL.md"
+    legacy_retired = roots["LEGACY_CODEX_SKILLS_DIR"] / "design-conformance-audit" / "SKILL.md"
+    unrelated = roots["SKILLS_DIR"] / "personal-skill" / "SKILL.md"
+    retired.parent.mkdir(parents=True)
+    legacy_retired.parent.mkdir(parents=True)
+    unrelated.parent.mkdir(parents=True)
+    retired.write_text("retired", encoding="utf-8")
+    legacy_retired.write_text("retired", encoding="utf-8")
+    unrelated.write_text("keep", encoding="utf-8")
+
+    assert s.detect_retired_skill_artifact_drift("claude")
+    assert s.detect_retired_skill_artifact_drift("legacy-codex")
+    assert s.materialize_retired_skill_artifacts("claude", dry=True) == [
+        f"remove retired {retired}"
+    ]
+    assert retired.exists()
+    s.materialize_retired_skill_artifacts("claude", dry=False)
+    s.materialize_retired_skill_artifacts("legacy-codex", dry=False)
+    assert not retired.exists()
+    assert not legacy_retired.exists()
+    assert unrelated.read_text(encoding="utf-8") == "keep"
+    assert not s.detect_retired_skill_artifact_drift("claude")
+
+
+def test_guide_omits_retired_discovery_and_legacy_scaffold_framework(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(s, "project_dirs", lambda: [])
+    sections = s.build_guide_sections()
+    assert "design-conformance-audit" not in sections["skills"]
+    assert "design-conformance-audit.md" not in sections["procedures"]
+    assert "frontend-quality" in sections["skills"]
+    assert "Radix" not in sections["skills"]
 
 
 def test_codex_gets_harden_as_a_skill_without_duplicating_claude_command() -> None:
@@ -506,6 +693,7 @@ def test_live_tree_has_no_artifact_or_doc_path_drift() -> None:
     hooks dir with a stale leading dot. These are the guards the pre-push --check relies on."""
     assert s.detect_artifact_drift() == []
     assert s.detect_codex_skill_drift() == []
+    assert s.detect_antigravity_skill_drift() == []
     assert s.detect_doc_path_drift() == []
 
 
@@ -514,6 +702,7 @@ def test_generated_claude_files_use_lf_newlines() -> None:
     artifacts stay byte-identical to their LF procedures/ sources. Guard that regression."""
     targets = list(s.SKILLS_DIR.glob("*/SKILL.md")) + list(s.AGENTS_DIR.glob("*.md"))
     targets += list(s.CODEX_SKILLS_DIR.glob("*/SKILL.md"))
+    targets += list(s.ANTIGRAVITY_SKILLS_DIR.glob("*/SKILL.md"))
     # files the generator writes: the /harden command + the docs whose tables it regenerates
     targets += [
         p

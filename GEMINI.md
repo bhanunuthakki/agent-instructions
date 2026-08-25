@@ -16,15 +16,16 @@ Gemini-specific context only:
 | **code-change** | `procedures/code-change.md` |
 | **context-engineering** | `procedures/context-engineering.md` |
 | **definitions** | `procedures/definitions.md` |
-| **design-conformance-audit** | `procedures/design-conformance-audit.md` |
 | **explain-change** | `procedures/explain-change.md` |
 | **external-practice** | `procedures/external-practice.md` |
+| **frontend-quality** | `procedures/frontend-quality.md` |
 | **grill-me** | `procedures/grill-me.md` |
 | **judging** | `procedures/judging.md` |
 | **linear-pipeline-hygiene** | `procedures/linear-pipeline-hygiene.md` |
 | **linear-pr-sync** | `procedures/linear-pr-sync.md` |
 | **llm-ops** | `procedures/llm-ops.md` |
 | **log-redaction** | `procedures/log-redaction.md` |
+| **mockup-review** | `procedures/mockup-review.md` |
 | **model-frontier** | `procedures/model-frontier.md` (+ `model-frontier.REFERENCE.md`) |
 | **scaffold-auth** | `procedures/scaffold-auth.md` |
 | **scaffold-deploy** | `procedures/scaffold-deploy.md` |

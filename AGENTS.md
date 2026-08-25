@@ -8,10 +8,11 @@ This is the small, always-loaded contract shared by Claude, Codex, Gemini, and o
 - This file holds cross-project invariants and routing cues.
 - The closest project or subtree `AGENTS.md` holds purpose, exact commands, state ownership, data boundaries, vocabulary, and codebase-specific gotchas.
 - `CLAUDE.md` and `GEMINI.md` add runtime mechanics only. Codex reads `AGENTS.md` directly.
-- `procedures/<name>.md` is the canonical source for reusable workflows. Claude and Codex receive generated native skills; Gemini reads the same procedure through its trigger table.
+- `procedures/<name>.md` is the canonical source for every reusable cross-runtime workflow. Runtimes may expose generated native skills or route directly to the procedure, but a provider-local skill is only an adapter and must never be the sole definition of a shared workflow.
 - Source code, tests, schemas, rubrics, mockups, and directives are preferred references when they express a requirement more precisely than prose.
 - Systems are exit-ready by design rather than universally portable: prompts, schemas, domain semantics, tests, eval definitions, and deterministic verification entrypoints remain locally owned and runtime-neutral.
 - Runtime skills, hosted CI, subscription wrappers, provider SDKs/CLIs, model IDs, grounding connectors, and realtime formats are treated as replaceable adapters behind documented boundaries.
+- Personal tools stay local and single-user until an explicit commercial transition; frontend quality and evidence are required now, while multi-tenant/commercial hardening starts deliberately through `/harden --full`.
 
 When a task matches a procedure’s frontmatter description, load that procedure completely before acting. Keep unrelated procedures out of context.
 
@@ -60,6 +61,7 @@ Use the smallest procedure that owns the work:
 | domain vocabulary or conflicting terms | `procedures/definitions.md` |
 | substantive coding/research validation, Judge, Critic, or Evaluation Suite work | `procedures/judging.md` |
 | code implementation, fix, refactor, or review | `procedures/code-change.md` |
+| frontend creation, visible UI change, redesign, mockup, or frontend review | `procedures/frontend-quality.md` composed with `code-change`, `mockup-review`, or the applicable scaffold |
 | branch or PR lifecycle transition with an exact Linear key | `procedures/linear-pr-sync.md` |
 | Linear backlog hygiene, cross-project cleanup, or stale/duplicate/dependency reconciliation | `procedures/linear-pipeline-hygiene.md` |
 | multi-agent, worktree, model-tier, or quota scheduling work | `procedures/agent-operations.md` |
@@ -69,6 +71,7 @@ Use the smallest procedure that owns the work:
 | credential-safe network logging | `procedures/log-redaction.md` |
 | auth, tenant schema, secrets, design system, or deployment baseline | the matching `procedures/scaffold-*.md` |
 | owner-facing explanation after a substantial LLM-written change | `procedures/explain-change.md` |
+| mockup, redesign, visual revision, or design review of an existing application page | `procedures/mockup-review.md` |
 | maturity-gated product audit or approved remediation | `procedures/harden.md` plus only the applicable `procedures/agents/<expert>.md` rubrics |
 
 An external-practice check starts at the real code or configuration seam and ends with an applicability conclusion, current primary-source provenance, version and access date, and explicit uncertainty. A URL list is not evidence synthesis.

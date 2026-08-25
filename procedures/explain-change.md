@@ -34,7 +34,7 @@ Group by user-visible behavior or system effect, not by file. Include only chang
 
 State the checks actually run and their results, behavior not verified, and concrete failure modes ranked by harm. Give an exact command or click path only when it is useful for independent confirmation.
 
-**Explicitly flag anything that touches:** secrets/credentials · database schema or migrations (data loss?) · authentication/authorization (cross-user access?) · money/payments · external API calls or writes (cost? rate limits? side effects?) · deletion of files or rows. Recommend the matching review or hardening audit when the surface warrants it. If a material change touches none of these, a single reassurance is enough.
+**Explicitly flag anything that touches:** secrets/credentials · database schema or migrations (data loss?) · authentication/authorization (cross-user access?) · money/payments · external API calls or writes (cost? rate limits? side effects?) · deletion of files or rows. Recommend the matching review or hardening audit when the surface warrants it. For material frontend changes, state the user task exercised, rendered proof, and any visual or interaction verification gap. If a material change touches none of these, a single reassurance is enough.
 
 ## Rules
 - Be honest about what you're unsure of — "I'm not certain X handles the empty case" beats false confidence. The user is trusting this verdict instead of reading the code.

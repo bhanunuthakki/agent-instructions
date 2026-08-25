@@ -1,0 +1,221 @@
+{
+  "coverage_claim": "Invocation coverage is unproven without an independent task population frame.",
+  "executed_at": "2026-08-25T07:55:56.145008+00:00",
+  "mode": "shadow",
+  "results": [
+    {
+      "case_id": "container-economy",
+      "preferred_variant": "a",
+      "reason": "Variant A communicates the summary directly with one semantic section. Variant B adds three nested card wrappers without conveying hierarchy or interaction boundaries, creating needless visual and structural complexity.",
+      "type": "restraint_pair",
+      "variant_a_flags": [],
+      "variant_b_flags": [
+        "nested-card-containers",
+        "unnecessary-visual-chrome"
+      ]
+    },
+    {
+      "case_id": "semantic-rail",
+      "preferred_variant": "a",
+      "reason": "Variant A communicates the alert semantically via role='status' with minimal markup. Variant B adds a visual rail but omits alert/status semantics.",
+      "type": "restraint_pair",
+      "variant_a_flags": [],
+      "variant_b_flags": [
+        "decorative_accent_without_semantic_status"
+      ]
+    },
+    {
+      "case_id": "type-economy",
+      "preferred_variant": "a",
+      "reason": "Variant A uses a straightforward heading treatment appropriate for a decision surface. Variant B stacks multiple emphasis mechanisms without evidence they improve hierarchy or comprehension.",
+      "type": "restraint_pair",
+      "variant_a_flags": [],
+      "variant_b_flags": [
+        "excessive_type_treatment",
+        "unnecessary_color_emphasis",
+        "unnecessary_indentation",
+        "unnecessary_uppercase"
+      ]
+    },
+    {
+      "case_id": "structural-list",
+      "preferred_variant": "a",
+      "reason": "A single standalone metric statement is clearer as a paragraph; a one-item list adds visual and structural noise without representing a real collection.",
+      "type": "restraint_pair",
+      "variant_a_flags": [],
+      "variant_b_flags": [
+        "unnecessary-list-structure"
+      ]
+    },
+    {
+      "case_id": "subtitle-value",
+      "preferred_variant": "a",
+      "reason": "Variant A\u2019s subtitle adds a useful, company-specific datum; Variant B merely repeats the page context.",
+      "type": "restraint_pair",
+      "variant_a_flags": [],
+      "variant_b_flags": [
+        "redundant_subtitle"
+      ]
+    },
+    {
+      "case_id": "material-existing-redesign",
+      "contract_flags": [
+        "material_ui_change",
+        "inspect_existing_route_before_edit",
+        "rendered_verification_required",
+        "post_change_observation_required"
+      ],
+      "findings": "This is a material existing-interface redesign: it explicitly requires baseline route inspection, a hierarchy change, and a post-change observation report. Rendered evidence is needed to verify that the daily decision is actually first in the visible experience.",
+      "material": true,
+      "reduction_pass": "Remove or demote competing above-the-fold dashboard content that does not directly support the daily decision.",
+      "rendered_evidence": "Inspect the existing runnable route before editing, then render the redesigned route and compare the visible hierarchy against the observed baseline.",
+      "type": "task_trajectory",
+      "ux_hypothesis": "Make the daily decision and its supporting actions the first, clearest element of the dashboard\u2019s information hierarchy.",
+      "verdict": "PASS",
+      "verification_gap": "The prompt does not identify the route, viewport, target user, decision content, or acceptance criteria for the revised hierarchy."
+    },
+    {
+      "case_id": "small-visual-adjustment",
+      "contract_flags": [],
+      "findings": "The requested scope is appropriately minimal, but the affected UI state has not been shown or verified.",
+      "material": false,
+      "reduction_pass": "Constrain the change to one visual treatment in the warning; avoid layout, copy, interaction, or state-logic changes.",
+      "rendered_evidence": "No rendered affected-state evidence was supplied.",
+      "type": "task_trajectory",
+      "ux_hypothesis": "A single visual emphasis adjustment can make the stale-data warning easier to scan while preserving its behavior.",
+      "verdict": "HOLD",
+      "verification_gap": "Render and inspect the stale-data state after the change, including its readability in context."
+    },
+    {
+      "case_id": "greenfield-scaffold",
+      "contract_flags": [],
+      "findings": "The trajectory correctly requires hierarchy-first design, but it lacks an implemented or rendered result to assess hierarchy, responsiveness, accessibility, or interaction clarity.",
+      "material": true,
+      "reduction_pass": "Establish the page hierarchy and primary reading decision before selecting components or visual treatment.",
+      "rendered_evidence": "No rendered implementation or viewport evidence is provided.",
+      "type": "task_trajectory",
+      "ux_hypothesis": "A local reading queue should prioritize the next item to read, then provide clear queue status and lightweight actions.",
+      "verdict": "HOLD",
+      "verification_gap": "Run the page in the repository\u2019s existing stack and inspect desktop and narrow viewport states, including empty and populated queue states."
+    },
+    {
+      "case_id": "nonvisual-frontend-behavior",
+      "contract_flags": [
+        "nonvisual_change",
+        "no_rendered_output_change"
+      ],
+      "findings": "The requested change is interaction logic only and provides no visual artifact to evaluate.",
+      "material": false,
+      "reduction_pass": "Classified as nonvisual handler behavior; no frontend-quality visual review is warranted.",
+      "rendered_evidence": "No rendered-output change is in scope.",
+      "type": "task_trajectory",
+      "ux_hypothesis": "Retry behavior should recover a failed request without altering the rendered interface.",
+      "verdict": "ABSTAIN",
+      "verification_gap": "Requires behavioral testing of retry attempts, failure handling, and duplicate-request prevention."
+    },
+    {
+      "case_id": "unrunnable-preview",
+      "contract_flags": [
+        "renderer_unavailable",
+        "mockup_artifact_unavailable",
+        "rendered_verification_missing"
+      ],
+      "findings": "The task can be reasoned about, but cannot be evaluated for frontend quality without the referenced mockup and a rendering path.",
+      "material": false,
+      "reduction_pass": "Limit changes to the requested revision; avoid inventing layout or interaction behavior without the mockup.",
+      "rendered_evidence": "No browser, local renderer, or supplied mockup artifact is available to inspect.",
+      "type": "task_trajectory",
+      "ux_hypothesis": "Preserve the supplied mockup\u2019s hierarchy and visual intent while making only task-relevant revisions.",
+      "verdict": "HOLD",
+      "verification_gap": "Rendered fidelity, responsive behavior, and visual regressions cannot be verified."
+    }
+  ],
+  "rubric_scores": [
+    {
+      "case_id": "container-economy",
+      "checks": {
+        "preferred_variant": true,
+        "variant_a_flags": true,
+        "variant_b_flags": false
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "semantic-rail",
+      "checks": {
+        "preferred_variant": true,
+        "variant_a_flags": true,
+        "variant_b_flags": false
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "type-economy",
+      "checks": {
+        "preferred_variant": true,
+        "variant_a_flags": true,
+        "variant_b_flags": false
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "structural-list",
+      "checks": {
+        "preferred_variant": true,
+        "variant_a_flags": true,
+        "variant_b_flags": false
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "subtitle-value",
+      "checks": {
+        "preferred_variant": true,
+        "variant_a_flags": true,
+        "variant_b_flags": false
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "material-existing-redesign",
+      "checks": {
+        "contract_flags": false,
+        "material": true
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "small-visual-adjustment",
+      "checks": {
+        "contract_flags": false,
+        "material": false
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "greenfield-scaffold",
+      "checks": {
+        "contract_flags": false,
+        "material": true
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "nonvisual-frontend-behavior",
+      "checks": {
+        "contract_flags": false,
+        "material": true
+      },
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "unrunnable-preview",
+      "checks": {
+        "contract_flags": false,
+        "material": false
+      },
+      "status": "MISMATCH"
+    }
+  ],
+  "schema_version": "1.0"
+}

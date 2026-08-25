@@ -30,3 +30,5 @@ Start with the highest-cost-to-reverse unknown. Resolve dependencies before leaf
 ## Stop
 
 Stop when the consequential branches are resolved or the user explicitly asks to proceed. Summarize the agreed outcome, decision boundaries, open assumptions, and validation bar. Ask for confirmation only when a remaining ambiguity would materially change the deliverable.
+
+For frontend work, `frontend-quality` remains the normal task-reasoning owner. Use this interview only for a material unresolved product choice; do not turn ordinary visual judgment into a ceremony.

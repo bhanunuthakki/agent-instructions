@@ -31,6 +31,8 @@
 !/evals/agent_system/
 /evals/agent_system/*
 !/evals/agent_system/routing_cases.jsonl
+!/evals/frontend_quality/
+!/evals/frontend_quality/shadow_cases.json
 !/governance/
 /governance/*
 !/governance/judge_ledger.jsonl

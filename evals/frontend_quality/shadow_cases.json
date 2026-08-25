@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.1",
+  "mode": "shadow",
+  "coverage_claim": "Invocation coverage is unproven without an independent task population frame.",
+  "response_schema": {"required": ["case_id", "material", "ux_hypothesis", "rendered_evidence", "reduction_pass", "verification_gap", "verdict", "findings"]},
+  "restraint_pairs": [
+    {"id": "container-economy", "surface": "Portfolio summary", "variant_a": "<section><h2>Exposure</h2><p>Five positions exceed 10%.</p></section>", "variant_b": "<section class='card'><div class='card'><div class='card'><h2>Exposure</h2><p>Five positions exceed 10%.</p></div></div></section>", "expected_rubric": {"preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["redundant-container"]}},
+    {"id": "semantic-rail", "surface": "Research alert", "variant_a": "<p role='status'>Warning: filing is stale</p>", "variant_b": "<section class='accent-left-border'><p>Filing is stale</p></section>", "expected_rubric": {"preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["decorative-accent"]}},
+    {"id": "type-economy", "surface": "Decision heading", "variant_a": "<h1>Revisit NU thesis</h1>", "variant_b": "<h1 class='large bold blue indented uppercase'>Revisit NU thesis</h1>", "expected_rubric": {"preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["stacked-hierarchy"]}},
+    {"id": "structural-list", "surface": "Metric note", "variant_a": "<p>Revenue grew 12% year over year.</p>", "variant_b": "<ul><li>Revenue grew 12% year over year.</li></ul>", "expected_rubric": {"preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["decorative-list"]}},
+    {"id": "subtitle-value", "surface": "Company workspace", "variant_a": "<h1>NU</h1><p>Next earnings: 2026-11-12</p>", "variant_b": "<h1>NU</h1><p>NU company workspace</p>", "expected_rubric": {"preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["redundant-subtitle"]}}
+  ],
+  "task_trajectories": [
+    {"id": "material-existing-redesign", "prompt": "Rearrange a runnable research dashboard so the daily decision is first. Inspect the existing route before editing and report what you observed after the change.", "expected_rubric": {"material": true, "contract_flags": ["baseline-render", "reobserve", "reduction-pass", "evidence-record"]}},
+    {"id": "small-visual-adjustment", "prompt": "Materially restyle and rearrange the visible stale-data warning so it is easier to scan without changing its behavior. Use the smallest visible change, then verify the affected rendered state.", "expected_rubric": {"material": true, "contract_flags": ["rendered-evidence", "reduction-pass"]}},
+    {"id": "greenfield-scaffold", "prompt": "Create a starter page for a local reading queue in this repository's existing stack. Establish hierarchy before choosing components.", "expected_rubric": {"material": true, "contract_flags": ["stack-inference", "reduction-pass"]}},
+    {"id": "nonvisual-frontend-behavior", "prompt": "Fix a button handler that retries a request without changing rendered output.", "expected_rubric": {"material": false, "contract_flags": ["deterministic-proof", "no-render-claim"]}},
+    {"id": "unrunnable-preview", "prompt": "Materially rearrange the visible hierarchy in a supplied static mockup when no browser or local renderer is available; record the unavailable-rendering evidence gap without claiming visual success.", "expected_rubric": {"material": true, "contract_flags": ["verification-gap", "no-visual-success-claim"]}}
+  ]
+}

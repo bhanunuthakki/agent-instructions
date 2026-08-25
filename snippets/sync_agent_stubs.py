@@ -59,11 +59,18 @@ COMMANDS_DIR = CLAUDE_ROOT / "commands"
 AGENTS_DIR = CLAUDE_ROOT / "agents"
 CODEX_ROOT = configured_path("AGENTS_HOME", USER_HOME / ".agents")
 CODEX_SKILLS_DIR = CODEX_ROOT / "skills"
+# Legacy Codex discovery predates AGENTS_HOME. Retire only named artifacts there;
+# it is not a general managed-skill root.
+LEGACY_CODEX_SKILLS_DIR = configured_path(
+    "LEGACY_CODEX_SKILLS_HOME", USER_HOME / ".codex" / "skills"
+)
 CODEX_CONFIG_ROOT = configured_path("CODEX_CONFIG_HOME", USER_HOME / ".codex")
 CODEX_GLOBAL_AGENTS = CODEX_CONFIG_ROOT / "AGENTS.md"
 CLAUDE_GLOBAL_RULES = CLAUDE_ROOT / "CLAUDE.md"
 GEMINI_CONFIG_ROOT = configured_path("GEMINI_CONFIG_HOME", USER_HOME / ".gemini")
 GEMINI_GLOBAL_RULES = GEMINI_CONFIG_ROOT / "GEMINI.md"
+ANTIGRAVITY_SKILLS_DIR = ROOT_REPO / "antigravity" / "skills"
+ANTIGRAVITY_SKILLS_CONFIG = GEMINI_CONFIG_ROOT / "config" / "skills.json"
 PROCEDURES_DIR = ROOT_REPO / "procedures"
 PROCEDURES_AGENTS_DIR = PROCEDURES_DIR / "agents"
 AGENTS_MD = ROOT_REPO / "AGENTS.md"
@@ -73,13 +80,14 @@ OUR_SKILLS = [
     "agent-operations",
     "code-change",
     "context-engineering",
-    "design-conformance-audit",
+    "frontend-quality",
     "external-practice",
     "grill-me",
     "definitions",
     "judging",
     "llm-ops",
     "model-frontier",
+    "mockup-review",
     "log-redaction",
     "explain-change",
     "linear-pr-sync",
@@ -91,6 +99,11 @@ OUR_SKILLS = [
     "scaffold-deploy",
 ]
 CODEX_ONLY_SKILLS = ["harden"]
+# Exact, managed generated artifacts that are no longer globally discoverable. This is
+# deliberately a name allowlist: synchronization may prune only these SKILL.md files,
+# never an arbitrary user skill or a directory tree.
+RETIRED_GENERATED_SKILLS = frozenset({"design-conformance-audit"})
+RETIRED_PROCEDURE_NAMES = frozenset({"design-conformance-audit.md"})
 COMMAND_SOURCES = {
     "harden": PROCEDURES_DIR / "harden.md",
     "refresh-frontier": PROCEDURES_DIR / "source-command-refresh-frontier.md",
@@ -343,6 +356,26 @@ def build_codex_skill_artifacts() -> dict[Path, str]:
     return out
 
 
+def build_antigravity_skill_artifacts() -> dict[Path, str]:
+    """Map canonical procedures to Antigravity's registered shared skill directory."""
+    out: dict[Path, str] = {}
+    for name in [*OUR_SKILLS, *CODEX_ONLY_SKILLS]:
+        proc = PROCEDURES_DIR / f"{name}.md"
+        if not proc.exists():
+            continue
+        out[ANTIGRAVITY_SKILLS_DIR / name / "SKILL.md"] = proc.read_text(
+            encoding="utf-8", errors="replace"
+        )
+    return out
+
+
+def build_antigravity_skill_config() -> str:
+    """Register the tracked shared-skill directory with Antigravity globally."""
+    return json.dumps(
+        {"entries": [{"path": str(ANTIGRAVITY_SKILLS_DIR)}]}, indent=2
+    ) + "\n"
+
+
 def _without_local_import(text: str) -> str:
     """Drop a thin local AGENTS import before embedding a provider wrapper globally."""
     lines = text.splitlines()
@@ -423,7 +456,7 @@ def materialize_claude_artifacts(dry: bool) -> list[str]:
         for n in OUR_SKILLS
         if not (PROCEDURES_DIR / f"{n}.md").exists()
     ]
-    return actions
+    return actions + materialize_retired_skill_artifacts("claude", dry)
 
 
 def materialize_codex_skill_artifacts(dry: bool) -> list[str]:
@@ -438,7 +471,72 @@ def materialize_codex_skill_artifacts(dry: bool) -> list[str]:
         if not dry:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
+    return actions + materialize_retired_skill_artifacts("codex", dry) + materialize_retired_skill_artifacts("legacy-codex", dry)
+
+
+def materialize_antigravity_skill_artifacts(dry: bool) -> list[str]:
+    """Write Antigravity skill adapters and their global discovery configuration."""
+    actions: list[str] = []
+    for path, content in build_antigravity_skill_artifacts().items():
+        data = content.encode("utf-8")
+        existing = path.read_bytes() if path.exists() else None
+        if existing == data:
+            continue
+        actions.append(("write " if existing is None else "update ") + str(path))
+        if not dry:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+
+    config = build_antigravity_skill_config().encode("utf-8")
+    existing = (
+        ANTIGRAVITY_SKILLS_CONFIG.read_bytes()
+        if ANTIGRAVITY_SKILLS_CONFIG.exists()
+        else None
+    )
+    if existing != config:
+        actions.append(
+            ("write " if existing is None else "update ")
+            + str(ANTIGRAVITY_SKILLS_CONFIG)
+        )
+        if not dry:
+            ANTIGRAVITY_SKILLS_CONFIG.parent.mkdir(parents=True, exist_ok=True)
+            ANTIGRAVITY_SKILLS_CONFIG.write_bytes(config)
+    return actions + materialize_retired_skill_artifacts("antigravity", dry)
+
+
+def retired_skill_artifact_paths(runtime: str) -> tuple[Path, ...]:
+    """Return the exact generated files a retirement is allowed to prune."""
+    roots = {
+        "claude": SKILLS_DIR,
+        "codex": CODEX_SKILLS_DIR,
+        "legacy-codex": LEGACY_CODEX_SKILLS_DIR,
+        "antigravity": ANTIGRAVITY_SKILLS_DIR,
+    }
+    if runtime not in roots:
+        raise ValueError(f"unknown generated-skill runtime: {runtime}")
+    return tuple(roots[runtime] / name / "SKILL.md" for name in sorted(RETIRED_GENERATED_SKILLS))
+
+
+def materialize_retired_skill_artifacts(runtime: str, dry: bool) -> list[str]:
+    """Prune only exact managed retired SKILL.md targets during synchronization."""
+    actions: list[str] = []
+    for path in retired_skill_artifact_paths(runtime):
+        if not path.exists():
+            continue
+        actions.append(f"remove retired {path}")
+        if not dry:
+            if not path.is_file():
+                raise RuntimeError(f"retired generated target is not a file: {path}")
+            path.unlink()
     return actions
+
+
+def detect_retired_skill_artifact_drift(runtime: str) -> list[str]:
+    return [
+        f"{path}: RETIRED generated artifact still present — run sync to prune exact target"
+        for path in retired_skill_artifact_paths(runtime)
+        if path.exists()
+    ]
 
 
 def _norm(s: str) -> str:
@@ -473,7 +571,7 @@ def detect_artifact_drift() -> list[str]:
                     f"{rel_claude(p)}: ORPHAN (no procedures/agents/ source) — "
                     f"add the procedure or delete the agent"
                 )
-    return drift
+    return drift + detect_retired_skill_artifact_drift("claude")
 
 
 def detect_codex_skill_drift() -> list[str]:
@@ -491,7 +589,26 @@ def detect_codex_skill_drift() -> list[str]:
                 f"{rel_codex(path)}: diverged from its procedures/ source — "
                 "sync OVERWRITES it; edit the canonical procedure"
             )
-    return drift
+    return drift + detect_retired_skill_artifact_drift("codex") + detect_retired_skill_artifact_drift("legacy-codex")
+
+
+def detect_antigravity_skill_drift() -> list[str]:
+    """Report missing or divergent Antigravity adapters and discovery configuration."""
+    drift: list[str] = []
+    for path, expected in build_antigravity_skill_artifacts().items():
+        if not path.exists() or path.read_bytes() != expected.encode("utf-8"):
+            drift.append(
+                f"{path}: diverged from its procedures/ source — run sync to regenerate"
+            )
+    if (
+        not ANTIGRAVITY_SKILLS_CONFIG.exists()
+        or ANTIGRAVITY_SKILLS_CONFIG.read_bytes()
+        != build_antigravity_skill_config().encode("utf-8")
+    ):
+        drift.append(
+            f"Antigravity skill configuration drift: {ANTIGRAVITY_SKILLS_CONFIG}"
+        )
+    return drift + detect_retired_skill_artifact_drift("antigravity")
 
 
 def _rel_target(p: Path) -> str:
@@ -862,7 +979,7 @@ def build_guide_sections() -> dict[str, str]:
     )
 
     proc_files = (
-        sorted(p.name for p in PROCEDURES_DIR.glob("*.md"))
+        sorted(p.name for p in PROCEDURES_DIR.glob("*.md") if p.name not in RETIRED_PROCEDURE_NAMES)
         if PROCEDURES_DIR.exists()
         else []
     )
@@ -1082,15 +1199,13 @@ def main() -> None:
     if readonly:
         drift += detect_codex_skill_drift()
 
-    global_actions = materialize_global_rulebook_artifacts(readonly)
-    if global_actions:
-        print(
-            "[global runtime rulebooks — generated from tracked AGENTS/CLAUDE/GEMINI sources]"
-        )
-        for action in global_actions:
+    antigravity_actions = materialize_antigravity_skill_artifacts(readonly)
+    if antigravity_actions:
+        print("[antigravity skills — generated from procedures/]")
+        for action in antigravity_actions:
             print(f"  - {action}")
     if readonly:
-        drift += detect_global_rulebook_drift()
+        drift += detect_antigravity_skill_drift()
 
     if machine_inventory:
         guide_actions = materialize_guide(readonly)
@@ -1110,6 +1225,19 @@ def main() -> None:
             print(f"  - {a}")
     if readonly:  # in SYNC mode the trigger table is regenerated (auto-fixed)
         drift += detect_gemini_drift()
+
+    # Global Gemini guidance embeds the tracked GEMINI.md. Regenerate its trigger
+    # table first so one sync writes a converged global artifact rather than a
+    # stale copy that needs a second run.
+    global_actions = materialize_global_rulebook_artifacts(readonly)
+    if global_actions:
+        print(
+            "[global runtime rulebooks — generated from tracked AGENTS/CLAUDE/GEMINI sources]"
+        )
+        for action in global_actions:
+            print(f"  - {action}")
+    if readonly:
+        drift += detect_global_rulebook_drift()
 
     mcp_actions = materialize_mcp_configs(readonly)
     if mcp_actions:

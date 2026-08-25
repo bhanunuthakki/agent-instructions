@@ -1,9 +1,11 @@
 ---
 name: design-conformance-audit
-description: Audit Earnings Summary dashboard surfaces for semantic design drift that deterministic UI guards cannot detect. Use only when the user explicitly requests a conformance audit or design review; do not schedule it automatically.
+description: Deprecated shared adapter for an Earnings Summary-specific semantic conformance audit. Use the project runbook on explicit request or when executing its already registered schedule; use frontend-quality and ux-design for generic frontend review.
 ---
 
-# Design Conformance Audit
+# Design Conformance Audit (Earnings Summary adapter)
+
+This is not a generic frontend-quality owner and does not create, change, or imply a schedule. The Earnings Summary runbook owns cadence and report location; `frontend-quality` owns generic task reasoning, restraint, and rendered evidence; `ux-design` owns hardening verdicts.
 
 Work in the current Earnings Summary checkout. On this Mac the canonical path is
 `/Applications/earnings-summary`. Inspect the current diff before acting and preserve unrelated
@@ -24,11 +26,13 @@ Focus on semantic drift that deterministic guards cannot identify:
 - role-level type hierarchy inversions across surfaces;
 - panels that bypass the established head, hairline, foot, or gridline-gap anatomy;
 - reinvented outline chips or tags that should compose `.k-chip`.
+- container economy and redundant nested boundaries; competing page-level layout grammars;
+  redundant title/subtitle stacks; decorative bullets or indentation; and unjustified visual differentiation.
 
 Do not re-report deterministic guard failures. Respect sanctioned exceptions in the canonical
 runbook. Re-read current code at every candidate location and report only confirmed findings with
 exact file and line evidence plus the kit-composing correction.
 
 Run the repository's focused UI-control test when its configured environment is available. Report
-findings, verification performed, and limitations. Do not create ignored reports or change the
-repository during the audit.
+findings, verification performed, and limitations. The project runbook determines whether an
+explicit or already scheduled run writes its ignored report; do not otherwise change the repository.

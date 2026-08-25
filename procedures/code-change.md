@@ -26,7 +26,7 @@ Do not weaken, disable, or rewrite a failing test merely to make it pass. Exact 
 - Treat LLM output, network payloads, files, and user input as untrusted. Do not classify with substring heuristics when an enum or validated schema expresses the contract.
 - Match local comment density, naming, and idiom. Add explanation where the code cannot make a consequential invariant obvious.
 
-For architecture or review work, read [code-change.REVIEW.md](code-change.REVIEW.md). For browser or UI work, read [code-change.FRONTEND.md](code-change.FRONTEND.md).
+For architecture or review work, read [code-change.REVIEW.md](code-change.REVIEW.md). For browser or UI work, read [code-change.FRONTEND.md](code-change.FRONTEND.md) and `frontend-quality`. `frontend-quality` owns task reasoning, composition, reduction, and rendered evidence; this procedure keeps the engineering loop.
 
 ## Network and sensitive surfaces
 
@@ -36,4 +36,4 @@ Call out database/schema, authentication/authorization, money, deletion, credent
 
 ## Handoff
 
-Lead with the outcome, changed paths, validation run, and any unverified behavior. After a substantial LLM-written change, use `explain-change` so the owner can understand the effect and blast radius without reading the diff.
+Lead with the outcome, changed paths, validation run, and any unverified behavior. For a material frontend change, include the task exercised, rendered proof, and any verification gap required by `frontend-quality`. After a substantial LLM-written change, use `explain-change` so the owner can understand the effect and blast radius without reading the diff.

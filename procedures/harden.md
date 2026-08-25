@@ -56,7 +56,7 @@ Most of this user's projects are personal/single-user local tools (earnings-summ
 | backend-multitenancy | — | A | B | — |
 | infra-devops | — | A | B | — |
 | infra-sre | — | A | B | ↻ |
-| ux-design | — | A | — | B |
+| ux-design | — | B | — | B |
 | frontend-web | — | A | — | B |
 | api-surface-designer | — | A | ↻ | B |
 | sec-tenant-isolation | — | — | B | — |
@@ -118,7 +118,7 @@ Before auditing a gate on a greenfield project, prefer to **generate** the secur
 
 1. Read `.harden/state.json` (create at `L0` if absent, conforming to the schema below). Resolve the target rung and its gate set from the matrix, applying the L1 cap unless `--full`.
 2. Run the external-practice check, record its inventory, and attach each routed row to its owning expert's brief.
-3. Apply the applicability rules, then load only the selected expert rubrics and dispatch them through the runtime's native subagent tool. Default to depth 1 and no more than three concurrent workers. Honor `Depends on`; hard-ordered: `data-engineer → backend-multitenancy`; `sec-authz` + `backend-multitenancy → sec-tenant-isolation`; `legal-compliance → payments`.
+3. Apply the applicability rules, then load only the selected expert rubrics and dispatch them through the runtime's native subagent tool. For a user-facing rendered interface, also give `ux-design` and `frontend-web` the `frontend-quality` contract. Default to depth 1 and no more than three concurrent workers. Honor `Depends on`; hard-ordered: `data-engineer → backend-multitenancy`; `sec-authz` + `backend-multitenancy → sec-tenant-isolation`; `legal-compliance → payments`.
 4. Each expert runs **AUDIT mode**: product code and state are read-only; `docs/hardening/<rung>/<expert>.md` is the sole permitted write. Treat the rubric as evaluation criteria, not a forced step order. It returns the same report and verdict to the orchestrator.
 5. **Gate logic:** at a `B` cell, any open `critical`/`high` finding ⇒ rung **BLOCKED**. `A`/`↻` cells log findings, never block. Advancing requires every `B` gate at the target rung = `PASS`.
 6. The Fable/Sol orchestrator checks applicability, deduplicates overlapping findings, reviews every blocking verdict, and presents the consolidated result. **Wait for explicit approval before any product change.**

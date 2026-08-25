@@ -24,7 +24,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**19 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**20 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
@@ -32,19 +32,20 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
 | **definitions** | Build, refresh, or enforce the project’s canonical domain vocabulary in DEFINITIONS.md. |
-| **design-conformance-audit** | Audit Earnings Summary dashboard surfaces for semantic design drift that deterministic UI guards cannot detect. |
 | **explain-change** | After an LLM writes or edits code, explain the outcome, impact, risk, and proof in plain language at a depth proportional to the change. |
 | **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
+| **frontend-quality** | Design, modify, review, or scaffold a rendered interface around the user's task, with compositional restraint and proportional browser or renderer ev… |
 | **grill-me** | Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. |
 | **judging** | Route substantive coding and research work through J0-J3 evidence tiers, typed judge receipts, risk controls, and statistically derived audit samples. |
 | **linear-pipeline-hygiene** | Audit and conservatively reconcile Linear pipelines across projects. |
 | **linear-pr-sync** | Synchronize an existing Linear issue with branch and pull-request progress. |
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
 | **log-redaction** | Design guidance for keeping secrets out of logs and exception output (AGENTS.md Universal Safety Rule 4). |
+| **mockup-review** | Redesign or review an existing application page through an observed mockup, task hypothesis, and proportional implementation notes. |
 | **model-frontier** | Pick an LLM against the dated cross-provider cost/performance frontier instead of from memory. |
 | **scaffold-auth** | Generate secure-by-default authentication for a web app — the generative counterpart to the sec-authz audit gate. |
 | **scaffold-deploy** | Take a working localhost app to a live, secure deployment — container + managed platform + CI + backups. |
-| **scaffold-design-system** | Generate a secure-by-default, accessible design system for a new web UI — design tokens, a small Radix-based component set, and empty/loading/error s… |
+| **scaffold-design-system** | Establish a small, accessible, stack-appropriate UI foundation after the user task and hierarchy are understood. |
 | **scaffold-secrets** | Set up secrets/env handling so credentials never enter the repo and load typed at startup. |
 | **scaffold-tenant-schema** | Generate secure-by-default multi-tenant database schema, Postgres Row-Level Security policies, a tenant-context object, and reversible Alembic migrat… |
 <!-- END:skills -->
@@ -100,15 +101,15 @@ Domain-expert "auditors" that grade a project from idea (L0) to commercial relea
 | `sec-llm` | LLM-specific security for the hardening fleet — prompt injection (direct and indirect), the OWASP LLM Top 10, untrusted output handling, tool-call sa… |
 | `sec-tenant-isolation` | Tenant isolation for the hardening fleet — guarantee no tenant can read or write another tenant's data, cache, storage, jobs, or compute. |
 | `tool-selector` | On-demand build/buy decisions for the hardening fleet — evaluate tools, libraries, services, and vendors by cost, functional fit, lock-in, and operat… |
-| `ux-design` | Design language, design system, user-centered design, and accessibility (WCAG) for the hardening fleet. |
+| `ux-design` | User-task clarity, compositional design quality, design systems, and accessibility (WCAG) for the hardening fleet. |
 <!-- END:agents -->
 
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**32 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 19 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**33 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 20 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `design-conformance-audit.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`
+`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `explain-change.md`, `external-practice.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook
