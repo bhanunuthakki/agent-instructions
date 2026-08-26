@@ -83,6 +83,7 @@ OUR_SKILLS = [
     "context-engineering",
     "data-foundation",
     "frontend-quality",
+    "external-integration",
     "external-practice",
     "grill-me",
     "iteration-shortcut",
@@ -101,6 +102,7 @@ OUR_SKILLS = [
     "scaffold-design-system",
     "scaffold-secrets",
     "scaffold-deploy",
+    "tool-selector",
 ]
 CODEX_ONLY_SKILLS = ["harden"]
 # Exact, managed generated artifacts that are no longer globally discoverable. This is

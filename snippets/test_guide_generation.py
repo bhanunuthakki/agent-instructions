@@ -400,6 +400,13 @@ def test_root_routes_standalone_tool_and_integration_workflows() -> None:
     for procedure in ("tool-selector.md", "external-integration.md"):
         assert f"`procedures/{procedure}`" in agents
         assert (s.PROCEDURES_DIR / procedure).exists()
+        skill_name = Path(procedure).stem
+        assert skill_name in s.OUR_SKILLS
+        assert s.SKILLS_DIR / skill_name / "SKILL.md" in s.build_claude_artifacts()
+        assert (
+            s.CODEX_SKILLS_DIR / skill_name / "SKILL.md"
+            in s.build_codex_skill_artifacts()
+        )
 
 
 def test_model_frontier_review_date_matches_near_term_refresh_gate() -> None:
@@ -407,6 +414,38 @@ def test_model_frontier_review_date_matches_near_term_refresh_gate() -> None:
         encoding="utf-8"
     )
     assert "Next review: 2026-08-31" in frontier
+
+
+def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
+    frontier = (s.PROCEDURES_DIR / "model-frontier.REFERENCE.md").read_text(
+        encoding="utf-8"
+    )
+    rows: list[tuple[str, float, float, float]] = []
+    for line in frontier.splitlines():
+        if not line.startswith("| `"):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        rows.append(
+            (cells[0].strip("`"), float(cells[2]), float(cells[3]), float(cells[4]))
+        )
+
+    expected_current_prices = {
+        "gemini-3.5-flash-lite": (0.30, 2.50),
+        "gpt-5.6-luna": (0.20, 1.20),
+        "gpt-5.6-terra": (2.00, 12.00),
+    }
+    observed = {
+        model_id: (input_price, output_price)
+        for model_id, input_price, output_price, _ in rows
+    }
+    assert expected_current_prices.items() <= observed.items()
+
+    blended_values: list[float] = []
+    for _model_id, input_price, output_price, blended in rows:
+        expected_blended = round((6 * input_price + output_price) / 7, 2)
+        assert blended == expected_blended
+        blended_values.append(blended)
+    assert blended_values == sorted(blended_values)
 
 
 def test_unmanaged_command_artifacts_are_orphans(tmp_path: Path) -> None:
@@ -927,6 +966,25 @@ def test_frontend_quality_shadow_runner_has_a_schema_checked_dry_run(
     monkeypatch.setattr(sys, "argv", ["run_shadow_eval.py", "--limit", "1"])
     runner.main()
     assert json.loads(capsys.readouterr().out)["selected"] == ["container-economy"]
+
+
+def test_committed_frontend_quality_receipts_match_current_schema() -> None:
+    runner_path = s.ROOT_REPO / "evals" / "frontend_quality" / "run_shadow_eval.py"
+    spec = spec_from_file_location("frontend_quality_shadow_receipts", runner_path)
+    assert spec and spec.loader
+    runner = module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    cases = runner.load_cases()
+
+    receipts = sorted(
+        (s.ROOT_REPO / "evals" / "frontend_quality" / "receipts").glob("*.json")
+    )
+    assert receipts
+    for path in receipts:
+        receipt = runner.validate_receipt(
+            json.loads(path.read_text(encoding="utf-8")), cases
+        )
+        assert path.name == runner.receipt_target(receipt["run_identifier"]).name
 
 
 def test_retired_generated_skill_is_exactly_detected_and_pruned(
