@@ -155,6 +155,69 @@ def receipt_target(run_identifier: str) -> Path:
     return RECEIPTS / f"{run_identifier}_shadow.json"
 
 
+def validate_receipt(value: object, cases: dict[str, Any]) -> dict[str, Any]:
+    required = {
+        "schema_version",
+        "mode",
+        "coverage_claim",
+        "executed_at",
+        "run_identifier",
+        "results",
+        "rubric_scores",
+    }
+    if not isinstance(value, dict):
+        raise TypeError("frontend-quality receipt must be a JSON object")
+    if set(value) != required:
+        raise ValueError("frontend-quality receipt does not match the current schema")
+    if value["schema_version"] != "1.0" or value["mode"] != "shadow":
+        raise ValueError("frontend-quality receipt has unsupported metadata")
+    run_identifier = value["run_identifier"]
+    if not isinstance(run_identifier, str) or not run_identifier:
+        raise ValueError("frontend-quality receipt is missing its run identifier")
+    if (
+        not isinstance(value["coverage_claim"], str)
+        or "unproven" not in value["coverage_claim"]
+    ):
+        raise ValueError("frontend-quality receipt overclaims invocation coverage")
+    if not isinstance(value["executed_at"], str):
+        raise TypeError("frontend-quality receipt execution time must be a string")
+    datetime.fromisoformat(value["executed_at"])
+
+    case_by_id = {
+        str(case["id"]): case
+        for case in [*cases["restraint_pairs"], *cases["task_trajectories"]]
+    }
+    if not isinstance(value["results"], list) or not isinstance(
+        value["rubric_scores"], list
+    ):
+        raise TypeError("frontend-quality receipt results must be lists")
+    if len(value["results"]) != len(value["rubric_scores"]):
+        raise ValueError("frontend-quality receipt result and score counts differ")
+
+    observed_ids: list[str] = []
+    for result, recorded_score in zip(
+        value["results"], value["rubric_scores"], strict=True
+    ):
+        if not isinstance(result, dict) or not isinstance(result.get("case_id"), str):
+            raise TypeError("frontend-quality receipt has an invalid result")
+        case_id = result["case_id"]
+        case = case_by_id.get(case_id)
+        if case is None:
+            raise ValueError(
+                f"frontend-quality receipt references unknown case {case_id}"
+            )
+        validated_result = validate_response(result, case)
+        expected_score = score_case(case, validated_result)
+        if recorded_score != expected_score:
+            raise ValueError(
+                f"frontend-quality receipt score does not replay for {case_id}"
+            )
+        observed_ids.append(case_id)
+    if len(observed_ids) != len(set(observed_ids)):
+        raise ValueError("frontend-quality receipt repeats a case")
+    return value
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--execute", action="store_true", help="call the managed Codex transport")
@@ -181,6 +244,7 @@ def main() -> None:
             for case, result in zip(selected, results, strict=True)
         ],
     }
+    validate_receipt(receipt, cases)
     if args.write_receipt:
         RECEIPTS.mkdir(parents=True, exist_ok=True)
         target = receipt_target(run_identifier)
