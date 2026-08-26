@@ -22,3 +22,15 @@ safety boundaries, and progressive execution procedures.
 - `AGENTS.md`: The canonical, cross-runtime contract.
 - `procedures/`: Markdown procedure definitions for specific engineering workflows.
 - `snippets/`: Sync scripts and governance tools that maintain consistency across tools.
+
+## Procedure-routing check
+
+Run the small offline discriminability corpus against Sol with:
+
+```shell
+python snippets/procedure_routing_eval.py
+```
+
+The report is written to `.tmp/procedure_routing_eval.json`. It measures whether the shared
+contract distinguishes procedure boundaries; it does not claim that live runtimes invoked every
+required procedure.
