@@ -15,6 +15,16 @@ Create the smallest durable foundation for the product at hand. This is a genera
 
 ## Foundation contract
 
+Create or complete the closest `AGENTS.md` `## Interface` declaration before styling:
+
+- `Profile`: one seed from `frontend-quality.PROFILES.md` (`dense-desktop`, `editorial-reading`, `touch-first`, or `none`);
+- `Contract`: a repository-relative project design contract, normally `docs/UI_CONTRACT.md`;
+- `Executable authority`: repository-relative token, primitive, or stylesheet paths that implement the contract;
+- `Render`: the runnable command and primary viewport or renderer;
+- `Gate`: the deterministic command that checks the local contract.
+
+The profile is scaffolding input only. Write the task-specific density, typography, spacing, interaction, responsive, state, exception, and rendered-evidence decisions into the local contract, then make the executable authority and gate enforce them. Do not leave another project's paths or design values in the scaffold.
+
 Use the existing stack’s equivalent mechanisms, not copied framework samples. The foundation should have one source of truth for:
 
 - semantic color, typography, spacing, sizing, shape, depth, motion, and breakpoint tokens; document foreground/background contrast pairings to WCAG AA where text or controls use them;

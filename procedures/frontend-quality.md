@@ -25,7 +25,16 @@ Before choosing cards, grids, accents, or variants, record a concise implementat
 
 This is working reasoning, not a mandatory questionnaire. Inspect available evidence and make reversible product judgments. Use `grill-me` only when an unresolved product choice would materially change the result; use a mockup when recognition is more useful than prose. Prototype approval never authorizes production changes.
 
-Before composing an established project interface, load the closest project design contract and every executable authority it names. Observe the current page plus its nearest shipped sibling and registered family. Preserve that family's shell, navigation, semantic text roles, controls, density, responsive grammar, and state anatomy. Introduce a new family only when the user task cannot be expressed by an existing family, with a typed rationale and an adversarial continuity test. Exact tokens, recipes, exceptions, and verification commands remain project-owned and must not be copied into this shared procedure.
+Before composing an established project interface, resolve the closest `AGENTS.md` `## Interface` block in this order:
+
+1. Read its `Profile`, `Contract`, `Executable authority`, `Render`, and `Gate` fields.
+2. Load the project-owned contract and every executable authority it names before proposing or editing visual code.
+3. Render the current page plus its nearest shipped sibling and registered family at the declared primary viewport.
+4. Treat a missing field, missing file, repository-escaping reference, or unrunnable recipe as an authority gap. Repair it when the request authorizes project changes; otherwise report it instead of silently borrowing another project's language.
+
+The standard declarations and profile seeds are defined in `frontend-quality.PROFILES.md`; profiles seed new contracts but never override an established local authority. If a repository has no rendered interface, it declares profile `none` and every other field `none`.
+
+Preserve the registered family's shell, navigation, semantic text roles, controls, density, responsive grammar, and state anatomy. Introduce a new family only when the user task cannot be expressed by an existing family, with a typed rationale and an adversarial continuity test. Exact tokens, recipes, exceptions, and verification commands remain project-owned and must not be copied into this shared procedure.
 
 ## Observe–reason–change–reobserve
 

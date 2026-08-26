@@ -49,13 +49,14 @@ def test_instruction_paths_are_derived_instead_of_machine_bound() -> None:
     assert s.ROOT_REPO == expected_root
     assert s.PROCEDURES_DIR == expected_root / "procedures"
     assert s.HOOKS_DIR == expected_root / "githooks"
-    configured_scratch = os.environ.get("BHANU_SCRATCH_ROOT")
-    expected_scratch = (
-        Path(configured_scratch).expanduser().resolve()
-        if configured_scratch
-        else expected_root / "antigravity" / "scratch"
+    configured_root = os.environ.get("BHANU_DEVELOPER_ROOT")
+    expected_project_root = (
+        Path(configured_root).expanduser().resolve()
+        if configured_root
+        else expected_root.parent
     )
-    assert s.SCRATCH == expected_scratch
+    assert s.PROJECT_ROOT == expected_project_root
+    assert s.SCRATCH == expected_project_root
 
 
 def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None:
@@ -86,6 +87,7 @@ def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
     assert 'ROOT_REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)' in bootstrap
     assert 'PROJECT_ROOT=${BHANU_DEVELOPER_ROOT:-"$(dirname "$ROOT_REPO")"}' in bootstrap
     assert 'for PROJECT_DIR in "$PROJECT_ROOT"/*' in bootstrap
+    assert "project_agent_contract.py" in bootstrap
     assert "--check --artifacts-only" in bootstrap
     assert "BHANU_SCRATCH_ROOT" not in bootstrap
     assert "C:/Users/" not in bootstrap
@@ -563,6 +565,19 @@ def test_project_discovery_checks_unwired_projects_too() -> None:
         and child.resolve() != s.ROOT_REPO.resolve()
     }
     assert set(s.project_dirs()) == expected
+
+
+def test_interface_authority_audit_surfaces_legacy_projects_without_sync_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    project = tmp_path / "legacy-ui"
+    project.mkdir()
+    (project / "AGENTS.md").write_text("# Rules\n", encoding="utf-8")
+    monkeypatch.setattr(s, "project_dirs", lambda: [project])
+
+    assert s.interface_authority_warnings() == [
+        "legacy-ui: missing ## Interface authority block"
+    ]
 
 
 def test_demo_sandbox_is_preserved_but_excluded_from_active_projects() -> None:
