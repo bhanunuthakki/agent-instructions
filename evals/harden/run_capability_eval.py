@@ -15,7 +15,7 @@ DATASET_SCHEMA_VERSION = 1
 REQUEST_SCHEMA = "internal://harden-capability-request/v2"
 OUTPUT_SCHEMA = "internal://harden-capability-output/v2"
 CASE_RESULT_SCHEMA = "internal://harden-capability-case-result/v2"
-ALLOWED_VERDICTS = {"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}
+ALLOWED_VERDICTS = {"PASS", "BLOCK", "HOLD", "ADVISORY", "N/A"}
 REQUIRED_SHAPES = {
     "normal", "empty", "long-context", "malformed", "adversarial",
     "degraded", "conflicting-evidence",

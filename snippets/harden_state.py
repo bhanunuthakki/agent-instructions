@@ -523,7 +523,7 @@ def _validate_dataset(root: Path) -> None:
         if not isinstance(case["case_id"], str) or not case["case_id"] or case["case_id"] in case_ids:
             raise StateError("capability dataset case IDs must be unique and non-empty")
         verdict = case.get("expected", {}).get("verdict")
-        if verdict not in {"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}:
+        if verdict not in VERDICTS:
             raise StateError("capability dataset expected verdict is invalid")
         shape = case.get("shape")
         if shape is not None and shape not in CAPABILITY_CASE_SHAPES:
@@ -555,8 +555,8 @@ def _validate_dataset(root: Path) -> None:
             shapes.add(shape)
     if rubrics != set(ACTIVE_EXPERTS):
         raise PackageHold("capability dataset does not cover all 19 active rubrics")
-    if not {"PASS", "BLOCK", "HOLD", "ABSTAIN"} <= verdicts:
-        raise PackageHold("capability dataset lacks positive, negative, HOLD, or ABSTAIN cases")
+    if not {"PASS", "BLOCK", "HOLD"} <= verdicts:
+        raise PackageHold("capability dataset lacks positive, negative, or HOLD cases")
     if any(count < 2 for count in rubric_counts.values()):
         raise PackageHold("capability dataset requires at least two cases per active rubric")
     if shapes != CAPABILITY_CASE_SHAPES:
@@ -621,7 +621,7 @@ def _expected_capability_request(
             "rubric_hash": rubric["rubric_hash"],
             "rubric_package_hash": package_hash,
             "input_hash": input_hash,
-            "verdict": sorted({"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}),
+            "verdict": sorted(VERDICTS),
             "finding_ids": "array of non-empty strings",
             "rationale": "concise evidence-grounded string",
         },
@@ -697,7 +697,7 @@ def _validate_capability_case_bindings(
                 not isinstance(parsed, dict)
                 or set(parsed) != output_keys
                 or parsed.get("$schema") != OUTPUT_SCHEMA
-                or parsed.get("verdict") not in {"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}
+                or parsed.get("verdict") not in VERDICTS
                 or not isinstance(parsed.get("finding_ids"), list)
                 or not all(isinstance(item, str) and item.strip() for item in parsed["finding_ids"])
                 or not isinstance(parsed.get("rationale"), str)
@@ -757,7 +757,7 @@ def _validate_capability_case_bindings(
     total = len(cases)
     correct = sum(int(item[2]) for item in observed.values())
     block_ids = [case["case_id"] for case in cases if case.get("expected", {}).get("verdict") == "BLOCK"]
-    uncertain_ids = [case["case_id"] for case in cases if case.get("expected", {}).get("verdict") in {"HOLD", "ABSTAIN"}]
+    uncertain_ids = [case["case_id"] for case in cases if case.get("expected", {}).get("verdict") == "HOLD"]
     covered = {
         expected_by_id[case_id]["rubric_id"]
         for case_id, item in observed.items() if item[0]
