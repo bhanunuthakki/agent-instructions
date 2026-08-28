@@ -73,6 +73,10 @@ def package(tmp_path: Path) -> Path:
         "harden_capability_registry.json",
     ):
         shutil.copy2(INSTRUCTIONS_ROOT / "config" / name, root / "config" / name)
+    registry_path = root / "config" / "harden_capability_registry.json"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry["qualifications"] = []
+    registry_path.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
     shutil.copy2(INSTRUCTIONS_ROOT / "evals" / "harden" / "cases.jsonl", root / "evals" / "cases.jsonl")
     return root
 
