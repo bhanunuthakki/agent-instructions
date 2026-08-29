@@ -17,6 +17,8 @@ Keep mockup approval separate from production implementation. A prototype may be
 
 Use focused structural tests where the repository supports them. Do not modify APIs, persistence, migrations, jobs, or live routes during a mockup-only request.
 
+When the user explicitly asks to explore alternatives, compare two or three variants that diverge on a named axis such as hierarchy, density, or interaction model. Render one variant at a time, full-size and in realistic context; switching between variants is instant. Keep exploration outside production imports, state each direction's cost, and promote only the explicitly selected direction.
+
 ## Compact handoff
 
 For normal personal/local work, hand off:

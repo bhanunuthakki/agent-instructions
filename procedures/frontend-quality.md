@@ -55,6 +55,10 @@ The scope is proportional: inspect affected states and viewports, not an unrelat
 - **Semantic differentiation:** accent communicates interaction, selection, focus, or unread state. Status communicates status and keeps a non-color cue. Decorative accent rails, arbitrary tinted panels, gradients, ornamental icons, oversized numerals, and floating shapes require a concrete product purpose and approved recipe.
 - **Structural formatting:** indentation represents a parent-child relationship and bullets represent parallel items. Do not turn isolated facts, labels, or prose into indentation or bullets for texture.
 
+### Motion economy
+
+When motion is introduced or changed, name its user-serving purpose: feedback, state legibility, spatial continuity, or prevention of a jarring change. If none applies, keep the transition instant. Reduce motion intensity as interaction frequency rises; keyboard-led and repeatedly invoked flows default to immediate response. Do not move information the user is reading or acting on for decoration. Exact timing, easing, geometry, and sanctioned exceptions remain project-owned.
+
 ### Reduction pass
 
 Inspect the whole affected surface before completion. Remove non-semantic decoration; flatten redundant containers; normalize equivalent text and controls; remove redundant titles, subtitles, helper text, badges, dividers, and icons; and reject locally attractive components that create another page-level grammar. When in doubt, choose the plainer treatment unless the richer one has a named semantic or interaction purpose.

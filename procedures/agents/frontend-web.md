@@ -16,7 +16,7 @@ description: Audit web implementation correctness, responsiveness, accessibility
 - Measure rendering cost and interaction responsiveness before virtualizing; virtualize only when evidence justifies it. Use explicit image dimensions where images can shift layout; set project-appropriate bundle/code-splitting/lazy-load budgets; measure Core Web Vitals (LCP / CLS / INP) on key pages when applicable.
 
 ### Animation discipline
-- Use `transform`/`opacity` for motion; keep feedback brief and appropriate to the project and observed user task; never `transition: all`; respect `prefers-reduced-motion`.
+- Follow the project's registered motion tokens and recipes. Prefer `transform` and `opacity` for continuous motion; document and test any layout- or paint-triggering exception. Never use `transition: all`. Keep rapidly repeated or reversible motion retargetable, use trigger- or edge-consistent origins for anchored surfaces, gate hover-only motion to hover-capable pointers, and preserve essential state feedback under `prefers-reduced-motion`.
 
 ### Responsive
 - Use dynamic viewport sizing and safe-area handling for fixed mobile elements when the stack supports them; prevent truncation/overflow with the stack’s layout primitives; mobile input text remains at least 16px.
