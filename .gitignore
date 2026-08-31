@@ -8,7 +8,6 @@
 !/CLAUDE.md
 !/GEMINI.md
 !/AGENTS_GUIDE.md
-!/MAC_MIGRATION_PLAN.md
 !/AGENT_SYSTEM_ADVERSARIAL_REVIEW_2026-07-21.md
 !/DEFINITIONS.md
 !/requirements-test.lock
@@ -16,6 +15,15 @@
 !/snippets/
 !/githooks/
 !/config/
+!/.github/
+
+# Machine migration, launchd, MCP topology, and runtime evidence are private.
+MAC_MIGRATION_PLAN.md
+docs/mac_workspace_backup.md
+launchd/
+snippets/backup_mac_workspace.py
+snippets/test_backup_mac_workspace.py
+snippets/mcp_registry.json
 /config/*
 !/config/judge_policy.json
 !/config/judge_registry.json
@@ -53,9 +61,13 @@
 /governance/harden_capability_receipts/*
 !/governance/harden_capability_receipts/.gitkeep
 !/governance/harden_capability_receipts/legacy_uncalibrated.json
+!/governance/harden_capability_receipts/codex-gpt-5-6-sol-high-2026-08-28-v1.json
 !/governance/harden_capability_evidence/
 /governance/harden_capability_evidence/*
 !/governance/harden_capability_evidence/.gitkeep
+!/governance/harden_capability_evidence/codex-gpt-5-6-sol-high-2026-08-28-v1/
+!/governance/harden_capability_evidence/codex-gpt-5-6-sol-high-2026-08-28-v1/per_case_outputs.jsonl
+!/governance/harden_capability_evidence/codex-gpt-5-6-sol-high-2026-08-28-v1/score.json
 
 # Caches inside tracked dirs
 __pycache__/

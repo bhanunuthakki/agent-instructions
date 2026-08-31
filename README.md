@@ -1,7 +1,16 @@
 # Agent Instructions
 
-Shared system instructions, safety contracts, and canonical workflow procedures for
-local AI coding pairs (Claude Code, Codex, Gemini, Antigravity).
+Shared, provider-neutral system instructions, safety contracts, and canonical
+workflow procedures for local AI coding pairs.
+
+This is a reusable public ruleset. It contains no machine migration plans,
+launchd files, MCP topology, credentials, or runtime evidence. Those artifacts
+belong in a private machine configuration repository and are intentionally
+ignored here.
+
+`snippets/mcp_registry.example.json` documents the public registry schema. Copy
+it to the ignored `snippets/mcp_registry.json` and configure local commands and
+endpoints outside Git.
 
 ## What this is
 

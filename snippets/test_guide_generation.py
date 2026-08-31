@@ -4,7 +4,7 @@ Structural assertions only — never the exact prose of a generated table, which
 skills/agents/projects come and go. We assert: the right sections exist, counts/names match the
 live filesystem, marker injection preserves surrounding prose, and re-rendering is idempotent.
 
-Run:  python -m pytest C:\\Users\\Bhanu\\.gemini\\snippets\\test_guide_generation.py
+Run:  python -m pytest <local-project>/snippets/test_guide_generation.py
 """
 
 from __future__ import annotations
@@ -88,8 +88,8 @@ def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
     assert 'for PROJECT_DIR in "$PROJECT_ROOT"/*' in bootstrap
     assert "--check --artifacts-only" in bootstrap
     assert "BHANU_SCRATCH_ROOT" not in bootstrap
-    assert "C:/Users/" not in bootstrap
-    assert "C:\\Users\\" not in bootstrap
+    assert "C:" + "/" + "Users/" not in bootstrap
+    assert "C:" + "\\Users\\" not in bootstrap
 
 
 def test_local_hook_directory_does_not_shadow_shared_safety_hooks(

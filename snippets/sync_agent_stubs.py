@@ -134,6 +134,7 @@ COMMAND_SOURCES = {
 }
 
 MCP_REGISTRY = ROOT_REPO / "snippets" / "mcp_registry.json"
+PUBLIC_MCP_REGISTRY = ROOT_REPO / "snippets" / "mcp_registry.example.json"
 MCP_TARGETS: dict[str, Path] = {
     "gemini": ROOT_REPO / "config" / "mcp_config.json",
     "antigravity": ROOT_REPO / "antigravity" / "mcp_config.json",
@@ -857,9 +858,10 @@ def _rel_target(p: Path) -> str:
 
 def build_mcp_configs() -> dict[Path, str]:
     """Pure: compile the canonical mcp_registry.json into target JSON config strings."""
-    if not MCP_REGISTRY.exists():
+    registry = MCP_REGISTRY if MCP_REGISTRY.exists() else PUBLIC_MCP_REGISTRY
+    if not registry.exists():
         return {}
-    data = json.loads(MCP_REGISTRY.read_text(encoding="utf-8"))
+    data = json.loads(registry.read_text(encoding="utf-8"))
     servers = data.get("servers", {})
     configs: dict[Path, str] = {}
     for target_name, path in MCP_TARGETS.items():
@@ -902,6 +904,8 @@ def materialize_mcp_configs(dry: bool) -> list[str]:
 
 def detect_mcp_drift() -> list[str]:
     """Report drift between canonical mcp_registry.json and runtime MCP config files."""
+    if not MCP_REGISTRY.exists():
+        return []
     configs = build_mcp_configs()
     drift: list[str] = []
     for path, expected in configs.items():
