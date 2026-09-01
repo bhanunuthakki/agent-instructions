@@ -73,3 +73,41 @@ def test_live_capability_registry_is_forbidden(tracked_repo: Path) -> None:
         json.dumps(registry),
     )
     assert "config/harden_capability_registry.json" in violations(tracked_repo)
+
+
+def policy(**overrides: object) -> dict[str, object]:
+    value: dict[str, object] = {
+        "$schema": "internal://harden-eval-policy/v1",
+        "schema_version": 1,
+        "purpose": "hardening-gate-verdict",
+        "ratified": False,
+        "ratified_at": None,
+        "ratifier": None,
+    }
+    value.update(overrides)
+    return value
+
+
+def test_unratified_public_policy_template_is_allowed(tracked_repo: Path) -> None:
+    track(
+        tracked_repo,
+        "config/harden_eval_policy.json",
+        json.dumps(policy()),
+    )
+    assert violations(tracked_repo) == []
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"ratified": True},
+        {"ratifier": "Synthetic Owner"},
+        {"ratified_at": "2099-01-01T00:00:00Z"},
+    ],
+)
+def test_public_policy_rejects_mutable_ratification_state(
+    tracked_repo: Path, mutation: dict[str, object]
+) -> None:
+    relative = "config/harden_eval_policy.json"
+    track(tracked_repo, relative, json.dumps(policy(**mutation)))
+    assert relative in violations(tracked_repo)

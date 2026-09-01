@@ -17,6 +17,7 @@ STATE_FILES = (
     Path("governance/judge_issuance.jsonl"),
     Path("governance/judge_outcomes.jsonl"),
     Path("config/harden_capability_registry.json"),
+    Path("config/harden_eval_policy.json"),
 )
 STATE_TREES = (
     Path("governance/harden_capability_receipts"),

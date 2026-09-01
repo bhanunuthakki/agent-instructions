@@ -99,6 +99,38 @@ def test_private_capability_state_is_bundled_into_local_runtime_only(
     assert f"evidence/{receipt_id}/score.json" in artifacts
 
 
+def test_private_ratified_policy_overrides_public_template_in_runtime_package(
+    tmp_path: Path, monkeypatch
+) -> None:
+    state_root = tmp_path / "private-state"
+    private_policy = state_root / "config" / "harden_eval_policy.json"
+    private_policy.parent.mkdir(parents=True)
+    private_policy.write_text(
+        json.dumps(
+            {
+                "$schema": "internal://harden-eval-policy/v1",
+                "schema_version": 1,
+                "purpose": "hardening-gate-verdict",
+                "ratified": True,
+                "ratified_at": "2099-01-01T00:00:00Z",
+                "ratifier": "Synthetic Owner",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(sync, "PRIVATE_STATE_ROOT", state_root)
+
+    package_root = tmp_path / "harden"
+    artifacts = relative_map(
+        package_root, sync.build_harden_package_artifacts(package_root)
+    )
+
+    assert (
+        json.loads(artifacts["config/harden_eval_policy.json"])["ratifier"]
+        == "Synthetic Owner"
+    )
+
+
 def test_materialized_direct_package_detects_missing_dependency(
     tmp_path: Path, monkeypatch
 ) -> None:

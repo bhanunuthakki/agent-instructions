@@ -153,11 +153,13 @@ Any mismatch invalidates cached `PASS`/`ADVISORY` receipts. A quick run may reus
 
 Each capability receipt names one canonical `agent-operations` role, status, identity, purpose, runtime, model identifier, effort, shared evaluation identifier and receipt hash, evaluation and expiry timestamps, exact qualified rubric IDs, and limitations. `PASS`/`ADVISORY` requires an available, unexpired `blocking-specialist` or `frontier-synthesizer` receipt whose ID and hash resolve through `config/harden_capability_registry.json` to a typed receipt under `receipts/`, with its raw outputs and deterministic score under `evidence/<receipt-id>/`. The receipt binds the role/runtime/model/effort and rubrics to a versioned dataset hash, policy hash, rubric hashes, raw-output hash, metric thresholds, measured passing result, and expiry; every duplicated state field must match exactly. The shared registry starts empty until a real evaluation is registered. A project-authored file, provider name, generic worker label, or self-asserted availability is not calibration evidence.
 
-In the public instruction checkout, the registry, receipts, and raw evidence are mutable private
-state. They live under `.private-state/config/` and `.private-state/governance/` by default, or
-under the absolute `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT`. The sync generator copies a complete
-snapshot into each machine-local hardening package as `config/`, `receipts/`, and `evidence/`;
-those generated package files are runtime inputs, not public source artifacts.
+In the public instruction checkout, the tracked evaluation policy is an unratified template. Its
+ratified snapshot, the capability registry, receipts, and raw evidence are mutable private state.
+They live under `.private-state/config/` and `.private-state/governance/` by default, or under the
+absolute `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT`. Runtime validation reads private policy and
+registry overrides when present. The sync generator copies a complete snapshot into each
+machine-local hardening package as `config/`, `receipts/`, and `evidence/`; those generated package
+files are runtime inputs, not public source artifacts.
 
 Qualification requests include the complete current text of the case's named rubric. Every retained raw case result binds the case ID, full dataset-case hash, blind input hash, rubric ID and hash, rubric-package hash, exact request payload and request hash. The scorer and receipt validator independently reconstruct those bindings and reject missing, duplicate, extra, or mismatched cases before accepting metrics. A receipt cannot qualify a rubric that is absent from the scored raw bindings. Long-context cases must also satisfy the policy's minimum retained character count and structured-section count; a label alone is not coverage.
 

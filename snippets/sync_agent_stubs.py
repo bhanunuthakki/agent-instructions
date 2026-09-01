@@ -376,20 +376,21 @@ def build_harden_package_artifacts(package_root: Path) -> dict[Path, str]:
             out[package_root / "rubrics" / f"{name}.md"] = rubric.read_text(
                 encoding="utf-8", errors="replace"
             )
-    private_registry = (
-        PRIVATE_STATE_ROOT / "config" / "harden_capability_registry.json"
-    )
-    registry_source = (
-        private_registry
-        if private_registry.is_file()
-        else ROOT_REPO / "config" / "harden_capability_registry.json"
-    )
-    for name in HARDEN_PACKAGE_CONFIGS:
-        config = (
-            registry_source
-            if name == "harden_capability_registry.json"
+    private_config_names = {
+        "harden_capability_registry.json",
+        "harden_eval_policy.json",
+    }
+    config_sources = {
+        name: (
+            PRIVATE_STATE_ROOT / "config" / name
+            if (PRIVATE_STATE_ROOT / "config" / name).is_file()
             else ROOT_REPO / "config" / name
         )
+        for name in private_config_names
+    }
+    registry_source = config_sources["harden_capability_registry.json"]
+    for name in HARDEN_PACKAGE_CONFIGS:
+        config = config_sources.get(name, ROOT_REPO / "config" / name)
         if config.is_file():
             out[package_root / "config" / name] = config.read_text(
                 encoding="utf-8", errors="replace"
