@@ -25,6 +25,12 @@ from harden_state import (
 INSTRUCTIONS_ROOT = Path(__file__).resolve().parents[1]
 
 
+def credential_fixture() -> str:
+    """Build a credential-shaped test value without storing one in this public tree."""
+
+    return "sk-" + "abcdefghijklmnopqrstuvwxyz123456"
+
+
 def profile(**overrides: object) -> dict[str, object]:
     value: dict[str, object] = {
         "deployment": "local",
@@ -85,6 +91,36 @@ def digest(path: Path) -> str:
     return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
 
 
+def test_repo_layout_resolves_harden_evidence_from_private_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "instructions"
+    repo.mkdir()
+    state_root = tmp_path / "private-state"
+    monkeypatch.setenv("AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT", str(state_root))
+    assert harden_state._config_path(
+        repo, "harden_capability_registry.json"
+    ) == repo / "config" / "harden_capability_registry.json"
+    private_registry = state_root / "config" / "harden_capability_registry.json"
+    private_registry.parent.mkdir(parents=True)
+    private_registry.write_text("{}", encoding="utf-8")
+    assert harden_state._config_path(
+        repo, "harden_capability_registry.json"
+    ) == private_registry
+    assert harden_state._config_path(
+        repo, "harden_eval_policy.json"
+    ) == repo / "config" / "harden_eval_policy.json"
+    private_policy = state_root / "config" / "harden_eval_policy.json"
+    private_policy.write_text("{}", encoding="utf-8")
+    assert harden_state._config_path(repo, "harden_eval_policy.json") == private_policy
+    assert harden_state._receipt_path(repo, "synthetic") == (
+        state_root
+        / "governance"
+        / "harden_capability_receipts"
+        / "synthetic.json"
+    )
+
+
 def test_active_matrix_is_exactly_nineteen_mece_rubrics() -> None:
     assert len(ACTIVE_EXPERTS) == len(set(ACTIVE_EXPERTS)) == 19
     assert "data-engineer" not in ACTIVE_EXPERTS
@@ -125,7 +161,7 @@ def test_clean_product_empty_registry_holds_before_worker_spend(repo: Path, pack
 
 def test_exposed_credential_blocks_even_when_registry_is_empty(repo: Path, package: Path) -> None:
     (repo / "app.py").write_text(
-        'API_TOKEN = "sk-abcdefghijklmnopqrstuvwxyz123456"\n', encoding="utf-8"
+        f'API_TOKEN = "{credential_fixture()}"\n', encoding="utf-8"
     )
     report, code = preflight(repo, package, "codex", profile(), "L1")
     assert code == 4
@@ -141,7 +177,7 @@ def test_unchanged_credential_shaped_fixture_in_modified_file_does_not_block(
 ) -> None:
     fixture = repo / "fixture.txt"
     fixture.write_text(
-        "historical fixture: sk-abcdefghijklmnopqrstuvwxyz123456\n",
+        f"historical fixture: {credential_fixture()}\n",
         encoding="utf-8",
     )
     subprocess.run(["git", "add", "fixture.txt"], cwd=repo, check=True)
@@ -160,7 +196,7 @@ def test_unchanged_credential_shaped_fixture_in_modified_file_does_not_block(
 
 def test_untracked_credential_remains_a_product_block(repo: Path, package: Path) -> None:
     (repo / "new_secret.txt").write_text(
-        "sk-abcdefghijklmnopqrstuvwxyz123456\n", encoding="utf-8"
+        credential_fixture() + "\n", encoding="utf-8"
     )
 
     report, code = preflight(repo, package, "codex", profile(), "L1")
@@ -271,7 +307,7 @@ def deterministic_block_state(repo: Path, package: Path) -> dict[str, object]:
 
 def test_receipt_free_block_requires_registered_reproduced_rule(repo: Path, package: Path) -> None:
     (repo / "app.py").write_text(
-        'API_TOKEN = "sk-abcdefghijklmnopqrstuvwxyz123456"\n', encoding="utf-8"
+        f'API_TOKEN = "{credential_fixture()}"\n', encoding="utf-8"
     )
     state = deterministic_block_state(repo, package)
     validate_state(state, repo, package)
@@ -284,7 +320,7 @@ def test_receipt_free_block_requires_registered_reproduced_rule(repo: Path, pack
 
 def test_model_basis_cannot_self_mint_capability(repo: Path, package: Path) -> None:
     (repo / "app.py").write_text(
-        'API_TOKEN = "sk-abcdefghijklmnopqrstuvwxyz123456"\n', encoding="utf-8"
+        f'API_TOKEN = "{credential_fixture()}"\n', encoding="utf-8"
     )
     state = deterministic_block_state(repo, package)
     gate = state["gates"]["L1"]["sec-appsec"]
