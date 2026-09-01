@@ -6,7 +6,7 @@ The **inventory tables** below (skills · commands · agents · procedures · pr
 
 ## The mental model
 
-- **`AGENTS.md`** (at `C:\Users\bhanu\.gemini\`) = the always-on rulebook every tool reads. Slim on purpose.
+- **`AGENTS.md`** (in the tracked `agent-instructions` repository) = the always-on rulebook every tool reads. Slim on purpose.
 - **`CLAUDE.md`** / **`GEMINI.md`** = thin wrappers that import `AGENTS.md` and add tool-specific bits.
 - **`procedures/`** = the heavy "how-to" guides (auth, deploy, evals…), as plain markdown any tool can read. **The canonical source** — the Claude skills, the `/harden` command, and the agent fleet (`procedures/agents/`) are generated *from* these.
 - **Skills / commands / hooks** = how Claude (and git) make the above automatic. Other tools (Gemini, Codex, a local model) read `AGENTS.md` → `procedures/` and get the same thing.
@@ -24,29 +24,35 @@ You rarely touch any of this. It just shapes how the agent behaves.
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**19 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**25 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
-| **agent-operations** | Coordinate subagents, shared worktrees, model tiers, or scheduled LLM work. |
+| **agent-operations** | Coordinate subagents, shared worktrees, capability roles, or scheduled LLM work. |
 | **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
+| **data-foundation** | Design or change durable application state, schemas, data pipelines, or sources of truth with local-first simplicity, explicit lifecycle, recovery, a… |
 | **definitions** | Build, refresh, or enforce the project’s canonical domain vocabulary in DEFINITIONS.md. |
-| **design-conformance-audit** | Audit Earnings Summary dashboard surfaces for semantic design drift that deterministic UI guards cannot detect. |
 | **explain-change** | After an LLM writes or edits code, explain the outcome, impact, risk, and proof in plain language at a depth proportional to the change. |
+| **external-integration** | Add or audit an inbound external API, webhook, SDK, or MCP capability through a typed, least-privilege, observable adapter. |
 | **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
-| **grill-me** | Interview the user to uncover load-bearing unknowns before a feature, design, plan, or consequential decision. |
+| **frontend-quality** | Design, modify, review, or scaffold a rendered interface around the user's task, with compositional restraint and proportional browser or renderer ev… |
+| **grill-me** | Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision. |
+| **iteration-shortcut** | Bound a deliberate temporary shortcut that accelerates learning without silently weakening retained truth, safety, or recovery. |
 | **judging** | Route substantive coding and research work through J0-J3 evidence tiers, typed judge receipts, risk controls, and statistically derived audit samples. |
 | **linear-pipeline-hygiene** | Audit and conservatively reconcile Linear pipelines across projects. |
 | **linear-pr-sync** | Synchronize an existing Linear issue with branch and pull-request progress. |
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
-| **log-redaction** | Design guidance for keeping secrets out of logs and exception output (AGENTS.md Universal Safety Rule 4). |
-| **model-frontier** | Pick an LLM against the dated cross-provider cost/performance frontier instead of from memory. |
-| **scaffold-auth** | Generate secure-by-default authentication for a web app — the generative counterpart to the sec-authz audit gate. |
-| **scaffold-deploy** | Take a working localhost app to a live, secure deployment — container + managed platform + CI + backups. |
-| **scaffold-design-system** | Generate a secure-by-default, accessible design system for a new web UI — design tokens, a small Radix-based component set, and empty/loading/error s… |
-| **scaffold-secrets** | Set up secrets/env handling so credentials never enter the repo and load typed at startup. |
-| **scaffold-tenant-schema** | Generate secure-by-default multi-tenant database schema, Postgres Row-Level Security policies, a tenant-context object, and reversible Alembic migrat… |
+| **log-redaction** | Keep secrets out of logs, exception output, and network diagnostics. |
+| **mockup-review** | Redesign or review an existing application page through an observed mockup, task hypothesis, and proportional implementation notes. |
+| **model-frontier** | Pick a hosted or open-weight LLM/runtime candidate against a dated cost and capability frontier instead of from memory. |
+| **product-feature** | Define or review a material product feature before implementation: user outcome, smallest coherent behavior, state and authority, non-goals, acceptan… |
+| **scaffold-auth** | Establish stack-appropriate authentication and authorization after the product profile requires external identity or multiple users. |
+| **scaffold-deploy** | Establish a reproducible, secure release and operation baseline for the selected local, private, hosted, or distributed profile. |
+| **scaffold-design-system** | Establish a small, accessible, stack-appropriate UI foundation after the user task and hierarchy are understood. |
+| **scaffold-secrets** | Establish narrow, typed secret configuration and leak prevention for the repository's actual stack. |
+| **scaffold-tenant-schema** | Establish tenant boundaries only after the product profile explicitly requires multiple isolated customer tenants. |
+| **tool-selector** | Compare a consequential library, service, vendor, or build/buy choice against current evidence and the product's real constraints. |
 <!-- END:skills -->
 
 ## Commands — type these
@@ -56,82 +62,64 @@ You rarely touch any of this. It just shapes how the agent behaves.
 
 | Command | What it does |
 |---|---|
-| `/harden` | Run the maturity-gated hardening fleet (L0→L3) — audit a project with domain-expert subagents and gate advancement. |
-| `/refresh-frontier` | Re-verify and restamp the canonical model cost and capability frontier from current primary provider sources, then flag purposes for evaluation. |
+| `/harden` | Run profile-aware, evidence-backed product hardening |
+| `/refresh-frontier` | Re-verify and restamp the canonical model cost and capability frontier from current primary sources and measurements, then flag purposes for evaluati… |
 | `/sync-agent-stubs` | Audit and synchronize canonical procedures, generated runtime artifacts, rulebook wrappers, semantic references, and composable shared hooks. |
 <!-- END:commands -->
 
 ## What happens automatically (no action needed)
 
-- **On `git commit`** → the pre-commit hook blocks credential files and hardcoded secrets. Bypass a false positive with `git commit --no-verify`.
-- **On `git push`** → the effective pre-push hook runs the project gate, then verifies the global instruction system (`sync_agent_stubs.py --check` + its tests). The `.gemini` meta-repo and every wired scratch repo use the shared hook path; an optional project `.githooks/pre-push` is composed, not substituted. Never pushes red. Bypass with `git push --no-verify`.
-- Hooks live in `C:\Users\bhanu\.gemini\githooks\` and are wired into each repo by `/sync-agent-stubs`. They work in **both** Claude and Gemini sessions (and plain `git`).
+- **On `git commit`** → the pre-commit hook blocks credential files and suspected hardcoded secrets without printing their values. If it flags a false positive, repair the rule with a regression test; do not bypass the safety gate.
+- **On `git push`** → the effective pre-push hook runs the project gate, then verifies the global instruction system, generated artifacts, human guide, and tests. The tracked instruction repository and every wired project use the shared hook path; an optional project `.githooks/pre-push` is composed, not substituted. Resolve a failing prerequisite or check before pushing.
+- Hooks live in the tracked `githooks/` directory and are wired into each repo by `/sync-agent-stubs`. They apply across Claude, Codex, Gemini, and plain `git`.
+- Live Judge ledgers, hardening policy ratification, and capability evidence live in the ignored private state root, not this public repository. The default is `.private-state/`; `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT` may name another absolute location. The tracked evaluation policy is an unratified template.
 
 ## The hardening fleet (advanced, opt-in)
 
-Domain-expert "auditors" that grade a project from idea (L0) to commercial release (L3) — security, architecture, data, infra, legal, payments, etc. You invoke them via `/harden`. **Most are SaaS-grade and won't fire on personal tools** (that's the L1 cap). Use them when a project is genuinely heading to paying users.
+Domain-expert auditors grade the product from decision (L0) through limited commercial release (L3). Maturity is separate from deployment, identity, commerce, data, and interface profile, so a personal tool receives the local reliability checks it needs without speculative SaaS machinery. Invoke them via `/harden`.
 
 <!-- BEGIN:agents -->
-**25 audit agents** — criteria canonical in `procedures/agents/`, generated into `~/.claude/agents/` for Claude's `/harden` dispatch (most are SaaS-grade and won't fire on personal tools — that's the L1 cap).
+**19 audit agents** — criteria canonical in `procedures/agents/`, generated into `~/.claude/agents/` for Claude's `/harden` dispatch. Profile and capability applicability keep personal tools local-first without weakening commercial gates.
 
 | Agent | Audits |
 |---|---|
-| `api-mcp-ingestor` | On-demand ingestion of an external API or MCP server's docs/capabilities into a usable capability map plus a typed client/contract, for the hardening… |
-| `api-surface-designer` | The outbound API/MCP surface the product EXPOSES to customers and developers — contract design, versioning, idempotency, pagination, errors, webhooks… |
-| `architecture-reviewer` | System-design coherence and Deep-Module review for the hardening fleet. |
-| `backend-multitenancy` | Multi-tenant data model and tenant-context propagation for the hardening fleet. |
-| `content-marketing` | Positioning, messaging, and content strategy for the hardening fleet — value proposition, landing page, and acquisition content. |
-| `customer-support` | Support and helpdesk for the hardening fleet — channels, ticketing, knowledge base, SLAs, escalation, incident comms, and the feedback loop to produc… |
-| `data-engineer` | Traceable, auditable, robust data for the hardening fleet — schema design, pipeline robustness, lineage/provenance, data-quality audits, and retentio… |
-| `docs-devex` | User documentation, API reference, onboarding, and developer experience for the hardening fleet. |
-| `finops-pricing` | Unit economics and pricing for the hardening fleet — cost-of-goods modeling (compute, LLM tokens, data licenses, support), margin per tenant, and the… |
-| `frontend-web` | Frontend implementation quality for the hardening fleet — correctness, performance, responsiveness, and rendered-UI verification. |
+| `api-surface-designer` | Audit product-owned API, MCP, webhook, or plugin contracts for schemas, errors, idempotency, limits, compatibility, and documentation. |
+| `architecture-reviewer` | Audit system coherence, module depth, dependency direction, state ownership, failure design, and profile-driven scalability. |
+| `data-foundation` | Audit canonical data ownership, identity and time semantics, migrations, provenance, quality, lifecycle, backup, restore, and export. |
+| `docs-support-readiness` | Audit setup, health, backup/recovery, user/API documentation, support intake, escalation, and feedback routing proportional to product reach. |
+| `finops-pricing` | Audit operating cost, unit economics, price, packaging, margin, and cost ceilings for the selected personal, free, or paid profile. |
+| `frontend-web` | Audit web implementation correctness, responsiveness, accessibility mechanics, performance, state handling, and rendered evidence. |
 | `idea-evaluator` | Decide if and what to build for the hardening fleet — time commitment, commercial viability, market wedge, competitive landscape, data-rights feasibi… |
-| `infra-devops` | CI/CD, infrastructure-as-code, environments, deployment, and release safety for the hardening fleet. |
-| `infra-sre` | Reliability and operability for the hardening fleet — observability (logs/metrics/traces), SLOs and alerting, resilience patterns, backups/DR with te… |
-| `legal-compliance` | Legal and regulatory posture for the hardening fleet — data-rights and licensing feasibility (L0), privacy (GDPR/CCPA) and data handling once real PI… |
-| `llm-evals-orchestrator` | LLM call governance for the hardening fleet — every LLM call must have a model-picker, an eval harness scoring response quality, structured schema-va… |
-| `notifications-email` | Transactional notifications and email deliverability for the hardening fleet — provider setup, templates, SPF/DKIM/DMARC, bounce/complaint handling,… |
-| `payments` | Billing and payments for the hardening fleet — provider integration, subscriptions/metering, invoicing, dunning, tax, refunds/chargebacks, with PCI s… |
-| `product-analytics-growth` | Product analytics instrumentation, funnel/activation/retention measurement, SEO, and onboarding-flow optimization for the hardening fleet. |
-| `qa-test-strategy` | Test strategy beyond per-change TDD for the hardening fleet — E2E/integration/regression suites, test data, CI gates, and (L3) load/performance testi… |
-| `sec-appsec` | Application-security audit for the hardening fleet — secrets hygiene, PII handling, dependency/supply-chain (SCA/SBOM), injection (SQLi/XSS/SSRF/comm… |
-| `sec-authz` | Authentication and authorization for the hardening fleet — identity (SSO/OAuth/OIDC/passwords/MFA), session and token lifecycle, RBAC/ABAC, broken-ac… |
-| `sec-llm` | LLM-specific security for the hardening fleet — prompt injection (direct and indirect), the OWASP LLM Top 10, untrusted output handling, tool-call sa… |
-| `sec-tenant-isolation` | Tenant isolation for the hardening fleet — guarantee no tenant can read or write another tenant's data, cache, storage, jobs, or compute. |
-| `tool-selector` | On-demand build/buy decisions for the hardening fleet — evaluate tools, libraries, services, and vendors by cost, functional fit, lock-in, and operat… |
-| `ux-design` | Design language, design system, user-centered design, and accessibility (WCAG) for the hardening fleet. |
+| `legal-compliance` | Audit applicable data rights, licensing, privacy, distribution, accessibility, payment, and commercial obligations; not a substitute for counsel. |
+| `llm-evals-orchestrator` | Audit purpose-based LLM routing, structured output, representative evals, attributable fallbacks, and per-call quality/cost/latency/failure evidence. |
+| `operations-readiness` | Audit release, distribution, runtime health, scheduled work, backup/restore execution, rollback, incidents, and proportional cost/availability teleme… |
+| `payments` | Audit the selected payment, billing, licensing, metering, reconciliation, refund/dispute, tax, and entitlement lifecycle. |
+| `product-analytics` | Audit the learning system for external beta and commercial products: questions, event meaning, activation, retention, and privacy-proportional eviden… |
+| `product-feature` | Audit the user-visible behavior contract, state transitions, acceptance, rollout, and learning criteria for a material feature. |
+| `qa-test-strategy` | Audit the representative unit, integration, end-to-end, regression, failure, and profile-specific performance test strategy. |
+| `sec-appsec` | Audit application vulnerabilities, credential hygiene, dependencies, untrusted inputs, sensitive data, abuse ceilings, disclosure, and threat boundar… |
+| `sec-authz` | Audit identity and access control whenever authentication exists or a non-local web/API product surface requires an explicit access decision. |
+| `sec-llm` | Audit prompt injection, untrusted model output, tool authority, model-mediated exfiltration, retrieval poisoning, and resource abuse. |
+| `tenant-boundaries` | Audit multi-tenant context propagation and prove isolation across every tenant-owned storage and compute path. |
+| `ux-design` | User-task clarity, compositional design quality, design systems, and accessibility (WCAG) for the hardening fleet. |
 <!-- END:agents -->
 
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**32 files** in `procedures/` (+ **25 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 19 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**38 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 25 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `definitions.md`, `design-conformance-audit.md`, `explain-change.md`, `external-practice.md`, `grill-me.md`, `harden.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`
+`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook
 
 <!-- BEGIN:projects -->
-**14 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
+**1 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
 
 | Project | Rulebook files present |
 |---|---|
 | agent-instructions | AGENTS.md, CLAUDE.md, GEMINI.md |
-| angel-memos | AGENTS.md, CLAUDE.md, GEMINI.md |
-| bhanu-resume-system | AGENTS.md |
-| blog-engine | AGENTS.md, CLAUDE.md, GEMINI.md |
-| date-suggester | AGENTS.md, CLAUDE.md, GEMINI.md |
-| earnings-summary | AGENTS.md, CLAUDE.md, GEMINI.md |
-| harness | AGENTS.md, CLAUDE.md, GEMINI.md |
-| huntdesk | AGENTS.md, CLAUDE.md, GEMINI.md |
-| myclaw | AGENTS.md, CLAUDE.md, GEMINI.md |
-| portfolio-tracker | AGENTS.md, CLAUDE.md, GEMINI.md |
-| reading-companion-app | AGENTS.md, CLAUDE.md, GEMINI.md |
-| repo-maintenance | AGENTS.md, CLAUDE.md, GEMINI.md |
-| wealthplan | AGENTS.md, CLAUDE.md, GEMINI.md |
-| xr-glasses-dev-guide | AGENTS.md, CLAUDE.md, GEMINI.md |
 <!-- END:projects -->
 
 ## Adding a new project
@@ -141,4 +129,4 @@ Domain-expert "auditors" that grade a project from idea (L0) to commercial relea
 
 ## If you switch off Claude
 
-Everything still works: `AGENTS.md` + `procedures/` (including the hardening fleet's per-expert criteria in `procedures/agents/`) are plain markdown that Codex/Cursor/Aider/a local model read directly — the procedures are the canonical source, not a Claude export, so nothing is lost. You lose only the auto-triggering + parallel-subagent convenience (you'd point the tool at the relevant `procedures/<name>.md` and run the fleet matrix sequentially). The git hooks keep working regardless.
+Everything still works: `AGENTS.md` + `procedures/` (including the hardening fleet's per-expert criteria in `procedures/agents/`) are plain markdown that another capable runtime or local model can read directly. Procedures remain canonical; runtime skills are replaceable adapters. A candidate model earns blocking work through the same representative role evaluation and typed receipt rather than its provider or parameter count. The git hooks remain runtime-independent.
