@@ -33,7 +33,7 @@ secret_files=$(git diff --cached --name-only --diff-filter=ACMR | while IFS= rea
   if git diff --cached --no-color -U0 -- "$path" \
     | grep -E '^\+' | grep -vE '^\+\+\+' \
     | grep -iE '(api[_-]?key|access[_-]?token|auth[_-]?token|client[_-]?secret|password|[^a-z]secret)["'"'"' ]*[:=][[:space:]]*["'"'"'][^"'"'"']{8,}["'"'"']' \
-    | grep -ivE 'example|placeholder|changeme|your[_-]|xxxx|dummy|redacted|<[^>]+>' \
+    | grep -ivE 'example|placeholder|changeme|your[_-]|xxxx|dummy|redacted|<[^>]+>|\$\{[A-Z][A-Z0-9_]*\}' \
     >/dev/null 2>&1; then
     printf '%s\n' "$path"
   fi
