@@ -118,9 +118,34 @@ def test_rejects_credential_content(tracked_repo: Path) -> None:
     assert "notes.txt" in violations(tracked_repo)
 
 
+def test_rejects_unquoted_generic_credential(tracked_repo: Path) -> None:
+    key = "pass" + "word"
+    value = "Ultra" + "Secret" + "Value123"
+    track(tracked_repo, "notes.txt", f"{key}={value}\n")
+    assert "notes.txt" in violations(tracked_repo)
+
+
 def test_rejects_personal_account_fact(tracked_repo: Path) -> None:
     track(tracked_repo, "notes.md", "my portfolio cost basis: $1234\n")
     assert "notes.md" in violations(tracked_repo)
+
+
+@pytest.mark.parametrize(
+    "content",
+    ['{"cost_basis":1234}\n', '{"shares":250}\n'],
+)
+def test_rejects_standalone_account_fields(tracked_repo: Path, content: str) -> None:
+    track(tracked_repo, "private.json", content)
+    assert "private.json" in violations(tracked_repo)
+
+
+def test_allows_weight_and_percentage_position_size(tracked_repo: Path) -> None:
+    track(
+        tracked_repo,
+        "public.json",
+        '{"weight":0.08,"position_size":0.08}\n',
+    )
+    assert violations(tracked_repo) == []
 
 
 def test_allows_synthetic_credential_assignment(tracked_repo: Path) -> None:
