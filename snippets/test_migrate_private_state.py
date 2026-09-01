@@ -22,6 +22,9 @@ def test_migration_copies_live_governance_state_without_deleting_source(
         "config/harden_capability_registry.json": (
             '{"qualifications":[{"receipt_id":"synthetic"}]}\n'
         ),
+        "config/harden_eval_policy.json": (
+            '{"ratified":true,"ratifier":"Synthetic Owner"}\n'
+        ),
     }
     for relative, content in files.items():
         path = source / relative

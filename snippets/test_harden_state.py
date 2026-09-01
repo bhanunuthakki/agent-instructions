@@ -101,6 +101,12 @@ def test_repo_layout_resolves_harden_evidence_from_private_state(
     assert harden_state._config_path(
         repo, "harden_capability_registry.json"
     ) == private_registry
+    assert harden_state._config_path(
+        repo, "harden_eval_policy.json"
+    ) == repo / "config" / "harden_eval_policy.json"
+    private_policy = state_root / "config" / "harden_eval_policy.json"
+    private_policy.write_text("{}", encoding="utf-8")
+    assert harden_state._config_path(repo, "harden_eval_policy.json") == private_policy
     assert harden_state._receipt_path(repo, "synthetic") == (
         state_root
         / "governance"

@@ -46,10 +46,11 @@ required procedure.
 
 ## Private operational state
 
-This public repository contains governance policy, schemas, rubrics, and synthetic tests. Live
-Judge ledgers, hardening qualification receipts, and raw capability-evaluation outputs live under
-the ignored `.private-state/` directory. Set `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT` to an absolute
-path to keep that state elsewhere.
+This public repository contains governance policy templates, schemas, rubrics, and synthetic tests.
+The tracked hardening evaluation policy is always unratified. Live Judge ledgers, policy
+ratification, qualification receipts, and raw capability-evaluation outputs live under the ignored
+`.private-state/` directory. Set `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT` to an absolute path to keep
+that state elsewhere.
 
 Before updating a checkout that still tracks the legacy `governance/` files, run the migration tool
 from an updated copy and point it at the old checkout:
@@ -60,6 +61,7 @@ python snippets/migrate_private_state.py \
   --state-root /absolute/path/to/private-agent-state
 ```
 
-The migration copies only the known governance state, verifies every copied file, never deletes the
-source, and refuses to overwrite a different destination. Configure the same state root, run
+The migration copies only the known governance state, including the ratified policy snapshot,
+verifies every copied file, never deletes the source, and refuses to overwrite a different
+destination. Configure the same state root, run
 `python snippets/sync_agent_stubs.py`, and only then update the old checkout.

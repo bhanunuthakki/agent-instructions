@@ -331,7 +331,7 @@ def test_scorer_emits_shadow_result_and_never_self_ratifies(tmp_path: Path) -> N
     )
     assert result["result"] == "PASS"
     assert result["qualification_status"] == "SHADOW"
-    assert result["ratification_eligible"] is True
+    assert result["ratification_eligible"] is False
 
 
 def test_scorer_rejects_claimed_rubric_hash_when_retained_request_omits_exact_text(

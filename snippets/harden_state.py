@@ -224,7 +224,10 @@ def _rubric_path(root: Path, expert: str) -> Path:
 
 
 def _config_path(root: Path, name: str) -> Path:
-    if not _is_package(root) and name == "harden_capability_registry.json":
+    if not _is_package(root) and name in {
+        "harden_capability_registry.json",
+        "harden_eval_policy.json",
+    }:
         private = _private_state_root(root) / "config" / name
         if private.is_file():
             return private

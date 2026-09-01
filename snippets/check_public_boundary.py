@@ -26,6 +26,7 @@ FORBIDDEN_FILENAMES = frozenset(
     }
 )
 PUBLIC_CAPABILITY_REGISTRY = "config/harden_capability_registry.json"
+PUBLIC_EVAL_POLICY = "config/harden_eval_policy.json"
 FORBIDDEN_TEXT = ("/Users/", "/home/", "C:\\Users\\")
 
 
@@ -56,6 +57,19 @@ def violations(repo: Path) -> list[str]:
                 found.append(relative)
                 continue
             if registry.get("qualifications") != []:
+                found.append(relative)
+            continue
+        if relative == PUBLIC_EVAL_POLICY:
+            try:
+                policy = json.loads(path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                found.append(relative)
+                continue
+            if (
+                policy.get("ratified") is not False
+                or policy.get("ratified_at") is not None
+                or policy.get("ratifier") is not None
+            ):
                 found.append(relative)
             continue
         if relative == "snippets/check_public_boundary.py":
