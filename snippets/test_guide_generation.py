@@ -131,6 +131,7 @@ def test_shared_hooks_do_not_bypass_install_or_guess_project_validation() -> Non
         assert command not in pre_push
     assert 'run sh "$local_hook" "$@"' in pre_push
     assert 'if [ "$root" = "$hook_repo" ]' in pre_push
+    assert 'run "$python_bin" "$public_boundary"' in pre_push
     assert 'run "$python_bin" "$stubs" --check --artifacts-only' in pre_push
 
 
@@ -268,6 +269,9 @@ def test_instruction_push_gate_honors_python_override(
     instruction_home = tmp_path / "instruction-home"
     (instruction_home / "snippets").mkdir(parents=True)
     (instruction_home / "snippets" / "sync_agent_stubs.py").write_text(
+        "# test stub\n", encoding="utf-8"
+    )
+    (instruction_home / "snippets" / "check_public_boundary.py").write_text(
         "# test stub\n", encoding="utf-8"
     )
     env = {
