@@ -47,6 +47,9 @@ def configured_path(name: str, default: Path) -> Path:
 USER_HOME = Path.home()
 SCRATCH = configured_path("BHANU_SCRATCH_ROOT", ROOT_REPO / "antigravity" / "scratch")
 HOOKS_DIR = ROOT_REPO / "githooks"
+PRIVATE_STATE_ROOT = configured_path(
+    "AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT", ROOT_REPO / ".private-state"
+)
 
 # CANONICAL DIRECTION: procedures/ is the hand-authored SOURCE OF TRUTH. This script GENERATES the
 # Claude and Codex skills, the /harden command, and the agent fleet FROM procedures/ — identity
@@ -373,8 +376,20 @@ def build_harden_package_artifacts(package_root: Path) -> dict[Path, str]:
             out[package_root / "rubrics" / f"{name}.md"] = rubric.read_text(
                 encoding="utf-8", errors="replace"
             )
+    private_registry = (
+        PRIVATE_STATE_ROOT / "config" / "harden_capability_registry.json"
+    )
+    registry_source = (
+        private_registry
+        if private_registry.is_file()
+        else ROOT_REPO / "config" / "harden_capability_registry.json"
+    )
     for name in HARDEN_PACKAGE_CONFIGS:
-        config = ROOT_REPO / "config" / name
+        config = (
+            registry_source
+            if name == "harden_capability_registry.json"
+            else ROOT_REPO / "config" / name
+        )
         if config.is_file():
             out[package_root / "config" / name] = config.read_text(
                 encoding="utf-8", errors="replace"
@@ -385,9 +400,10 @@ def build_harden_package_artifacts(package_root: Path) -> dict[Path, str]:
             encoding="utf-8", errors="replace"
         )
 
-    registry_path = ROOT_REPO / "config" / "harden_capability_registry.json"
+    registry_path = registry_source
     if registry_path.is_file():
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        governance_root = PRIVATE_STATE_ROOT / "governance"
         for entry in registry.get("qualifications", []):
             receipt_id = entry.get("receipt_id") if isinstance(entry, dict) else None
             if not isinstance(receipt_id, str) or not receipt_id:
@@ -395,14 +411,12 @@ def build_harden_package_artifacts(package_root: Path) -> dict[Path, str]:
                     "harden capability registry contains an invalid receipt entry"
                 )
             receipt = (
-                ROOT_REPO
-                / "governance"
+                governance_root
                 / "harden_capability_receipts"
                 / f"{receipt_id}.json"
             )
             raw_outputs = (
-                ROOT_REPO
-                / "governance"
+                governance_root
                 / "harden_capability_evidence"
                 / receipt_id
                 / "per_case_outputs.jsonl"

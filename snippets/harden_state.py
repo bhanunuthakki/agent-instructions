@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import re
 import subprocess
 import sys
@@ -24,6 +25,7 @@ CASE_RESULT_SCHEMA = "internal://harden-capability-case-result/v2"
 REQUEST_SCHEMA = "internal://harden-capability-request/v2"
 OUTPUT_SCHEMA = "internal://harden-capability-output/v2"
 GATE_PURPOSE = "hardening-gate-verdict"
+PRIVATE_STATE_ENV = "AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT"
 RUNGS = ("L0", "L1", "L2", "L3")
 RUNTIMES = ("claude", "codex", "gemini", "antigravity")
 VERDICTS = {"PASS", "BLOCK", "ADVISORY", "HOLD", "N/A"}
@@ -207,11 +209,25 @@ def _is_package(root: Path) -> bool:
     return (root / "rubrics").is_dir() or (root / "runtime" / "harden_state.py").is_file()
 
 
+def _private_state_root(root: Path) -> Path:
+    raw = os.environ.get(PRIVATE_STATE_ENV)
+    if not raw:
+        return (root / ".private-state").resolve()
+    configured = Path(raw).expanduser()
+    if not configured.is_absolute():
+        raise StateError(f"{PRIVATE_STATE_ENV} must be an absolute path")
+    return configured.resolve()
+
+
 def _rubric_path(root: Path, expert: str) -> Path:
     return root / "rubrics" / f"{expert}.md" if _is_package(root) else root / "procedures" / "agents" / f"{expert}.md"
 
 
 def _config_path(root: Path, name: str) -> Path:
+    if not _is_package(root) and name == "harden_capability_registry.json":
+        private = _private_state_root(root) / "config" / name
+        if private.is_file():
+            return private
     return root / "config" / name
 
 
@@ -220,11 +236,26 @@ def _dataset_path(root: Path) -> Path:
 
 
 def _receipt_path(root: Path, receipt_id: str) -> Path:
-    return root / "receipts" / f"{receipt_id}.json" if _is_package(root) else root / "governance" / "harden_capability_receipts" / f"{receipt_id}.json"
+    if _is_package(root):
+        return root / "receipts" / f"{receipt_id}.json"
+    return (
+        _private_state_root(root)
+        / "governance"
+        / "harden_capability_receipts"
+        / f"{receipt_id}.json"
+    )
 
 
 def _evidence_path(root: Path, receipt_id: str, name: str) -> Path:
-    return (root / "evidence" / receipt_id / name) if _is_package(root) else (root / "governance" / "harden_capability_evidence" / receipt_id / name)
+    if _is_package(root):
+        return root / "evidence" / receipt_id / name
+    return (
+        _private_state_root(root)
+        / "governance"
+        / "harden_capability_evidence"
+        / receipt_id
+        / name
+    )
 
 
 def _registry_entries(root: Path) -> list[dict[str, Any]]:
