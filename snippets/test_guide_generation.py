@@ -155,6 +155,26 @@ def test_pre_commit_blocks_inline_secret_without_echoing_value(tmp_path: Path) -
     assert secret_value not in completed.stderr
 
 
+def test_pre_commit_allows_environment_variable_placeholder(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=tmp_path, check=True)
+    source = tmp_path / "registry.json"
+    source.write_text(
+        '{"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"}\n',
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "registry.json"], cwd=tmp_path, check=True)
+
+    completed = subprocess.run(
+        ["sh", str(s.HOOKS_DIR / "pre-commit")],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+
+
 def test_pre_commit_scans_staged_credential_renames(tmp_path: Path) -> None:
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=tmp_path, check=True)
     source = tmp_path / "settings.txt"
