@@ -39,7 +39,6 @@ APPLICATION_REPOSITORIES = (
     ("Blog-Engine", "blog-engine"),
     ("Harness", "harness"),
     ("Huntdesk", "huntdesk"),
-    ("MyClaw", "myclaw"),
     ("Reading-Companion-App", "reading-companion-app"),
     ("Repo-Maintenance", "repo-maintenance"),
     ("Wealthplan", "wealthplan"),
@@ -83,9 +82,15 @@ class Source:
 
 
 def should_exclude(relative_path: Path) -> bool:
-    """Return true for cloud-unsafe or regenerable content, never for .git."""
+    """Return true for cloud-unsafe, regenerable, or volatile content."""
     parts = relative_path.parts
     if any(part in EXCLUDED_DIRS for part in parts):
+        return True
+    # Git reflogs are non-authoritative, locally regenerated recovery metadata.
+    # They can change while an otherwise idle repository is being archived,
+    # invalidating the archive manifest between hashing and capture. Preserve
+    # Git objects, refs, HEAD, and the index; only omit the volatile logs tree.
+    if any(parts[index : index + 2] == (".git", "logs") for index in range(len(parts) - 1)):
         return True
     if any(part in {".tmp.driveupload", "worktrees"} for part in parts):
         return True
@@ -185,9 +190,9 @@ def build_archive(sources: list[Source], archive: Path, *, dry_run: bool) -> dic
 3. Extract into a NEW local directory, never directly into ~/Developer.
 4. Review Git status in each restored repository, then copy only wanted files.
 
-Included: Git history and uncommitted source/recovery files.
+Included: Git history, refs, index state, and uncommitted source/recovery files.
 Excluded: raw live SQLite databases and sidecars, credentials/tokens/.env files,
-virtual environments, node_modules, caches, build output, and temporary files.
+Git reflogs, virtual environments, node_modules, caches, build output, and temporary files.
 The Database-Snapshots/HuntDesk snapshot was created with SQLite's online backup
 API and passed PRAGMA integrity_check before publication.
 Windows remains the sole writer and backup owner for live Earnings and Portfolio
@@ -317,7 +322,10 @@ def main(argv: list[str] | None = None) -> int:
         f"excluded: {manifest['excluded_file_count']} files; "
         f"estimated size: {human_bytes(manifest['estimated_bytes'])}"
     )
-    print("exclusions: credentials/tokens/.env, raw SQLite databases/WAL/SHM, virtualenvs, node_modules, caches, build output, temporary files")
+    print(
+        "exclusions: credentials/tokens/.env, raw SQLite databases/WAL/SHM, "
+        "Git reflogs, virtualenvs, node_modules, caches, build output, temporary files"
+    )
     log_record = {
         "created_at": datetime.now(UTC).isoformat(),
         "mode": "dry-run" if args.dry_run else "live",

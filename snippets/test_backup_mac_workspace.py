@@ -22,7 +22,14 @@ def test_live_databases_and_credentials_are_excluded() -> None:
 
 def test_git_and_uncommitted_source_files_are_preserved() -> None:
     assert not backup.should_exclude(Path("Developer/project/.git/HEAD"))
+    assert not backup.should_exclude(Path("Developer/project/.git/refs/heads/main"))
+    assert not backup.should_exclude(Path("Developer/project/.git/index"))
     assert not backup.should_exclude(Path("Developer/project/src/unfinished.py"))
+
+
+def test_volatile_git_reflogs_are_excluded() -> None:
+    assert backup.should_exclude(Path("Developer/project/.git/logs/HEAD"))
+    assert backup.should_exclude(Path("Developer/project/.git/logs/refs/heads/main"))
 
 
 def test_drive_root_is_discovered_without_an_account_name(tmp_path: Path) -> None:
@@ -40,17 +47,17 @@ def test_default_sources_include_the_instruction_clone_outside_developer() -> No
     ]
 
 
-def test_default_sources_cover_expected_application_repositories_but_not_recovery() -> None:
+def test_default_sources_cover_active_application_repositories_but_not_retired_or_recovery() -> None:
     sources = backup.configured_sources(backup.parser().parse_args([]))
     labels_and_paths = {(source.label, source.path) for source in sources}
 
     assert ("Earnings-Summary", Path("/Applications/earnings-summary")) in labels_and_paths
-    assert ("MyClaw", Path("/Applications/myclaw")) in labels_and_paths
     assert ("Resume-System", Path("/Applications/bhanu-resume-system")) in labels_and_paths
     assert (
         "XR-Glasses-Dev-Guide",
         Path("/Applications/xr-glasses-dev-guide"),
     ) in labels_and_paths
+    assert ("MyClaw", Path("/Applications/myclaw")) not in labels_and_paths
     assert all(source.label != "Migration-Recovery" for source in sources)
 
 

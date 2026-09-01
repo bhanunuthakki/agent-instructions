@@ -114,7 +114,7 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 ## Projects under the rulebook
 
 <!-- BEGIN:projects -->
-**14 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
+**13 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
 
 | Project | Rulebook files present |
 |---|---|
@@ -126,7 +126,6 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 | earnings-summary | AGENTS.md, CLAUDE.md, GEMINI.md |
 | harness | AGENTS.md, CLAUDE.md, GEMINI.md |
 | huntdesk | AGENTS.md, CLAUDE.md, GEMINI.md |
-| myclaw | AGENTS.md, CLAUDE.md, GEMINI.md |
 | portfolio-tracker | AGENTS.md, CLAUDE.md, GEMINI.md |
 | reading-companion-app | AGENTS.md, CLAUDE.md, GEMINI.md |
 | repo-maintenance | AGENTS.md, CLAUDE.md, GEMINI.md |

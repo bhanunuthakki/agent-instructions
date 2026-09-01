@@ -1,10 +1,10 @@
 # Canonical Windows-to-Mac migration plan
 
 **Mac arrival:** Wednesday, August 19, 2026  
-**Plan generated from a live scan:** August 15, 2026; refreshed August 24, 2026
+**Plan generated from a live scan:** August 15, 2026; refreshed August 31, 2026
 **Operating decision:** all development occurs on the Mac. Windows remains a production-only runner for Earnings, Portfolio, and Windows-resident backups. MyClaw is retired; Date Suggester and HuntDesk are Mac-owned.
 
-## Authoritative pending items — August 24, 2026
+## Authoritative pending items — August 31, 2026
 
 This is the only active migration follow-up list. Everything not listed here is complete,
 retired, an intentional operating split, or ordinary project backlog. Historical
@@ -15,11 +15,16 @@ original execution plan and are not current tasks.
 |---:|---|---|---|
 | 1 | Add an independent Mac backup | Owner, after purchasing an external disk | **DEFERRED BY OWNER.** FileVault is on and the verified weekly Google Drive snapshot is the accepted interim control. This does not protect against loss of the Google account. |
 | 2 | Reduce the Windows signed-in-session dependency | Future reliability project, only if unattended reboot recovery becomes important | **OPTIONAL.** This means replacing reliance on an interactive login for Google Drive and user-session jobs with machine-start services or non-Drive runtime paths. Until then, remotely sign in once after affected restarts. Earnings, Portfolio, and repository-maintenance production remain intentionally on Windows. |
-| 3 | Retire rollback artifacts | Review scheduled for August 30, 2026; deletion still requires an owner decision | **OPTIONAL CLEANUP.** Preserve the Resume recovery branch/stash, migration archives, Windows rollback copies, and retired MyClaw history until the review recommends what is safe to retire. Morning Markets Brief definitions may be archived or deleted if its retirement is permanent. |
+| 3 | Retire remaining rollback artifacts | After the Mac backup repair has another scheduled successful run; deletion still requires an owner decision | **OPTIONAL CLEANUP.** Preserve the Resume recovery branch/stash, migration archives, and Windows rollback copies until that gate. Earnings and Portfolio production copies are not rollback clutter and remain required. |
 
 **Settled decision:** Date Suggester's four personal learning-state files remain private,
 local, and snapshot-backed. Do not publish them to Git unless the owner explicitly reverses
 this decision.
+
+**Settled cleanup:** a verified 8,884-file workspace archive published on August 30 before
+the retired MyClaw checkout and paused Morning Markets Brief definition were removed from
+active Mac paths. MyClaw is no longer a configured backup source. The backup excludes
+volatile Git reflogs while retaining Git history, refs, index state, and dirty work.
 
 Resume product/editorial work is tracked only in
 `/Applications/bhanu-resume-system/HANDOFF.md`; it is not migration work. HuntDesk product
@@ -40,12 +45,12 @@ This section is the current sequential checklist. It supersedes older Windows-er
 | 6 | DONE | Mac bootstrap and shared instruction generation work. All 14 real repositories use `/Applications/agent-instructions/githooks`, and non-repository `.app`/Utilities folders are excluded. Both subscription-authenticated CLI wrappers passed harmless live checks on August 22: `CODEX_TRANSPORT_OK` and `CLAUDE_TRANSPORT_OK`; no API-key fallback was used. |
 | 7 | DEFERRED BY OWNER | FileVault is on. The owner explicitly accepts the active weekly Google Drive workspace snapshot as interim protection until an external Time Machine disk is purchased. This is not independent of the Google account. |
 | 8 | DONE / INTENTIONAL SPLIT | Mac holds the authoritative development checkouts and recreates project environments from declared dependencies as needed. Earnings and Portfolio production execution/data intentionally remain Windows-only; their Windows environment, token directory, database, and scheduled jobs were not duplicated on the Mac. Resume's Python environment and native macOS font path are verified. |
-| 9 | DONE | The Saturday 01:30 user LaunchAgent is installed and loaded. The latest live run exited 0 and published `mac_workspace_2026-08-22_162603.tar.gz` to Drive `scratch-backups`; 6,021 files verified. It includes an online SQLite snapshot of HuntDesk that passed restore `integrity_check` (`ok`, schema version 20), while still excluding raw live databases and sidecars. |
+| 9 | DONE | The Saturday 01:30 user LaunchAgent is installed and loaded. After excluding volatile, non-authoritative Git reflogs, a live repair run published `mac_workspace_2026-08-30_110013.tar.gz` to Drive `scratch-backups`; all 8,884 files independently re-verified. It includes an online SQLite snapshot of HuntDesk that passed restore `integrity_check` (`ok`, schema version 20), while still excluding raw live databases and sidecars. One normal scheduled success remains the gate before retiring the remaining rollback set. |
 | 10 | DONE FROM PRIOR SESSION; NO NEW RUN | A prior live archive `mac_workspace_2026-08-21_223225.tar.gz` exists. It independently verifies all 5,892 manifest files and restored into an isolated temporary directory with Git metadata for all 14 repositories and representative files intact. No archive was pruned. |
 | 11 | DEFERRED BY OWNER | Encrypted Time Machine remains deferred under the accepted weekly verified Drive-snapshot arrangement. Resume recovery and the newer Windows handoff are now reconciled and pushed; no Resume source remains Windows-only. |
 | 12 | DONE | Live Windows inspection found 44 tasks in `\earnings-summary\`: all 42 Task-Scheduler-owned manifest tasks, plus two healthy repo-maintenance tasks stored in that folder. `refresh_scenario_priors` exists and is Ready. The 43rd manifest lane, `capture_poller`, intentionally runs as the healthy `es-poller` Windows service instead of a scheduled task. Running the verifier from the clean production `runtime` checkout reports: `OK All 43 tasks parsed, registered and enabled`. The scratch checkout's 35 wrong-root findings are the expected guard against auditing/deploying from scratch. Morning Markets Brief is unrelated. |
 | 13 | DONE | HuntDesk is manual-only and Mac-owned; it is not scheduled on either host. The authoritative Windows database was copied quiescently through Drive with an exact SHA-256 match, migrated from schema 18 to 20 in isolation, and reconciled with the newer Mac portfolio-list data, 21 newer role observations, and one explicit role decision. The promoted Mac database passes `integrity_check` and `foreign_key_check`, retains local and Drive rollback snapshots, and serves HTTP 200. The authoritative Mac source, including the v20 work and Mac path/typecheck repair, passes all 456 tests and is pushed at `1ee4c24`. Windows retains only its untouched rollback source/database copy and must not be used for future HuntDesk development. |
-| 14 | RETIRED | The owner chose not to retain MyClaw functionality. Both verified Windows jobs, `weekly_review` and `monthly_curate`, are disabled; no Mac replacement was activated and no Telegram task exists. The repository is preserved as rollback/history rather than deleted. The previously merged hardening remains useful if the project is revived. |
+| 14 | RETIRED | The owner chose not to retain MyClaw functionality. Both verified Windows jobs, `weekly_review` and `monthly_curate`, are disabled; no Mac replacement was activated and no Telegram task exists. Its dirty Mac checkout was captured in the independently verified August 30 workspace archive and removed from the active application and backup inventory on August 31. |
 | 15 | DONE | Date Suggester is now Mac-owned. Fresh official Google OAuth granted the four required scopes; the no-email canary passed. Commit `17dc68e` makes the Windows-trained sklearn model degrade safely on Mac; all 431 tests pass. The verified Windows-completed August 16 slot was seeded before cutover, `DateSuggester_Weekly` is disabled on Windows, and the Mac Sunday 09:00 LaunchAgent is loaded. Its RunAtLoad canary skipped the seeded slot, exited 0, and wrote no stderr, proving duplicate suppression. The owner decided the four personal learning-state files remain private, local, and snapshot-backed; do not publish them to Git without a new explicit decision. The Windows-only URI handler remains retired unless separately requested. |
 
 ### Historical Mac repository inventory — August 21 snapshot
@@ -162,7 +167,7 @@ The rows are deliberately sequential. Do not skip a dependency just because a la
 | Angel Memos | `master`; one dirty definitions file | Commit or consciously leave in archive; recreate Google/Chrome authorization on Mac | Mac-ready after path/config fix |
 | Blog Engine | `main`; one dirty definitions file | Commit or consciously leave in archive; move WordPress secret/config to Mac-local config | Mac-ready; scheduled report lane may stay Windows |
 | HuntDesk | Mac source is authoritative; the reconciled schema-20 database is live and rollback snapshots exist | Keep source changes pushed; keep the ignored database in verified snapshots | Manual Mac app; no schedule or auto-start |
-| MyClaw | Preserved dirty/behind checkout retained only for history and rollback | No reconciliation required unless the owner revives the project | Retired; both Windows jobs disabled and no Mac jobs |
+| MyClaw | Mac checkout removed from the active application tree after capture in the verified August 30 archive; a Windows rollback copy may still remain | Delete the inactive Windows copy when remote desktop is available; no reconciliation is required unless the owner revives the project | Retired; both Windows jobs disabled and no Mac jobs |
 | Reading Companion | Clean `main`; local captures/jobs/sessions/threads are ignored | Confirm those local records are in the workspace archive; do not assume GitHub has them | Core Node work on Mac; Android setup later |
 | Wealthplan | Clean `main`, origin present | Export/backup ignored plans and scenario state; make legacy database path configurable | Mac-ready after config |
 | Harness | Clean `main` | Replace remaining Windows CLI path assumptions before first Mac use | Mac-ready after short adapter fix |
@@ -187,7 +192,7 @@ Do not migrate these just because the Mac is newer:
 | Portfolio Tracker API and live `portfolio.db` | Earnings reads this local Windows API; one machine must own the live database writer | Remote desktop only for recovery or an approved release |
 | Repository-maintenance backups | The source folders and Google Drive mount are on Windows | Weekly archive plus verification alert |
 
-HuntDesk is not on this list: it is a manual Mac application and must not be scheduled. Date Suggester is Mac-owned after its stop-old-before-start-new canary. MyClaw is retired: both Windows state jobs are disabled and no Mac replacements exist. Windows Git cleanup and Claude-memory streamlining retire after Windows development freezes. Design Conformance remains an on-demand skill. Morning Markets Brief is paused/dormant on both known hosts with an owner decision not to resume; archive/delete its definitions later if permanent retirement is desired.
+HuntDesk is not on this list: it is a manual Mac application and must not be scheduled. Date Suggester is Mac-owned after its stop-old-before-start-new canary. MyClaw is retired: its Mac checkout was removed, both Windows state jobs are disabled, and no Mac replacements exist; only deletion of any inactive Windows rollback copy remains. Windows Git cleanup and Claude-memory streamlining retire after Windows development freezes. Design Conformance remains an on-demand skill. Morning Markets Brief has been deleted from the active Mac skill and automation locations. Its paused Windows Cowork definition may still remain and can be deleted when remote desktop is available; it is not an active job.
 
 Every Windows application release is an exact-commit boundary: record the approved Git SHA, fetch without merging, build/test a clean candidate at that SHA, classify database/schema and scheduler compatibility, export task definitions, and take plus restore-test a consistent pre-switch database snapshot. Stop the owning process or scheduler only for the atomic switch, run its health check, and on failure roll back code, database, and task definitions together unless backward compatibility was explicitly proven. Never deploy with a blind `git pull`, from a dirty worktree, or while both hosts can write the same database or consume the same queue.
 
