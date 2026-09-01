@@ -44,6 +44,12 @@ if [ "$root" = "$hook_repo" ]; then
     printf 'PRE-PUSH BLOCKED: pytest is unavailable to %s.\n' "$python_bin" >&2
     exit 1
   fi
+  public_boundary="$instructions_home/snippets/check_public_boundary.py"
+  if [ ! -f "$public_boundary" ]; then
+    printf 'PRE-PUSH BLOCKED: public-boundary guard is missing: %s\n' "$public_boundary" >&2
+    exit 1
+  fi
+  run "$python_bin" "$public_boundary"
   run "$python_bin" "$stubs" --check --artifacts-only
   run "$python_bin" -m pytest \
     "$instructions_home/snippets/test_guide_generation.py" \
