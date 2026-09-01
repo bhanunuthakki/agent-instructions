@@ -1,0 +1,39 @@
+{
+  "version": "1",
+  "description": "Public schema example. Local commands, endpoints, and credentials belong in mcp_registry.json, which is ignored.",
+  "servers": {
+    "fmp": {
+      "description": "Configure the local financial-data MCP adapter.",
+      "targets": ["all"],
+      "command": "configure-fmp-mcp-command",
+      "args": []
+    },
+    "github": {
+      "description": "Configure the local GitHub MCP adapter.",
+      "targets": ["all"],
+      "command": "configure-github-mcp-command",
+      "args": [],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "linear": {
+      "description": "Configure the local Linear MCP adapter.",
+      "targets": ["all"],
+      "command": "configure-linear-mcp-command",
+      "args": []
+    },
+    "notebooks": {
+      "description": "Configure an optional local notebook adapter.",
+      "targets": ["all"],
+      "command": "configure-notebook-mcp-command",
+      "args": []
+    },
+    "visualization": {
+      "description": "Configure an optional local visualization adapter.",
+      "targets": ["all"],
+      "command": "configure-visualization-mcp-command",
+      "args": []
+    }
+  }
+}

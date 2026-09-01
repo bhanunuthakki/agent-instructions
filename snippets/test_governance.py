@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -69,6 +71,39 @@ def seal_receipts(receipts: list[dict[str, object]], path: Path) -> None:
 
 def test_router_uses_deterministic_proof_when_it_is_complete() -> None:
     assert judges.route_tier({"deterministic_complete": True}) == "J0"
+
+
+def test_cli_defaults_to_configured_private_state_root(tmp_path: Path) -> None:
+    state_root = tmp_path / "private-state"
+    env = {
+        **os.environ,
+        "AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT": str(state_root),
+    }
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "snippets" / "judge_governance.py"),
+            "begin",
+            "--task-id",
+            "synthetic-private-state-test",
+            "--task-class",
+            "coding",
+            "--signals",
+            "deterministic_complete",
+            "--repository-id",
+            "synthetic-repository",
+            "--work-anchor",
+            "synthetic-work-anchor",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    issuance = state_root / "governance" / "judge_issuance.jsonl"
+    assert issuance.is_file()
+    payload = json.loads(issuance.read_text(encoding="utf-8"))
+    assert payload["repository_id"] == "synthetic-repository"
 
 
 def test_router_uses_j2_for_two_independent_uncertainty_signals() -> None:
@@ -864,12 +899,32 @@ def test_owner_can_explicitly_request_a_second_judge() -> None:
     assert any("at least 2" in error for error in judges.validate_receipt(receipt))
 
 
-def test_historical_policy_receipt_remains_valid() -> None:
-    ledger = ROOT / "governance" / "judge_ledger.jsonl"
-    historical = json.loads(ledger.read_text(encoding="utf-8").splitlines()[0])
+def test_historical_policy_receipt_remains_valid(tmp_path: Path) -> None:
+    historical = {
+        "schema_version": "1.0.0",
+        "policy_version": "1.0.0",
+        "task_id": "synthetic-historical-policy-fixture",
+        "task_class": "coding",
+        "signals": {"missing_oracle": True, "multi_scope": True},
+        "recommended_tier": "J2",
+        "actual_tier": "J2",
+        "deterministic_evidence": [proof("synthetic-check")],
+        "judges": [judge("synthetic-one"), judge("synthetic-two")],
+        "verdict": "PASS",
+        "disagreement": False,
+        "owner_override": None,
+        "owner_approval": None,
+        "policy_change": None,
+        "failure_code": None,
+        "outcome": None,
+        "audit": None,
+    }
+    historical["sampling"] = judges.sampling_record(historical)
     assert historical["policy_version"] == "1.0.0"
     assert judges.validate_receipt(historical) == []
-    report = judges.audit_ledger(ledger, repository_id=".gemini")
+    ledger = tmp_path / "ledger.jsonl"
+    ledger.write_text(json.dumps(historical) + "\n", encoding="utf-8")
+    report = judges.audit_ledger(ledger)
     assert report["receipts"] >= 1
     assert report["routing_failures"] == 0
     assert report["execution_failures"] == 0

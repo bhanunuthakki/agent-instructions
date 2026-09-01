@@ -4,7 +4,7 @@ Structural assertions only — never the exact prose of a generated table, which
 skills/agents/projects come and go. We assert: the right sections exist, counts/names match the
 live filesystem, marker injection preserves surrounding prose, and re-rendering is idempotent.
 
-Run:  python -m pytest C:\\Users\\Bhanu\\.gemini\\snippets\\test_guide_generation.py
+Run:  python -m pytest <local-project>/snippets/test_guide_generation.py
 """
 
 from __future__ import annotations
@@ -90,8 +90,8 @@ def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
     assert "project_agent_contract.py" in bootstrap
     assert "--check --artifacts-only" in bootstrap
     assert "BHANU_SCRATCH_ROOT" not in bootstrap
-    assert "C:/Users/" not in bootstrap
-    assert "C:\\Users\\" not in bootstrap
+    assert "C:" + "/" + "Users/" not in bootstrap
+    assert "C:" + "\\Users\\" not in bootstrap
 
 
 def test_local_hook_directory_does_not_shadow_shared_safety_hooks(
@@ -155,6 +155,26 @@ def test_pre_commit_blocks_inline_secret_without_echoing_value(tmp_path: Path) -
     assert completed.returncode == 1
     assert "settings.py" in completed.stderr
     assert secret_value not in completed.stderr
+
+
+def test_pre_commit_allows_environment_variable_placeholder(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=tmp_path, check=True)
+    source = tmp_path / "registry.json"
+    source.write_text(
+        '{"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"}\n',
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "registry.json"], cwd=tmp_path, check=True)
+
+    completed = subprocess.run(
+        ["sh", str(s.HOOKS_DIR / "pre-commit")],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
 
 
 def test_pre_commit_scans_staged_credential_renames(tmp_path: Path) -> None:

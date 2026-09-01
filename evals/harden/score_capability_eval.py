@@ -16,6 +16,7 @@ REQUEST_SCHEMA = "internal://harden-capability-request/v2"
 OUTPUT_SCHEMA = "internal://harden-capability-output/v2"
 CASE_RESULT_SCHEMA = "internal://harden-capability-case-result/v2"
 SCORE_SCHEMA = "internal://harden-capability-score/v2"
+ALLOWED_VERDICTS = {"PASS", "BLOCK", "HOLD", "ADVISORY", "N/A"}
 REQUIRED_SHAPES = {
     "normal", "empty", "long-context", "malformed", "adversarial",
     "degraded", "conflicting-evidence",
@@ -98,7 +99,7 @@ def expected_request(
             "rubric_hash": rubric["rubric_hash"],
             "rubric_package_hash": package_hash,
             "input_hash": input_hash,
-            "verdict": sorted({"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}),
+            "verdict": sorted(ALLOWED_VERDICTS),
             "finding_ids": "array of non-empty strings",
             "rationale": "concise evidence-grounded string",
         },
@@ -133,7 +134,7 @@ def _validate_candidate_output(
         raise ScoreError(f"output {case_id} candidate response binding does not match its retained request")
     structurally_valid = (
         reparsed["$schema"] == OUTPUT_SCHEMA
-        and reparsed["verdict"] in {"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}
+        and reparsed["verdict"] in ALLOWED_VERDICTS
         and isinstance(reparsed["finding_ids"], list)
         and all(isinstance(item, str) and item.strip() for item in reparsed["finding_ids"])
         and isinstance(reparsed["rationale"], str) and bool(reparsed["rationale"].strip())
@@ -181,6 +182,8 @@ def score(
         rubric = case.get("rubric_id")
         if not isinstance(rubric, str) or not rubric:
             raise ScoreError("dataset rubric IDs must be non-empty strings")
+        if case.get("expected", {}).get("verdict") not in ALLOWED_VERDICTS:
+            raise ScoreError("dataset expected verdict is invalid")
         rubric_counts[rubric] = rubric_counts.get(rubric, 0) + 1
     if not rubric_counts or min(rubric_counts.values()) < 2:
         raise ScoreError("dataset requires at least two cases per rubric")
@@ -271,8 +274,8 @@ def score(
         correct += int(is_correct)
         block_total += int(expected == "BLOCK")
         block_correct += int(expected == "BLOCK" and is_correct)
-        uncertain_total += int(expected in {"HOLD", "ABSTAIN"})
-        uncertain_correct += int(expected in {"HOLD", "ABSTAIN"} and is_correct)
+        uncertain_total += int(expected == "HOLD")
+        uncertain_correct += int(expected == "HOLD" and is_correct)
         if valid:
             covered_rubrics.add(case["rubric_id"])
         per_case.append(

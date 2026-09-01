@@ -255,6 +255,65 @@ def test_corpus_has_multiple_cases_per_rubric_and_all_required_shapes() -> None:
         assert len(json.dumps(sections, ensure_ascii=False)) >= minimum_characters
 
 
+def test_capability_corpus_matches_harden_v2_verdict_contract() -> None:
+    runner = load_module("harden_eval_runner_contract", ROOT / "evals" / "harden" / "run_capability_eval.py")
+    cases = runner.load_cases(ROOT / "evals" / "harden" / "cases.jsonl")
+    assert runner.ALLOWED_VERDICTS == {"PASS", "BLOCK", "HOLD", "ADVISORY", "N/A"}
+    assert all(case["expected"]["verdict"] in runner.ALLOWED_VERDICTS for case in cases)
+    assert "ABSTAIN" not in runner.ALLOWED_VERDICTS
+    expected_by_id = {case["case_id"]: case["expected"]["verdict"] for case in cases}
+    assert expected_by_id["llm-malformed-abstain"] == "HOLD"
+    assert expected_by_id["legal-uncertain-abstain"] == "HOLD"
+    assert expected_by_id["legal-jurisdiction-conflict"] == "HOLD"
+    assert expected_by_id["finops-personal-pass"] == "ADVISORY"
+    assert expected_by_id["analytics-denominator-empty"] == "BLOCK"
+
+    case = cases[0]
+    bindings, package_hash = runner.load_rubric_bindings(
+        [case], ROOT / "procedures" / "agents"
+    )
+    rubric = bindings[case["rubric_id"]]
+    request = runner.request_for(case, rubric, package_hash)
+    assert request["response_contract"]["verdict"] == sorted(runner.ALLOWED_VERDICTS)
+    response = {
+        "case_id": request["binding"]["case_id"],
+        "rubric_id": request["binding"]["rubric_id"],
+        "rubric_hash": request["binding"]["rubric_hash"],
+        "rubric_package_hash": request["binding"]["rubric_package_hash"],
+        "input_hash": request["binding"]["input_hash"],
+        "$schema": runner.OUTPUT_SCHEMA,
+        "finding_ids": [],
+        "rationale": "fixture answer",
+        "verdict": "ABSTAIN",
+    }
+    parsed, error = runner.parse_response(
+        json.dumps(response), case, rubric, package_hash
+    )
+    assert parsed is None
+    assert error == "response verdict is invalid"
+
+
+def test_legacy_hold_abstain_metric_name_counts_hold_cases_only(tmp_path: Path) -> None:
+    runner = load_module("harden_eval_runner_hold_metric", ROOT / "evals" / "harden" / "run_capability_eval.py")
+    scorer = load_module("harden_eval_scorer_hold_metric", ROOT / "evals" / "harden" / "score_capability_eval.py")
+    dataset = ROOT / "evals" / "harden" / "cases.jsonl"
+    cases = runner.load_cases(dataset)
+    rows = bound_rows(runner, cases, ROOT / "procedures" / "agents")
+    target = next(row for row in rows if row["case_id"] == "finops-personal-pass")
+    response = json.loads(target["raw_response"])
+    response["verdict"] = "PASS"
+    target["raw_response"] = json.dumps(response, sort_keys=True)
+    target["parsed_response"] = response
+    outputs = tmp_path / "outputs.jsonl"
+    outputs.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    result = scorer.score(
+        dataset, outputs, ROOT / "config" / "harden_eval_policy.json",
+        "blocking-specialist", ROOT / "procedures" / "agents",
+    )
+    assert result["metrics"]["overall_accuracy"] < 1
+    assert result["metrics"]["hold_abstain_accuracy"] == 1
+
+
 def test_scorer_emits_shadow_result_and_never_self_ratifies(tmp_path: Path) -> None:
     scorer = load_module("harden_eval_scorer", ROOT / "evals" / "harden" / "score_capability_eval.py")
     dataset = ROOT / "evals" / "harden" / "cases.jsonl"

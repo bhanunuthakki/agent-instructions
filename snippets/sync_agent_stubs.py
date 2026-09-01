@@ -50,6 +50,9 @@ PROJECT_ROOT = configured_path("BHANU_DEVELOPER_ROOT", ROOT_REPO.parent)
 # Compatibility alias for internal callers while the project-root terminology settles.
 SCRATCH = PROJECT_ROOT
 HOOKS_DIR = ROOT_REPO / "githooks"
+PRIVATE_STATE_ROOT = configured_path(
+    "AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT", ROOT_REPO / ".private-state"
+)
 
 # CANONICAL DIRECTION: procedures/ is the hand-authored SOURCE OF TRUTH. This script GENERATES the
 # Claude and Codex skills, the /harden command, and the agent fleet FROM procedures/ — identity
@@ -137,6 +140,7 @@ COMMAND_SOURCES = {
 }
 
 MCP_REGISTRY = ROOT_REPO / "snippets" / "mcp_registry.json"
+PUBLIC_MCP_REGISTRY = ROOT_REPO / "snippets" / "mcp_registry.example.json"
 MCP_TARGETS: dict[str, Path] = {
     "gemini": ROOT_REPO / "config" / "mcp_config.json",
     "antigravity": ROOT_REPO / "antigravity" / "mcp_config.json",
@@ -384,8 +388,21 @@ def build_harden_package_artifacts(package_root: Path) -> dict[Path, str]:
             out[package_root / "rubrics" / f"{name}.md"] = rubric.read_text(
                 encoding="utf-8", errors="replace"
             )
+    private_config_names = {
+        "harden_capability_registry.json",
+        "harden_eval_policy.json",
+    }
+    config_sources = {
+        name: (
+            PRIVATE_STATE_ROOT / "config" / name
+            if (PRIVATE_STATE_ROOT / "config" / name).is_file()
+            else ROOT_REPO / "config" / name
+        )
+        for name in private_config_names
+    }
+    registry_source = config_sources["harden_capability_registry.json"]
     for name in HARDEN_PACKAGE_CONFIGS:
-        config = ROOT_REPO / "config" / name
+        config = config_sources.get(name, ROOT_REPO / "config" / name)
         if config.is_file():
             out[package_root / "config" / name] = config.read_text(
                 encoding="utf-8", errors="replace"
@@ -396,9 +413,10 @@ def build_harden_package_artifacts(package_root: Path) -> dict[Path, str]:
             encoding="utf-8", errors="replace"
         )
 
-    registry_path = ROOT_REPO / "config" / "harden_capability_registry.json"
+    registry_path = registry_source
     if registry_path.is_file():
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        governance_root = PRIVATE_STATE_ROOT / "governance"
         for entry in registry.get("qualifications", []):
             receipt_id = entry.get("receipt_id") if isinstance(entry, dict) else None
             if not isinstance(receipt_id, str) or not receipt_id:
@@ -406,14 +424,12 @@ def build_harden_package_artifacts(package_root: Path) -> dict[Path, str]:
                     "harden capability registry contains an invalid receipt entry"
                 )
             receipt = (
-                ROOT_REPO
-                / "governance"
+                governance_root
                 / "harden_capability_receipts"
                 / f"{receipt_id}.json"
             )
             raw_outputs = (
-                ROOT_REPO
-                / "governance"
+                governance_root
                 / "harden_capability_evidence"
                 / receipt_id
                 / "per_case_outputs.jsonl"
@@ -869,9 +885,10 @@ def _rel_target(p: Path) -> str:
 
 def build_mcp_configs() -> dict[Path, str]:
     """Pure: compile the canonical mcp_registry.json into target JSON config strings."""
-    if not MCP_REGISTRY.exists():
+    registry = MCP_REGISTRY if MCP_REGISTRY.exists() else PUBLIC_MCP_REGISTRY
+    if not registry.exists():
         return {}
-    data = json.loads(MCP_REGISTRY.read_text(encoding="utf-8"))
+    data = json.loads(registry.read_text(encoding="utf-8"))
     servers = data.get("servers", {})
     configs: dict[Path, str] = {}
     for target_name, path in MCP_TARGETS.items():
@@ -914,6 +931,8 @@ def materialize_mcp_configs(dry: bool) -> list[str]:
 
 def detect_mcp_drift() -> list[str]:
     """Report drift between canonical mcp_registry.json and runtime MCP config files."""
+    if not MCP_REGISTRY.exists():
+        return []
     configs = build_mcp_configs()
     drift: list[str] = []
     for path, expected in configs.items():

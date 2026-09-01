@@ -72,6 +72,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 - **On `git commit`** → the pre-commit hook blocks credential files and suspected hardcoded secrets without printing their values. If it flags a false positive, repair the rule with a regression test; do not bypass the safety gate.
 - **On `git push`** → the effective pre-push hook runs the project gate, then verifies the global instruction system, generated artifacts, human guide, and tests. The tracked instruction repository and every wired project use the shared hook path; an optional project `.githooks/pre-push` is composed, not substituted. Resolve a failing prerequisite or check before pushing.
 - Hooks live in the tracked `githooks/` directory and are wired into each repo by `/sync-agent-stubs`. They apply across Claude, Codex, Gemini, and plain `git`.
+- Live Judge ledgers, hardening policy ratification, and capability evidence live in the ignored private state root, not this public repository. The default is `.private-state/`; `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT` may name another absolute location. The tracked evaluation policy is an unratified template.
 
 ## The hardening fleet (advanced, opt-in)
 

@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import re
 import subprocess
 import sys
@@ -24,6 +25,7 @@ CASE_RESULT_SCHEMA = "internal://harden-capability-case-result/v2"
 REQUEST_SCHEMA = "internal://harden-capability-request/v2"
 OUTPUT_SCHEMA = "internal://harden-capability-output/v2"
 GATE_PURPOSE = "hardening-gate-verdict"
+PRIVATE_STATE_ENV = "AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT"
 RUNGS = ("L0", "L1", "L2", "L3")
 RUNTIMES = ("claude", "codex", "gemini", "antigravity")
 VERDICTS = {"PASS", "BLOCK", "ADVISORY", "HOLD", "N/A"}
@@ -207,11 +209,28 @@ def _is_package(root: Path) -> bool:
     return (root / "rubrics").is_dir() or (root / "runtime" / "harden_state.py").is_file()
 
 
+def _private_state_root(root: Path) -> Path:
+    raw = os.environ.get(PRIVATE_STATE_ENV)
+    if not raw:
+        return (root / ".private-state").resolve()
+    configured = Path(raw).expanduser()
+    if not configured.is_absolute():
+        raise StateError(f"{PRIVATE_STATE_ENV} must be an absolute path")
+    return configured.resolve()
+
+
 def _rubric_path(root: Path, expert: str) -> Path:
     return root / "rubrics" / f"{expert}.md" if _is_package(root) else root / "procedures" / "agents" / f"{expert}.md"
 
 
 def _config_path(root: Path, name: str) -> Path:
+    if not _is_package(root) and name in {
+        "harden_capability_registry.json",
+        "harden_eval_policy.json",
+    }:
+        private = _private_state_root(root) / "config" / name
+        if private.is_file():
+            return private
     return root / "config" / name
 
 
@@ -220,11 +239,26 @@ def _dataset_path(root: Path) -> Path:
 
 
 def _receipt_path(root: Path, receipt_id: str) -> Path:
-    return root / "receipts" / f"{receipt_id}.json" if _is_package(root) else root / "governance" / "harden_capability_receipts" / f"{receipt_id}.json"
+    if _is_package(root):
+        return root / "receipts" / f"{receipt_id}.json"
+    return (
+        _private_state_root(root)
+        / "governance"
+        / "harden_capability_receipts"
+        / f"{receipt_id}.json"
+    )
 
 
 def _evidence_path(root: Path, receipt_id: str, name: str) -> Path:
-    return (root / "evidence" / receipt_id / name) if _is_package(root) else (root / "governance" / "harden_capability_evidence" / receipt_id / name)
+    if _is_package(root):
+        return root / "evidence" / receipt_id / name
+    return (
+        _private_state_root(root)
+        / "governance"
+        / "harden_capability_evidence"
+        / receipt_id
+        / name
+    )
 
 
 def _registry_entries(root: Path) -> list[dict[str, Any]]:
@@ -523,7 +557,7 @@ def _validate_dataset(root: Path) -> None:
         if not isinstance(case["case_id"], str) or not case["case_id"] or case["case_id"] in case_ids:
             raise StateError("capability dataset case IDs must be unique and non-empty")
         verdict = case.get("expected", {}).get("verdict")
-        if verdict not in {"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}:
+        if verdict not in VERDICTS:
             raise StateError("capability dataset expected verdict is invalid")
         shape = case.get("shape")
         if shape is not None and shape not in CAPABILITY_CASE_SHAPES:
@@ -555,8 +589,8 @@ def _validate_dataset(root: Path) -> None:
             shapes.add(shape)
     if rubrics != set(ACTIVE_EXPERTS):
         raise PackageHold("capability dataset does not cover all 19 active rubrics")
-    if not {"PASS", "BLOCK", "HOLD", "ABSTAIN"} <= verdicts:
-        raise PackageHold("capability dataset lacks positive, negative, HOLD, or ABSTAIN cases")
+    if not {"PASS", "BLOCK", "HOLD"} <= verdicts:
+        raise PackageHold("capability dataset lacks positive, negative, or HOLD cases")
     if any(count < 2 for count in rubric_counts.values()):
         raise PackageHold("capability dataset requires at least two cases per active rubric")
     if shapes != CAPABILITY_CASE_SHAPES:
@@ -621,7 +655,7 @@ def _expected_capability_request(
             "rubric_hash": rubric["rubric_hash"],
             "rubric_package_hash": package_hash,
             "input_hash": input_hash,
-            "verdict": sorted({"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}),
+            "verdict": sorted(VERDICTS),
             "finding_ids": "array of non-empty strings",
             "rationale": "concise evidence-grounded string",
         },
@@ -697,7 +731,7 @@ def _validate_capability_case_bindings(
                 not isinstance(parsed, dict)
                 or set(parsed) != output_keys
                 or parsed.get("$schema") != OUTPUT_SCHEMA
-                or parsed.get("verdict") not in {"PASS", "BLOCK", "HOLD", "ABSTAIN", "ADVISORY", "N/A"}
+                or parsed.get("verdict") not in VERDICTS
                 or not isinstance(parsed.get("finding_ids"), list)
                 or not all(isinstance(item, str) and item.strip() for item in parsed["finding_ids"])
                 or not isinstance(parsed.get("rationale"), str)
@@ -757,7 +791,7 @@ def _validate_capability_case_bindings(
     total = len(cases)
     correct = sum(int(item[2]) for item in observed.values())
     block_ids = [case["case_id"] for case in cases if case.get("expected", {}).get("verdict") == "BLOCK"]
-    uncertain_ids = [case["case_id"] for case in cases if case.get("expected", {}).get("verdict") in {"HOLD", "ABSTAIN"}]
+    uncertain_ids = [case["case_id"] for case in cases if case.get("expected", {}).get("verdict") == "HOLD"]
     covered = {
         expected_by_id[case_id]["rubric_id"]
         for case_id, item in observed.items() if item[0]

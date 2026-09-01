@@ -73,12 +73,46 @@ def package(tmp_path: Path) -> Path:
         "harden_capability_registry.json",
     ):
         shutil.copy2(INSTRUCTIONS_ROOT / "config" / name, root / "config" / name)
+    registry_path = root / "config" / "harden_capability_registry.json"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry["qualifications"] = []
+    registry_path.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
     shutil.copy2(INSTRUCTIONS_ROOT / "evals" / "harden" / "cases.jsonl", root / "evals" / "cases.jsonl")
     return root
 
 
 def digest(path: Path) -> str:
     return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
+
+
+def test_repo_layout_resolves_harden_evidence_from_private_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "instructions"
+    repo.mkdir()
+    state_root = tmp_path / "private-state"
+    monkeypatch.setenv("AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT", str(state_root))
+    assert harden_state._config_path(
+        repo, "harden_capability_registry.json"
+    ) == repo / "config" / "harden_capability_registry.json"
+    private_registry = state_root / "config" / "harden_capability_registry.json"
+    private_registry.parent.mkdir(parents=True)
+    private_registry.write_text("{}", encoding="utf-8")
+    assert harden_state._config_path(
+        repo, "harden_capability_registry.json"
+    ) == private_registry
+    assert harden_state._config_path(
+        repo, "harden_eval_policy.json"
+    ) == repo / "config" / "harden_eval_policy.json"
+    private_policy = state_root / "config" / "harden_eval_policy.json"
+    private_policy.write_text("{}", encoding="utf-8")
+    assert harden_state._config_path(repo, "harden_eval_policy.json") == private_policy
+    assert harden_state._receipt_path(repo, "synthetic") == (
+        state_root
+        / "governance"
+        / "harden_capability_receipts"
+        / "synthetic.json"
+    )
 
 
 def test_active_matrix_is_exactly_nineteen_mece_rubrics() -> None:
