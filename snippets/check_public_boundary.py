@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -12,6 +13,19 @@ FORBIDDEN_PATH_PARTS = (
     "mcp_registry.json",
     "backup_mac_workspace.py",
 )
+FORBIDDEN_PATH_PREFIXES = (
+    ".private-state/",
+    "governance/",
+)
+FORBIDDEN_FILENAMES = frozenset(
+    {
+        "judge_issuance.jsonl",
+        "judge_ledger.jsonl",
+        "judge_outcomes.jsonl",
+        "per_case_outputs.jsonl",
+    }
+)
+PUBLIC_CAPABILITY_REGISTRY = "config/harden_capability_registry.json"
 FORBIDDEN_TEXT = ("/Users/", "/home/", "C:\\Users\\")
 
 
@@ -28,8 +42,21 @@ def violations(repo: Path) -> list[str]:
         relative = path.relative_to(repo).as_posix()
         if not path.exists():
             continue
-        if any(part in relative for part in FORBIDDEN_PATH_PARTS) and not relative.endswith(".gitkeep"):
+        if (
+            relative.startswith(FORBIDDEN_PATH_PREFIXES)
+            or path.name in FORBIDDEN_FILENAMES
+            or any(part in relative for part in FORBIDDEN_PATH_PARTS)
+        ):
             found.append(relative)
+            continue
+        if relative == PUBLIC_CAPABILITY_REGISTRY:
+            try:
+                registry = json.loads(path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                found.append(relative)
+                continue
+            if registry.get("qualifications") != []:
+                found.append(relative)
             continue
         if relative == "snippets/check_public_boundary.py":
             continue

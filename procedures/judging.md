@@ -42,6 +42,12 @@ task class, and root episode identity. One exclusive local writer owns issuance 
 Every issuance must reach a terminal receipt, and one repository/work anchor may have only one live
 root; abandoned or competing roots fail the ledger gate.
 
+Mutable issuance, receipt, and outcome ledgers live under the ignored private state root, not in
+this public repository. The default is `.private-state/` in the instruction checkout; set the
+absolute `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT` environment variable to place the same state
+elsewhere. CLI commands use that root by default and still accept explicit paths for recovery or
+inspection.
+
 - **J0:** deterministic proof is complete and no unresolved risk signal remains.
 - **J1:** bounded, reversible work whose semantic quality needs one purpose-specific Judge.
 - **J2:** material but reversible uncertainty. One specialist Judge is standard. Conflicting
@@ -98,7 +104,7 @@ and no demotion may undercut the current router floor. Evidence from another tie
 Control Review cannot satisfy an ordinary demotion target.
 
 ```shell
-python snippets/judge_governance.py review-policy governance/judge_ledger.jsonl --current-tier J1 --signals <signals>
+python snippets/judge_governance.py review-policy --current-tier J1 --signals <signals>
 ```
 
 Read [judging.EVALS.md](judging.EVALS.md) for sampling, audit-schema, and calibration rules, and

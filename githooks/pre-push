@@ -50,7 +50,8 @@ if [ "$root" = "$hook_repo" ]; then
     "$instructions_home/snippets/test_harden_state.py" \
     "$instructions_home/snippets/test_governance.py" -q
   governance="$instructions_home/snippets/judge_governance.py"
-  ledger="$instructions_home/governance/judge_ledger.jsonl"
+  private_state_root=${AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT:-$instructions_home/.private-state}
+  ledger="$private_state_root/governance/judge_ledger.jsonl"
   if [ -f "$governance" ]; then
     run "$python_bin" "$governance" activation-check --repository-id "$(basename "$root")"
     if [ -f "$ledger" ]; then

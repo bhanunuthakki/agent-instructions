@@ -2,10 +2,5 @@
   "$schema": "internal://harden-capability-registry/v1",
   "schema_version": 1,
   "purpose": "hardening-gate-verdict",
-  "qualifications": [
-    {
-      "receipt_id": "codex-gpt-5-6-sol-high-2026-08-28-v1",
-      "receipt_hash": "sha256:f33b18c36076d466f391bacd8a348fb960a4673ac6452da0fbb2dd4049aee64a"
-    }
-  ]
+  "qualifications": []
 }

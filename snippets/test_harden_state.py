@@ -85,6 +85,30 @@ def digest(path: Path) -> str:
     return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
 
 
+def test_repo_layout_resolves_harden_evidence_from_private_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "instructions"
+    repo.mkdir()
+    state_root = tmp_path / "private-state"
+    monkeypatch.setenv("AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT", str(state_root))
+    assert harden_state._config_path(
+        repo, "harden_capability_registry.json"
+    ) == repo / "config" / "harden_capability_registry.json"
+    private_registry = state_root / "config" / "harden_capability_registry.json"
+    private_registry.parent.mkdir(parents=True)
+    private_registry.write_text("{}", encoding="utf-8")
+    assert harden_state._config_path(
+        repo, "harden_capability_registry.json"
+    ) == private_registry
+    assert harden_state._receipt_path(repo, "synthetic") == (
+        state_root
+        / "governance"
+        / "harden_capability_receipts"
+        / "synthetic.json"
+    )
+
+
 def test_active_matrix_is_exactly_nineteen_mece_rubrics() -> None:
     assert len(ACTIVE_EXPERTS) == len(set(ACTIVE_EXPERTS)) == 19
     assert "data-engineer" not in ACTIVE_EXPERTS

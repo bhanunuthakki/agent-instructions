@@ -12,13 +12,18 @@ from pathlib import Path
 from typing import Any, Mapping
 from uuid import UUID, uuid4
 
+from private_state import private_state_root
+
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "config" / "judge_policy.json"
 POLICY_DIR = ROOT / "config" / "judge_policies"
 JUDGE_REGISTRY_DIR = ROOT / "config" / "judge_registries"
 ROLLOUT_PATH = ROOT / "config" / "judge_rollout.json"
-ISSUANCE_PATH = ROOT / "governance" / "judge_issuance.jsonl"
-OUTCOME_PATH = ROOT / "governance" / "judge_outcomes.jsonl"
+PRIVATE_STATE_ROOT = private_state_root(ROOT)
+GOVERNANCE_ROOT = PRIVATE_STATE_ROOT / "governance"
+LEDGER_PATH = GOVERNANCE_ROOT / "judge_ledger.jsonl"
+ISSUANCE_PATH = GOVERNANCE_ROOT / "judge_issuance.jsonl"
+OUTCOME_PATH = GOVERNANCE_ROOT / "judge_outcomes.jsonl"
 TIERS = ("J0", "J1", "J2", "J3")
 FINAL_VERDICTS = {"PASS", "BLOCK", "HOLD", "ABSTAIN"}
 TASK_CLASSES = {"coding", "research"}
@@ -1649,9 +1654,7 @@ def main() -> None:
     begin.add_argument("--issuance", type=Path, default=ISSUANCE_PATH)
     complete = sub.add_parser("complete")
     complete.add_argument("receipt", type=Path)
-    complete.add_argument(
-        "--ledger", type=Path, default=ROOT / "governance" / "judge_ledger.jsonl"
-    )
+    complete.add_argument("--ledger", type=Path, default=LEDGER_PATH)
     complete.add_argument("--issuance", type=Path, default=ISSUANCE_PATH)
     outcome = sub.add_parser("record-outcome")
     outcome.add_argument("--root-episode-id", required=True)
@@ -1674,16 +1677,16 @@ def main() -> None:
     activation.add_argument("--repository-id", required=True)
     activation.add_argument("--config", type=Path, default=ROLLOUT_PATH)
     audit = sub.add_parser("audit-ledger")
-    audit.add_argument("ledger", type=Path)
+    audit.add_argument("ledger", nargs="?", type=Path, default=LEDGER_PATH)
     audit.add_argument("--issuance", type=Path, default=ISSUANCE_PATH)
     audit.add_argument("--outcomes", type=Path, default=OUTCOME_PATH)
     audit.add_argument("--repository-id")
     plan = sub.add_parser("plan-audits")
-    plan.add_argument("ledger", type=Path)
+    plan.add_argument("ledger", nargs="?", type=Path, default=LEDGER_PATH)
     plan.add_argument("--tier", choices=("J0", "J1", "J2"), required=True)
     plan.add_argument("--task-class", choices=sorted(TASK_CLASSES), required=True)
     review = sub.add_parser("review-policy")
-    review.add_argument("ledger", type=Path)
+    review.add_argument("ledger", nargs="?", type=Path, default=LEDGER_PATH)
     review.add_argument("--current-tier", choices=TIERS, required=True)
     review.add_argument("--signals", default="")
     review.add_argument("--issuance", type=Path, default=ISSUANCE_PATH)
