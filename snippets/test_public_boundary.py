@@ -111,3 +111,23 @@ def test_public_policy_rejects_mutable_ratification_state(
     relative = "config/harden_eval_policy.json"
     track(tracked_repo, relative, json.dumps(policy(**mutation)))
     assert relative in violations(tracked_repo)
+
+
+def test_rejects_credential_content(tracked_repo: Path) -> None:
+    track(tracked_repo, "notes.txt", "api_key='ghp_" + "A" * 30 + "'\n")
+    assert "notes.txt" in violations(tracked_repo)
+
+
+def test_rejects_personal_account_fact(tracked_repo: Path) -> None:
+    track(tracked_repo, "notes.md", "my portfolio cost basis: $1234\n")
+    assert "notes.md" in violations(tracked_repo)
+
+
+def test_allows_synthetic_credential_assignment(tracked_repo: Path) -> None:
+    track(tracked_repo, "notes.txt", "api_key='placeholder-value-123'\n")
+    assert violations(tracked_repo) == []
+
+
+def test_rejects_unscannable_private_document(tracked_repo: Path) -> None:
+    track(tracked_repo, "exports/research.xlsx", "not really a workbook\n")
+    assert "exports/research.xlsx" in violations(tracked_repo)
