@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -28,6 +29,36 @@ FORBIDDEN_FILENAMES = frozenset(
 PUBLIC_CAPABILITY_REGISTRY = "config/harden_capability_registry.json"
 PUBLIC_EVAL_POLICY = "config/harden_eval_policy.json"
 FORBIDDEN_TEXT = ("/Users/", "/home/", "C:\\Users\\")
+PERSONAL_EMAIL = re.compile(
+    r"\b(?:bhanu|nuthakki)[^@\s]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", re.IGNORECASE
+)
+PRIVATE_KEY = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----")
+HIGH_CONFIDENCE_SECRET = re.compile(
+    r"(?<![A-Za-z0-9])(?:AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}"
+    r"|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}"
+    r"|sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{30,}"
+    r"|xox[baprs]-[A-Za-z0-9-]{10,})"
+)
+CREDENTIAL_ASSIGNMENT = re.compile(
+    r"(?:api[_-]?key|access[_-]?token|auth[_-]?token|client[_-]?secret|password)"
+    r"\s*[=:]\s*(?:[\"'](?P<quoted>[^\"'\s]{12,})[\"']|"
+    r"(?P<bare>[A-Za-z0-9_./+=-]{12,}))",
+    re.IGNORECASE,
+)
+SYNTHETIC_SECRET = re.compile(
+    r"(?:dummy|example|fake|fixture|placeholder|redacted|changeme|not-a-real|test-token)",
+    re.IGNORECASE,
+)
+ACCOUNT_LEVEL_FACT = re.compile(
+    r"\b(?:cost[ _-]*basis|account[ _-]*balance|share[ _-]*quantity|shares|quantity"
+    r"|account[ _-]*(?:id|number))\b\s*[\"']?\s*[:=]\s*[\"']?[$€£]?[0-9A-Za-z]"
+    r"|\bposition[ _-]*(?:value|size)\b\s*[\"']?\s*[:=]\s*[\"']?"
+    r"(?:[$€£]\s*\d|\d[\d,.]*\s*(?:USD|dollars?))",
+    re.IGNORECASE,
+)
+ACCOUNT_FACT_SUFFIXES = {".csv", ".json", ".md", ".tsv", ".txt", ".yaml", ".yml"}
+UNSCANNABLE_PRIVATE_SUFFIXES = {".db", ".docx", ".pdf", ".sqlite", ".xlsx", ".zip"}
+CODE_SUFFIXES = {".js", ".py", ".sh", ".ts"}
 
 
 def tracked_files(repo: Path) -> list[Path]:
@@ -47,6 +78,7 @@ def violations(repo: Path) -> list[str]:
             relative.startswith(FORBIDDEN_PATH_PREFIXES)
             or path.name in FORBIDDEN_FILENAMES
             or any(part in relative for part in FORBIDDEN_PATH_PARTS)
+            or path.suffix.lower() in UNSCANNABLE_PRIVATE_SUFFIXES
         ):
             found.append(relative)
             continue
@@ -78,7 +110,31 @@ def violations(repo: Path) -> list[str]:
             text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        if any(marker in text for marker in FORBIDDEN_TEXT):
+        has_secret = (
+            PRIVATE_KEY.search(text) is not None
+            or HIGH_CONFIDENCE_SECRET.search(text) is not None
+        )
+        if not has_secret:
+            has_secret = any(
+                not SYNTHETIC_SECRET.search(
+                    match.group("quoted") or match.group("bare")
+                )
+                and (
+                    match.group("quoted") is not None
+                    or path.suffix.lower() not in CODE_SUFFIXES
+                )
+                for match in CREDENTIAL_ASSIGNMENT.finditer(text)
+            )
+        has_account_fact = (
+            path.suffix.lower() in ACCOUNT_FACT_SUFFIXES
+            and ACCOUNT_LEVEL_FACT.search(text) is not None
+        )
+        if (
+            any(marker in text for marker in FORBIDDEN_TEXT)
+            or PERSONAL_EMAIL.search(text) is not None
+            or has_secret
+            or has_account_fact
+        ):
             found.append(relative)
     return found
 
