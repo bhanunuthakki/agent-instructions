@@ -39,7 +39,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **frontend-quality** | Design, modify, review, or scaffold a rendered interface around the user's task, with compositional restraint and proportional browser or renderer ev… |
 | **grill-me** | Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision. |
 | **iteration-shortcut** | Bound a deliberate temporary shortcut that accelerates learning without silently weakening retained truth, safety, or recovery. |
-| **judging** | Route substantive coding and research work through J0-J3 evidence tiers, typed judge receipts, risk controls, and statistically derived audit samples. |
+| **judging** | Govern explicit Judge, Critic, evaluation-suite, or consequential incomplete-oracle review work through proportional evidence tiers, independence rul… |
 | **linear-pipeline-hygiene** | Audit and conservatively reconcile Linear pipelines across projects. |
 | **linear-pr-sync** | Synchronize an existing Linear issue with branch and pull-request progress. |
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
@@ -107,25 +107,38 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**38 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 25 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**39 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 25 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
+`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook
 
 <!-- BEGIN:projects -->
-**1 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
+**13 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
 
 | Project | Rulebook files present |
 |---|---|
 | agent-instructions | AGENTS.md, CLAUDE.md, GEMINI.md |
+| angel-memos | AGENTS.md, CLAUDE.md, GEMINI.md |
+| bhanu-resume-system | AGENTS.md, CLAUDE.md, GEMINI.md |
+| blog-engine | AGENTS.md, CLAUDE.md, GEMINI.md |
+| date-suggester | AGENTS.md, CLAUDE.md, GEMINI.md |
+| earnings-summary | AGENTS.md, CLAUDE.md, GEMINI.md |
+| harness | AGENTS.md, CLAUDE.md, GEMINI.md |
+| huntdesk | AGENTS.md, CLAUDE.md, GEMINI.md |
+| portfolio-tracker | AGENTS.md, CLAUDE.md, GEMINI.md |
+| reading-companion-app | AGENTS.md, CLAUDE.md, GEMINI.md |
+| repo-maintenance | AGENTS.md, CLAUDE.md, GEMINI.md |
+| wealthplan | AGENTS.md, CLAUDE.md, GEMINI.md |
+| xr-glasses-dev-guide | AGENTS.md, CLAUDE.md, GEMINI.md |
 <!-- END:projects -->
 
 ## Adding a new project
 
 1. Drop an `AGENTS.md` in the repo (or ask the agent to write one).
-2. Run `/sync-agent-stubs` — it adds the `CLAUDE.md`/`GEMINI.md` wrappers, wires the git hooks, and re-lists the project in the table above.
+2. If it has a rendered interface, add the standard `## Interface` block or seed one with `python snippets/project_agent_contract.py init --repo <path> --profile <profile>`, then replace every `TODO` with the project-owned contract, executable paths, render recipe, and gate. Nonvisual repositories use profile `none`.
+3. Run `python snippets/project_agent_contract.py check --repo <path>` and `/sync-agent-stubs` — the checker verifies local UI authority; sync adds the `CLAUDE.md`/`GEMINI.md` wrappers, wires the git hooks, re-lists the project, and reports non-blocking migration warnings for any other project without an Interface declaration.
 
 ## If you switch off Claude
 

@@ -14,16 +14,18 @@ Keep the root agent responsible for intent, architecture, synthesis, and final v
 - **blocking-specialist** — narrow expertise required to resolve a material risk, failure, or unknown.
 - **frontier-synthesizer** — ambiguous architecture, cross-domain synthesis, or consequential review where weaker reasoning would dominate the outcome.
 
-Choose the least expensive currently evaluated model that meets the role. A provider label, model name, context-window size, or advertised tier is not evidence of fitness. Record a capability receipt when routing matters: role, purpose, runtime, model identifier, effort, relevant evaluation, evaluation date, and known limit. If no current evidence qualifies a candidate, use a stronger evaluated candidate or return `HOLD`; do not silently lower the role.
+Use the runtime's normal assignment for ordinary bounded delegation. For recurring, scheduled, high-risk, or evaluation-governed routing, choose the least expensive currently evaluated model that meets the role and record a capability receipt with the material evidence. A provider label, model name, context window, or advertised tier alone is not evidence of fitness; insufficient evidence for a consequential route yields `HOLD`, not silent down-tiering.
 
 ## Dispatch
 
 - Before a nontrivial fan-out, check whether one short user answer is likely to change the result enough to avoid materially greater elapsed time, worker count, token/model spend, rework, or debt. When it is, use the lightweight `grill-me` route first. Otherwise proceed with the smallest reversible default or narrow the fan-out. Record this decision only when the delegation is material; it is not a universal receipt or another rigor tier.
+- Cross-task messages may update a dependency or resource handoff, but they do not replace the current task's user objective unless the user explicitly accepts the expanded scope. Apply relevant coordination to the original deliverable, then validate and report that deliverable; queue or acknowledge irrelevant coordination without making it the task's reported outcome.
 - Give each worker one outcome, explicit scope or file ownership, relevant constraints, required evidence, and a stopping condition.
 - Use one to three concurrent workers at depth one unless the runtime or task proves a different limit useful. Parallelize independent reads; serialize overlapping writes.
 - Do not leak the intended answer into an audit or skill evaluation. Give the worker the raw artifact and acceptance criteria.
 - A worker returns findings, changed paths, and validation evidence. The root reconciles conflicts and verifies the integrated result.
 - Improve a weak brief or split the task before escalating capability. Resume an interrupted worker when its context is still valid.
+- Treat an auto-reconnecting browser or remote-control session as an owned mutable resource even when it appears idle. A handoff names the current owner, in-flight action, last proof, resources held or released, and receiving owner; the applicable browser or remote-control workflow owns release mechanics.
 
 ## Shared checkout
 
@@ -31,10 +33,16 @@ Choose the least expensive currently evaluated model that meets the role. A prov
 - Concurrent writers need exclusive file or module ownership. If an existing change overlaps and cannot be preserved mechanically, stop at that file and ask.
 - Stage or commit only an explicit allowlist. Verify staged names and whitespace before committing.
 
+## Failure recovery
+
+During delegated or coordinated work: After two equivalent failures from the same tool or mechanism, change the approach or surface the blocker. Do not repeat an unchanged attempt.
+
 ## Scheduling and quota
 
 When work uses subscription-backed agents or recurring LLM calls, read [agent-operations.SCHEDULING.md](agent-operations.SCHEDULING.md) before dispatch or registration.
 
 ## Completion
 
-The root finishes only after checking the worker result against the repository state and the task’s success criteria. Delegation changes who executes; it does not transfer decision ownership.
+For delegated or coordinated work, synthesize worker activity into the user-visible outcome rather than returning an activity log. During a long operation, also provide a concise periodic update when the user would otherwise lack current status.
+
+When delegated work finishes, propagate the result promptly, cancel temporary task-owned monitors that are no longer part of the requested outcome, and release held resources. Preserve a user-requested persistent monitor until its own stop condition or explicit cancellation. The root checks worker results against repository state and success criteria, then applies the global completion contract. Delegation changes who executes; it does not transfer decision ownership.

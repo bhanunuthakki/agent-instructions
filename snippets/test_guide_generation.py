@@ -49,13 +49,14 @@ def test_instruction_paths_are_derived_instead_of_machine_bound() -> None:
     assert s.ROOT_REPO == expected_root
     assert s.PROCEDURES_DIR == expected_root / "procedures"
     assert s.HOOKS_DIR == expected_root / "githooks"
-    configured_scratch = os.environ.get("BHANU_SCRATCH_ROOT")
-    expected_scratch = (
-        Path(configured_scratch).expanduser().resolve()
-        if configured_scratch
-        else expected_root / "antigravity" / "scratch"
+    configured_root = os.environ.get("BHANU_DEVELOPER_ROOT")
+    expected_project_root = (
+        Path(configured_root).expanduser().resolve()
+        if configured_root
+        else expected_root.parent
     )
-    assert s.SCRATCH == expected_scratch
+    assert s.PROJECT_ROOT == expected_project_root
+    assert s.SCRATCH == expected_project_root
 
 
 def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None:
@@ -64,7 +65,12 @@ def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None
     assert s.CODEX_GLOBAL_AGENTS in artifacts
     assert s.CLAUDE_GLOBAL_RULES in artifacts
     assert s.GEMINI_GLOBAL_RULES in artifacts
-    assert s.AGENTS_MD.read_text(encoding="utf-8") in artifacts[s.CODEX_GLOBAL_AGENTS]
+    local_agents = s.AGENTS_MD.read_text(encoding="utf-8")
+    global_agents = s.project_agent_contract.without_interface_section(local_agents)
+    assert global_agents in artifacts[s.CODEX_GLOBAL_AGENTS]
+    assert "## Interface" in local_agents
+    assert "## Interface" not in artifacts[s.CODEX_GLOBAL_AGENTS]
+    assert s.project_agent_contract.check_repo(s.ROOT_REPO).ok
     assert "Generated from" in artifacts[s.CLAUDE_GLOBAL_RULES]
     if s.GEMINI_GLOBAL_RULES.resolve() == s.GEMINI_MD.resolve():
         assert artifacts[s.GEMINI_GLOBAL_RULES] == s.GEMINI_MD.read_text(
@@ -86,6 +92,7 @@ def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
     assert 'ROOT_REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)' in bootstrap
     assert 'PROJECT_ROOT=${BHANU_DEVELOPER_ROOT:-"$(dirname "$ROOT_REPO")"}' in bootstrap
     assert 'for PROJECT_DIR in "$PROJECT_ROOT"/*' in bootstrap
+    assert "project_agent_contract.py" in bootstrap
     assert "--check --artifacts-only" in bootstrap
     assert "BHANU_SCRATCH_ROOT" not in bootstrap
     assert "C:" + "/" + "Users/" not in bootstrap
@@ -245,6 +252,10 @@ def test_instruction_push_gate_fails_closed_and_runs_the_full_suite() -> None:
         "test_guide_generation.py",
         "test_harden_state.py",
         "test_governance.py",
+        "test_instruction_routing.py",
+        "test_procedure_routing_eval.py",
+        "test_project_agent_contract.py",
+        "test_interaction_outcome_eval.py",
     ):
         assert test_file in pre_push
     assert 'run "$python_bin" -m pytest' in pre_push
@@ -437,7 +448,7 @@ def test_model_frontier_review_date_matches_near_term_refresh_gate() -> None:
     frontier = (s.PROCEDURES_DIR / "model-frontier.REFERENCE.md").read_text(
         encoding="utf-8"
     )
-    assert "Next review: 2026-08-31" in frontier
+    assert "Next review: 2026-09-09" in frontier
 
 
 def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
@@ -454,6 +465,7 @@ def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
         )
 
     expected_current_prices = {
+        "claude-sonnet-5": (2.00, 10.00),
         "gemini-3.5-flash-lite": (0.30, 2.50),
         "gpt-5.6-luna": (0.20, 1.20),
         "gpt-5.6-terra": (2.00, 12.00),
@@ -589,13 +601,27 @@ def test_project_discovery_checks_unwired_projects_too() -> None:
     assert set(s.project_dirs()) == expected
 
 
+def test_interface_authority_audit_surfaces_legacy_projects_without_sync_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    project = tmp_path / "legacy-ui"
+    project.mkdir()
+    (project / "frontend").mkdir()
+    (project / "AGENTS.md").write_text("# Rules\n", encoding="utf-8")
+    monkeypatch.setattr(s, "project_dirs", lambda: [project])
+
+    assert s.interface_authority_warnings() == [
+        "legacy-ui: missing ## Interface authority block"
+    ]
+
+
 def test_demo_sandbox_is_preserved_but_excluded_from_active_projects() -> None:
     assert "demo_sandbox" in s.SKIP_PROJECT_NAMES
     assert all(project.name != "demo_sandbox" for project in s.project_dirs())
 
 
-def test_resume_wrappers_are_deferred_while_recovery_branch_is_held() -> None:
-    assert "bhanu-resume-system" in s.DEFERRED_WRAPPER_PROJECT_NAMES
+def test_no_active_project_wrapper_is_deferred() -> None:
+    assert not s.DEFERRED_WRAPPER_PROJECT_NAMES
 
 
 def test_linked_git_worktree_is_not_treated_as_a_separate_project(

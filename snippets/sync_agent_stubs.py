@@ -1,6 +1,6 @@
-"""Sync the AGENTS.md tool-agnostic instruction system across all scratch projects.
+"""Sync the AGENTS.md tool-agnostic instruction system across all local projects.
 
-Idempotent. For every visible project directory under the scratch parent, report a missing
+Idempotent. For every visible Git repository under the configured developer root, report a missing
 canonical AGENTS.md; when it exists, ensure both runtime wrappers exist so the repo's rules
 load in *either* CLI:
 
@@ -34,6 +34,7 @@ from pathlib import Path
 from typing import Any
 
 import definition_governance
+import project_agent_contract
 
 ROOT_REPO = Path(__file__).resolve().parents[1]
 
@@ -45,7 +46,9 @@ def configured_path(name: str, default: Path) -> Path:
 
 
 USER_HOME = Path.home()
-SCRATCH = configured_path("BHANU_SCRATCH_ROOT", ROOT_REPO / "antigravity" / "scratch")
+PROJECT_ROOT = configured_path("BHANU_DEVELOPER_ROOT", ROOT_REPO.parent)
+# Compatibility alias for internal callers while the project-root terminology settles.
+SCRATCH = PROJECT_ROOT
 HOOKS_DIR = ROOT_REPO / "githooks"
 PRIVATE_STATE_ROOT = configured_path(
     "AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT", ROOT_REPO / ".private-state"
@@ -188,9 +191,7 @@ HARDEN_ACTIVE_RUBRICS = (
 # including documentation-only repositories such as xr-glasses-dev-guide.
 SKIP_PREFIXES = ("_presync", "_reconcile", "_redeploy", "localwip", "reconcile-backup")
 SKIP_PROJECT_NAMES = frozenset({"demo_sandbox"})
-# Resume recovery remains on its dedicated branch while newer Windows-local work is reconciled.
-# Wire its local safety hooks, but do not add wrapper files that would dirty that held branch.
-DEFERRED_WRAPPER_PROJECT_NAMES = frozenset({"bhanu-resume-system"})
+DEFERRED_WRAPPER_PROJECT_NAMES: frozenset[str] = frozenset()
 
 
 def is_worktree_path(p: Path) -> bool:
@@ -267,6 +268,15 @@ def project_dirs() -> list[Path]:
             continue
         out.append(child)
     return out
+
+
+def interface_authority_warnings() -> list[str]:
+    """Return migration warnings without turning legacy projects into sync drift."""
+    findings: list[str] = []
+    for project in project_dirs():
+        result = project_agent_contract.check_estate_repo(project)
+        findings.extend(f"{project.name}: {finding}" for finding in result.findings)
+    return findings
 
 
 def ensure_wrappers(proj: Path, dry: bool) -> list[str]:
@@ -566,7 +576,9 @@ def build_global_rulebook_artifacts() -> dict[Path, str]:
         "<!-- Generated from the agent-instructions repository. "
         "Edit the tracked source and rerun snippets/sync_agent_stubs.py. -->\n\n"
     )
-    agents = AGENTS_MD.read_text(encoding="utf-8", errors="replace")
+    agents = project_agent_contract.without_interface_section(
+        AGENTS_MD.read_text(encoding="utf-8", errors="replace")
+    )
     claude = CLAUDE_MD.read_text(encoding="utf-8", errors="replace")
     gemini = GEMINI_MD.read_text(encoding="utf-8", errors="replace")
     out = {
@@ -1399,12 +1411,12 @@ def main() -> None:
     project_wiring = includes_project_wiring(sys.argv)
     machine_inventory = includes_machine_specific_inventory(sys.argv)
     guide_validation = includes_guide_validation(sys.argv)
-    if project_wiring and not SCRATCH.exists():
-        print(f"scratch parent not found: {SCRATCH}")
+    if project_wiring and not PROJECT_ROOT.exists():
+        print(f"project root not found: {PROJECT_ROOT}")
         sys.exit(1)
     mode = "CHECK (read-only)" if check else ("DRY RUN" if dry else "SYNC")
     scope = (
-        f"project stubs under {SCRATCH}" if project_wiring else "runtime artifacts only"
+        f"project stubs under {PROJECT_ROOT}" if project_wiring else "runtime artifacts only"
     )
     print(f"[{mode}] {scope}\n")
 
@@ -1476,6 +1488,11 @@ def main() -> None:
             )
             for a in guide_actions:
                 print(f"  - {a}")
+        interface_warnings = interface_authority_warnings()
+        if interface_warnings:
+            print("[project Interface authority — migration warnings, not blocking]")
+            for warning in interface_warnings:
+                print(f"  ! {warning}")
     if readonly and (machine_inventory or guide_validation):
         # `--check --artifacts-only` is the instruction-repo pre-push path. It must
         # still catch a stale tracked guide even though it does not rewrite projects.

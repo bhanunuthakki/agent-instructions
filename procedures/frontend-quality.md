@@ -25,7 +25,16 @@ Before choosing cards, grids, accents, or variants, record a concise implementat
 
 This is working reasoning, not a mandatory questionnaire. Inspect available evidence and make reversible product judgments. Use `grill-me` only when an unresolved product choice would materially change the result; use a mockup when recognition is more useful than prose. Prototype approval never authorizes production changes.
 
-Before composing an established project interface, load the closest project design contract and every executable authority it names. Observe the current page plus its nearest shipped sibling and registered family. Preserve that family's shell, navigation, semantic text roles, controls, density, responsive grammar, and state anatomy. Introduce a new family only when the user task cannot be expressed by an existing family, with a typed rationale and an adversarial continuity test. Exact tokens, recipes, exceptions, and verification commands remain project-owned and must not be copied into this shared procedure.
+Before composing an established project interface, resolve the closest `AGENTS.md` `## Interface` block in this order:
+
+1. Read its `Profile`, `Contract`, `Executable authority`, `Render`, and `Gate` fields.
+2. Load the project-owned contract and every executable authority it names before proposing or editing visual code.
+3. Render the current page plus its nearest shipped sibling and registered family at the declared primary viewport.
+4. Treat a missing field, missing file, repository-escaping reference, or unrunnable recipe as an authority gap. Repair it when the request authorizes project changes; otherwise report it instead of silently borrowing another project's language.
+
+The standard declarations and profile seeds are defined in `frontend-quality.PROFILES.md`; profiles seed new contracts but never override an established local authority. If a repository has no rendered interface, its entire declaration is `## Interface` with `Profile: none`.
+
+Preserve the registered family's shell, navigation, semantic text roles, controls, density, responsive grammar, and state anatomy. Introduce a new family only when the user task cannot be expressed by an existing family, with a typed rationale and an adversarial continuity test. Exact tokens, recipes, exceptions, and verification commands remain project-owned and must not be copied into this shared procedure.
 
 ## Observe–reason–change–reobserve
 
@@ -45,6 +54,10 @@ The scope is proportional: inspect affected states and viewports, not an unrelat
 - **Layout consistency:** use one dominant layout grammar per surface or registered family. Equivalent sections use equivalent recipes; do not vary adjacent layouts merely for visual novelty. Responsive behavior preserves hierarchy rather than inventing a second visual language.
 - **Semantic differentiation:** accent communicates interaction, selection, focus, or unread state. Status communicates status and keeps a non-color cue. Decorative accent rails, arbitrary tinted panels, gradients, ornamental icons, oversized numerals, and floating shapes require a concrete product purpose and approved recipe.
 - **Structural formatting:** indentation represents a parent-child relationship and bullets represent parallel items. Do not turn isolated facts, labels, or prose into indentation or bullets for texture.
+
+### Motion economy
+
+When motion is introduced or changed, name its user-serving purpose: feedback, state legibility, spatial continuity, or prevention of a jarring change. If none applies, keep the transition instant. Reduce motion intensity as interaction frequency rises; keyboard-led and repeatedly invoked flows default to immediate response. Do not move information the user is reading or acting on for decoration. Exact timing, easing, geometry, and sanctioned exceptions remain project-owned.
 
 ### Reduction pass
 

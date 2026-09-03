@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 
@@ -17,6 +18,25 @@ def test_root_is_invariant_and_routing_only() -> None:
     assert "## Effort calibration" not in root
     assert "short answer is likely to prevent materially greater rework" in root
     assert root.count("procedures/iteration-shortcut.md") == 1
+    assert "A material user correction replaces the prior framing" in root
+    assert "proposed, implemented, validated, running, committed, merged, deployed" in root
+    assert "conclusion or diagnosis, practical implications, and requested actions" in root
+
+
+def test_operations_owns_resource_handoff_and_truthful_closure() -> None:
+    operations = _text("procedures/agent-operations.md")
+    assert "auto-reconnecting browser or remote-control session" in operations
+    assert "After two equivalent failures" in operations
+    assert "cancel temporary task-owned monitors" in operations
+    assert "Preserve a user-requested persistent monitor" in operations
+    assert "applies the global completion contract" in operations
+
+
+def test_code_change_calibrates_tests_and_release_gates() -> None:
+    code_change = _text("procedures/code-change.md")
+    assert "For a bug or new behavior" in code_change
+    assert "mechanical refactor or documentation-only change" in code_change
+    assert "At the push or release boundary" in code_change
 
 
 def test_clarification_and_shortcut_have_one_detailed_owner() -> None:
@@ -106,3 +126,39 @@ def test_active_procedures_name_owners_instead_of_stale_global_rules() -> None:
         "per Testing Discipline",
     ):
         assert stale_reference not in corpus
+
+
+def test_interaction_outcome_corpus_covers_observed_failure_modes() -> None:
+    path = ROOT / "evals" / "agent_system" / "interaction_outcome_cases.jsonl"
+    cases = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+    ids = {case["case_id"] for case in cases}
+    assert {
+        "decision-first-advice",
+        "cross-task-objective-preservation",
+        "huntdesk-crm-sync-scope",
+        "huntdesk-company-axes",
+        "crd-resource-handoff",
+        "truthful-archive-readiness",
+        "explore-dcf-boundary",
+        "matched-alpha-precision",
+    } <= ids
+    assert {
+        "archive-ready-positive",
+        "huntdesk-broad-inbox-authorized",
+        "distributed-adoption-positive",
+        "crd-release-positive",
+        "alpha-reconciled-positive",
+        "angel-approved-publication",
+        "blog-live-edit-authorized",
+        "resume-unsupported-claim",
+        "dcf-edit-positive",
+        "reading-simulator-boundary",
+        "company-tracked-inactive",
+        "maintenance-preview-authority",
+        "cross-task-relevant-dependency",
+        "wealthplan-private-scenario",
+    } <= ids
+    for case in cases:
+        assert case["context"] and case["request"]
+        assert case["instruction_paths"]
+        assert case["must_include"] and case["must_avoid"]

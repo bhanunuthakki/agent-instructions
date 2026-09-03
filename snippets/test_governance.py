@@ -11,8 +11,8 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
-import definition_governance as definitions  # noqa: E402
-import judge_governance as judges  # noqa: E402
+import definition_governance as definitions
+import judge_governance as judges
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -1085,6 +1085,8 @@ def test_definition_demotion_requires_strict_descendant_owner(tmp_path: Path) ->
 def test_rollout_status_keeps_unresolved_repositories_visible(tmp_path: Path) -> None:
     (tmp_path / "one").mkdir()
     (tmp_path / "two").mkdir()
+    (tmp_path / "one" / ".git").mkdir()
+    (tmp_path / "two" / ".git").mkdir()
     config = tmp_path / "rollout.json"
     config.write_text(
         json.dumps({"repositories": {"one": {"disposition": "adopt_now"}}}),
@@ -1099,6 +1101,7 @@ def test_rollout_cannot_claim_active_before_activation_prerequisites(
     tmp_path: Path,
 ) -> None:
     (tmp_path / "one").mkdir()
+    (tmp_path / "one" / ".git").mkdir()
     config = tmp_path / "rollout.json"
     config.write_text(
         json.dumps({"repositories": {"one": {"mode": "active"}}}),

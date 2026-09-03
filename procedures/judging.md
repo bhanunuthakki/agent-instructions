@@ -1,6 +1,6 @@
 ---
 name: judging
-description: Route substantive coding and research work through J0-J3 evidence tiers, typed judge receipts, risk controls, and statistically derived audit samples. Use for judge, critic, evaluation, review rigor, substantive code or research validation, or high-impact decisions.
+description: Govern explicit Judge, Critic, evaluation-suite, or consequential incomplete-oracle review work through proportional evidence tiers, independence rules, and optional governed receipts.
 ---
 
 # Evidence-Governed Judging
@@ -28,7 +28,9 @@ Tolerable Error Rate and confidence target for each coding/research stratum. Jud
 registered but remain calibration-shadowed. Historical receipts remain bound to their immutable
 policy snapshots.
 
-## Issue before judging
+## Governed issuance
+
+An ad hoc independent review or self-contained evaluation suite may apply this procedure's evidence and independence rules without creating a ledger episode. A suite explicitly configured for governance issuance, a policy-enforced audit, or a task explicitly requiring a governed receipt uses the flow below.
 
 `route` is a read-only preview and does not create a sealed episode. Governed work uses the exclusive
 `begin` writer, which appends the issuance before revealing the sampling identity:

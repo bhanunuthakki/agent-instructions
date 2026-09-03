@@ -27,6 +27,7 @@ AGENT_INSTRUCTIONS_HOME="$ROOT_REPO"
 export AGENT_INSTRUCTIONS_HOME
 
 "$PYTHON_BIN" "$ROOT_REPO/snippets/sync_agent_stubs.py" --artifacts-only
+"$PYTHON_BIN" "$ROOT_REPO/snippets/project_agent_contract.py" check-estate --root "$PROJECT_ROOT"
 
 # Project CLAUDE.md/GEMINI.md wrappers are tracked in each repository. Only
 # wire Git repositories here; do not regenerate the tracked human guide from a
