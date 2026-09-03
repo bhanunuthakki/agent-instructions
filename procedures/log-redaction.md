@@ -42,7 +42,7 @@ def redact(text: object) -> str:
 
 ### 2. Re-raise propagated HTTP exceptions with `from None`
 
-When a function calls `raise_for_status()` and its caller does **not** wrap the call, the original `HTTPError` propagates with the credentialed URL in `__traceback__` and `__cause__`. Replace it with a clean exception and drop the chain — `from None` suppresses both the implicit context and the original traceback frames that carry the URL.
+When a function calls `raise_for_status()` and its caller does **not** sanitize the failure, the original `HTTPError` can expose a credentialed URL through its message or displayed exception context. Replace it with a clean exception and use `from None` to suppress display of the implicit context. Python still retains the prior exception in `__context__`, so telemetry and crash-reporting boundaries must sanitize captured exception objects rather than assuming the chain was erased.
 
 ```python
 def fetch_quote(symbol: str) -> Quote:
@@ -58,13 +58,13 @@ Use plain `raise` (no `from`) only when the caller is guaranteed to redact at th
 
 ### 3. Prefer headers over query params
 
-Secrets in the URL leak via the exception path above, server access logs, browser history, and proxy logs. Headers leak through none of those. If the API accepts either, use a header — it removes the leak surface entirely rather than masking it after the fact.
+Secrets in the URL commonly leak through exception messages, access logs, browser history, and proxies. Headers avoid URL-specific exposure, but observability systems and intermediaries may still capture them; configure those boundaries to redact sensitive headers. Prefer a header when the API supports it, then retain end-to-end redaction.
 
 ```python
 # ❌ secret in URL — leaks via exception message, access logs, proxies
 requests.get(url, params={"apikey": api_key})
 
-# ✅ secret in header — never in the URL string
+# ✅ secret in header — absent from the URL string; still redact telemetry
 requests.get(url, headers={"Authorization": f"Bearer {api_key}"})
 # or: headers={"x-api-key": api_key}
 ```
@@ -74,7 +74,7 @@ requests.get(url, headers={"Authorization": f"Bearer {api_key}"})
 To find a project's leak surface, enumerate every credential read from the environment, then trace each to the network call that consumes it:
 
 1. **Enumerate reads.** Grep for `os.environ.get`, `os.getenv`, `os.environ[`, and (TS/JS) `process.env.`. Each hit naming a credential-ish var (`*KEY*`, `*TOKEN*`, `*SECRET*`, `*PASSWORD*`) is a candidate.
-2. **Trace each to its call site.** Follow the variable to the `requests`/`httpx`/`fetch`/`axios` call. Note whether it goes into `params=` (URL — leak surface) or `headers=` (safe).
+2. **Trace each to its call site.** Follow the variable to the `requests`/`httpx`/`fetch`/`axios` call. Note whether it goes into `params=` (URL leak surface) or `headers=` (absent from the URL; still redact telemetry and intermediary capture).
 3. **Check the failure path.** For each leak-surface call, confirm `raise_for_status` / the propagated exception is either wrapped with `redact()` + `from None`, or the caller redacts at the boundary. An unwrapped `params=` call is a finding.
 4. **Verify the redactor is wired, not just present.** A `log_redact.py` that no call site imports is a false sense of security.
 
@@ -90,7 +90,7 @@ Do not assert on the exact mask string or message text — those change.
 ## Anti-patterns
 
 - `log.error(str(exc))` on an HTTP exception without `redact()` — the canonical leak.
-- `raise CustomError(...) from exc` on an HTTP error — `from exc` re-attaches the credentialed traceback you were trying to drop. Use `from None`.
+- `raise CustomError(...) from exc` on an HTTP error — it explicitly displays the credentialed cause. Use a sanitized exception `from None` for ordinary display, and redact retained context at telemetry boundaries.
 - Redacting your own log messages but letting an uncaught traceback escape to a crash handler / Sentry / stderr — the traceback is the leak, not the message.
 - A second copy of the regex in some other module — it drifts. Import the canonical `redact`.
 - Masking the param name too (`***=***`) — keep the name for triage; mask only the value.

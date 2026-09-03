@@ -1,8 +1,9 @@
 """Audit and initialize the project-owned interface authority handshake.
 
-The shared frontend procedure owns composition rules. Each visual project owns its
-exact profile, contract, executable authority, render recipe, and deterministic gate
-through a compact ``## Interface`` block in its closest ``AGENTS.md``.
+The shared frontend procedure owns composition rules. Every project declares its
+interface profile through a compact ``## Interface`` block in its closest
+``AGENTS.md``; visual projects also name their exact contract, executable authority,
+render recipe, and deterministic gate.
 """
 
 from __future__ import annotations
@@ -34,6 +35,17 @@ def _interface_section(text: str) -> str | None:
     tail = text[match.end() :]
     next_heading = re.search(r"^##\s+", tail, re.MULTILINE)
     return tail[: next_heading.start()] if next_heading else tail
+
+
+def without_interface_section(text: str) -> str:
+    """Remove a repository-local Interface section from text exported globally."""
+    match = re.search(r"^## Interface\s*$", text, re.MULTILINE)
+    if match is None:
+        return text.strip()
+    tail = text[match.end() :]
+    next_heading = re.search(r"^##\s+", tail, re.MULTILINE)
+    end = match.end() + next_heading.start() if next_heading else len(text)
+    return (text[: match.start()] + text[end:]).strip()
 
 
 def parse_interface(text: str) -> dict[str, str] | None:
@@ -74,23 +86,27 @@ def check_repo(repo: Path) -> ContractResult:
     if interface is None:
         return ContractResult(repo, ("missing ## Interface authority block",))
 
-    findings = [
-        f"Interface field is missing: {field}"
-        for field in FIELDS
-        if field not in interface
-    ]
+    findings = []
     profile = interface.get("Profile", "")
+    if "Profile" not in interface:
+        findings.append("Interface field is missing: Profile")
     if profile not in PROFILES:
         findings.append(
             f"Interface Profile must be one of {', '.join(sorted(PROFILES))}: {profile or '<empty>'}"
         )
     if profile == "none":
         for field in FIELDS[1:]:
-            if interface.get(field) != "none":
+            if field in interface:
                 findings.append(
-                    f"Interface {field} must be `none` when Profile is `none`"
+                    f"Interface {field} must be omitted when Profile is `none`"
                 )
         return ContractResult(repo, tuple(findings))
+
+    findings.extend(
+        f"Interface field is missing: {field}"
+        for field in FIELDS[1:]
+        if field not in interface
+    )
 
     contract_path, contract_findings = _relative_file(
         repo, interface.get("Contract", ""), "Contract"
@@ -137,6 +153,11 @@ def check_repo(repo: Path) -> ContractResult:
     return ContractResult(repo, tuple(findings))
 
 
+def check_estate_repo(repo: Path) -> ContractResult:
+    """Apply the same explicit interface-declaration contract estate-wide."""
+    return check_repo(repo)
+
+
 def project_dirs(root: Path) -> list[Path]:
     if not root.is_dir():
         return []
@@ -144,21 +165,14 @@ def project_dirs(root: Path) -> list[Path]:
         child
         for child in sorted(root.iterdir())
         if child.is_dir()
-        and (child / ".git").is_dir()
+        and (child / ".git").exists()
         and not child.name.startswith(".")
     ]
 
 
 def render_block(profile: str) -> str:
     if profile == "none":
-        return (
-            "## Interface\n"
-            "- Profile: none\n"
-            "- Contract: none\n"
-            "- Executable authority: none\n"
-            "- Render: none\n"
-            "- Gate: none\n"
-        )
+        return "## Interface\n- Profile: none\n"
     return (
         "## Interface\n"
         f"- Profile: {profile}\n"
@@ -227,7 +241,7 @@ def main() -> int:
         result = check_repo(args.repo)
         _print_result(result)
         return 0 if result.ok else 1
-    results = [check_repo(repo) for repo in project_dirs(args.root.resolve())]
+    results = [check_estate_repo(repo) for repo in project_dirs(args.root.resolve())]
     for result in results:
         _print_result(result)
     failures = sum(not result.ok for result in results)

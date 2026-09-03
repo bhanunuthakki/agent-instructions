@@ -54,7 +54,11 @@ if [ "$root" = "$hook_repo" ]; then
   run "$python_bin" -m pytest \
     "$instructions_home/snippets/test_guide_generation.py" \
     "$instructions_home/snippets/test_harden_state.py" \
-    "$instructions_home/snippets/test_governance.py" -q
+    "$instructions_home/snippets/test_governance.py" \
+    "$instructions_home/snippets/test_instruction_routing.py" \
+    "$instructions_home/snippets/test_procedure_routing_eval.py" \
+    "$instructions_home/snippets/test_project_agent_contract.py" \
+    "$instructions_home/snippets/test_interaction_outcome_eval.py" -q
   governance="$instructions_home/snippets/judge_governance.py"
   private_state_root=${AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT:-$instructions_home/.private-state}
   ledger="$private_state_root/governance/judge_ledger.jsonl"

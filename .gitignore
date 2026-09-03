@@ -47,6 +47,8 @@ snippets/mcp_registry.json
 /evals/agent_system/*
 !/evals/agent_system/routing_cases.jsonl
 !/evals/agent_system/procedure_routing_cases.jsonl
+!/evals/agent_system/interaction_outcome_cases.jsonl
+!/evals/agent_system/README.md
 !/evals/frontend_quality/
 !/evals/frontend_quality/shadow_cases.json
 !/evals/harden/

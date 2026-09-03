@@ -11,9 +11,9 @@ Match the surrounding code and preserve the repository’s public behavior unles
 
 1. Inspect the affected interface, nearby tests, repository commands, and current diff.
 2. State the next behavior in one sentence.
-3. Add the smallest test that should fail for that behavior; confirm the failure is relevant. A bug fix needs a regression test.
+3. For a bug or new behavior, add the smallest regression or behavior test that should fail without the change and confirm the failure is relevant. For a mechanical refactor or documentation-only change, use adequate existing coverage unless inspection reveals a real gap.
 4. Implement the minimum coherent change, then refactor only where it improves information hiding or removes genuine duplication.
-5. Run targeted validation after each behavior. Finish with the repository’s applicable format, lint, typecheck, tests, and build checks in that order.
+5. Run targeted validation after each behavior. At the push or release boundary, finish with the repository’s applicable format, lint, typecheck, tests, and build checks in that order.
 
 Do not weaken, disable, or rewrite a failing test merely to make it pass. Exact prose assertions are appropriate only when wording is the contract; prefer structural and semantic checks.
 
@@ -30,7 +30,7 @@ For architecture or review work, read [code-change.REVIEW.md](code-change.REVIEW
 
 ## Network and sensitive surfaces
 
-Keep secrets in headers or typed secret configuration, never query strings or logs. Sanitize exceptions before logging and re-raise credential-bearing HTTP failures without the original traceback. Use `procedures/log-redaction.md` for implementation details.
+Keep secrets in headers or typed secret configuration, never query strings or logs. Sanitize exceptions before logging, replace credential-bearing HTTP failures with a safe public exception, and ensure telemetry also redacts retained exception context. Use `procedures/log-redaction.md` for implementation details.
 
 Call out database/schema, authentication/authorization, money, deletion, credential, external-write, and production-migration surfaces in the handoff. Use the matching scaffold or hardening expert when that risk is material.
 

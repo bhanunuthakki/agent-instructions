@@ -22,5 +22,5 @@ For primarily mobile or tablet interaction. Start with reachable actions, 44px t
 
 ## `none`
 
-For repositories with no rendered user interface. Declare every other Interface field as `none` so
-absence is explicit and estate audits do not confuse a nonvisual project with an unwired one.
+For repositories with no rendered user interface. Declare only `Profile: none`; omit the visual-only
+Contract, Executable authority, Render, and Gate fields.

@@ -39,7 +39,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **frontend-quality** | Design, modify, review, or scaffold a rendered interface around the user's task, with compositional restraint and proportional browser or renderer ev… |
 | **grill-me** | Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision. |
 | **iteration-shortcut** | Bound a deliberate temporary shortcut that accelerates learning without silently weakening retained truth, safety, or recovery. |
-| **judging** | Route substantive coding and research work through J0-J3 evidence tiers, typed judge receipts, risk controls, and statistically derived audit samples. |
+| **judging** | Govern explicit Judge, Critic, evaluation-suite, or consequential incomplete-oracle review work through proportional evidence tiers, independence rul… |
 | **linear-pipeline-hygiene** | Audit and conservatively reconcile Linear pipelines across projects. |
 | **linear-pr-sync** | Synchronize an existing Linear issue with branch and pull-request progress. |
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
@@ -121,7 +121,7 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 |---|---|
 | agent-instructions | AGENTS.md, CLAUDE.md, GEMINI.md |
 | angel-memos | AGENTS.md, CLAUDE.md, GEMINI.md |
-| bhanu-resume-system | AGENTS.md |
+| bhanu-resume-system | AGENTS.md, CLAUDE.md, GEMINI.md |
 | blog-engine | AGENTS.md, CLAUDE.md, GEMINI.md |
 | date-suggester | AGENTS.md, CLAUDE.md, GEMINI.md |
 | earnings-summary | AGENTS.md, CLAUDE.md, GEMINI.md |

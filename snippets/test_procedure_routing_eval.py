@@ -39,7 +39,7 @@ def test_corpus_is_valid_and_uses_known_procedures() -> None:
     catalog = routing.load_procedure_catalog(ROOT)
     cases = routing.load_cases(CASES_PATH, known_procedures=set(catalog))
 
-    assert len(cases) == 20
+    assert len(cases) == 22
     assert len({case.case_id for case in cases}) == len(cases)
     assert any(not case.required_procedures for case in cases)
     assert any(case.should_clarify for case in cases)

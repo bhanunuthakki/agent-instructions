@@ -42,6 +42,31 @@ def test_missing_interface_block_is_reported(tmp_path: Path) -> None:
     assert result.findings == ("missing ## Interface authority block",)
 
 
+def test_estate_check_requires_explicit_none_declaration_for_nonvisual_repo(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "worker"
+    (repo / ".git").mkdir(parents=True)
+    (repo / "AGENTS.md").write_text("# worker\n", encoding="utf-8")
+
+    assert contract.check_estate_repo(repo).findings == (
+        "missing ## Interface authority block",
+    )
+
+
+def test_estate_check_requires_interface_declaration_for_visual_repo(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "web-app"
+    (repo / ".git").mkdir(parents=True)
+    (repo / "frontend").mkdir()
+    (repo / "AGENTS.md").write_text("# web app\n", encoding="utf-8")
+
+    assert contract.check_estate_repo(repo).findings == (
+        "missing ## Interface authority block",
+    )
+
+
 def test_foreign_contract_path_is_rejected(tmp_path: Path) -> None:
     write_visual_project(tmp_path, contract_target="../other/UI_CONTRACT.md")
 
@@ -61,10 +86,21 @@ def test_missing_executable_authority_is_reported(tmp_path: Path) -> None:
     )
 
 
-def test_none_profile_requires_explicit_none_fields(tmp_path: Path) -> None:
+def test_none_profile_is_a_minimal_explicit_declaration(tmp_path: Path) -> None:
     (tmp_path / "AGENTS.md").write_text(contract.render_block("none"), encoding="utf-8")
 
     assert contract.check_repo(tmp_path).ok
+    assert contract.render_block("none") == "## Interface\n- Profile: none\n"
+
+
+def test_none_profile_rejects_visual_only_fields(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        "## Interface\n- Profile: none\n- Contract: none\n", encoding="utf-8"
+    )
+
+    assert contract.check_repo(tmp_path).findings == (
+        "Interface Contract must be omitted when Profile is `none`",
+    )
 
 
 def test_initializer_seeds_but_does_not_overwrite_local_authority(

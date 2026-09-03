@@ -32,7 +32,7 @@ Before composing an established project interface, resolve the closest `AGENTS.m
 3. Render the current page plus its nearest shipped sibling and registered family at the declared primary viewport.
 4. Treat a missing field, missing file, repository-escaping reference, or unrunnable recipe as an authority gap. Repair it when the request authorizes project changes; otherwise report it instead of silently borrowing another project's language.
 
-The standard declarations and profile seeds are defined in `frontend-quality.PROFILES.md`; profiles seed new contracts but never override an established local authority. If a repository has no rendered interface, it declares profile `none` and every other field `none`.
+The standard declarations and profile seeds are defined in `frontend-quality.PROFILES.md`; profiles seed new contracts but never override an established local authority. If a repository has no rendered interface, its entire declaration is `## Interface` with `Profile: none`.
 
 Preserve the registered family's shell, navigation, semantic text roles, controls, density, responsive grammar, and state anatomy. Introduce a new family only when the user task cannot be expressed by an existing family, with a typed rationale and an adversarial continuity test. Exact tokens, recipes, exceptions, and verification commands remain project-owned and must not be copied into this shared procedure.
 

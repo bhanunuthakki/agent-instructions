@@ -7,14 +7,16 @@ import hashlib
 import json
 import math
 import os
+from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 from uuid import UUID, uuid4
 
 from private_state import private_state_root
 
 ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(os.environ.get("BHANU_DEVELOPER_ROOT", ROOT.parent)).expanduser().resolve()
 POLICY_PATH = ROOT / "config" / "judge_policy.json"
 POLICY_DIR = ROOT / "config" / "judge_policies"
 JUDGE_REGISTRY_DIR = ROOT / "config" / "judge_registries"
@@ -1002,9 +1004,7 @@ def audit_is_complete(receipt: Mapping[str, Any]) -> bool:
         return False
     if finding == "execution_miss" and audit["execution_correct"]:
         return False
-    if not isinstance(audit.get("reason"), str) or not audit["reason"].strip():
-        return False
-    return True
+    return isinstance(audit.get("reason"), str) and bool(audit["reason"].strip())
 
 
 def _read_ledger(path: Path) -> list[dict[str, Any]]:
@@ -1021,7 +1021,7 @@ def _read_ledger(path: Path) -> list[dict[str, Any]]:
         except json.JSONDecodeError as exc:
             raise ValueError(f"ledger line {line_number} is invalid JSON") from exc
         if not isinstance(value, dict):
-            raise ValueError(f"ledger line {line_number} must be an object")
+            raise TypeError(f"ledger line {line_number} must be an object")
         receipts.append(value)
     return receipts
 
@@ -1376,7 +1376,11 @@ def rollout_status(scratch: Path, config_path: Path = ROLLOUT_PATH) -> dict[str,
     )
     rows: dict[str, Any] = {}
     for project in sorted(scratch.iterdir()):
-        if not project.is_dir() or project.name.startswith("."):
+        if (
+            not project.is_dir()
+            or project.name.startswith(".")
+            or not (project / ".git").exists()
+        ):
             continue
         row = dict(configured.get(project.name, default))
         row.setdefault("reminder", row.get("mode") == "reminder")
@@ -1407,7 +1411,7 @@ def _activation_blockers() -> list[str]:
                     if _statistical_target(policy, tier, task_class) is None:
                         raise ValueError("missing target")
             if not isinstance(confidence, (int, float)):
-                raise ValueError("missing confidence")
+                raise TypeError("missing confidence")
         except (KeyError, TypeError, ValueError):
             blockers.append("statistical_contract_invalid")
     coverage = policy.get("invocation_coverage", {})
@@ -1666,13 +1670,9 @@ def main() -> None:
     validate = sub.add_parser("validate")
     validate.add_argument("receipt", type=Path)
     rollout = sub.add_parser("rollout-status")
-    rollout.add_argument(
-        "--scratch", type=Path, default=ROOT / "antigravity" / "scratch"
-    )
+    rollout.add_argument("--scratch", type=Path, default=PROJECT_ROOT)
     reminders = sub.add_parser("rollout-reminders")
-    reminders.add_argument(
-        "--scratch", type=Path, default=ROOT / "antigravity" / "scratch"
-    )
+    reminders.add_argument("--scratch", type=Path, default=PROJECT_ROOT)
     activation = sub.add_parser("activation-check")
     activation.add_argument("--repository-id", required=True)
     activation.add_argument("--config", type=Path, default=ROLLOUT_PATH)

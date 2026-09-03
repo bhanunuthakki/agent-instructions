@@ -191,9 +191,7 @@ HARDEN_ACTIVE_RUBRICS = (
 # including documentation-only repositories such as xr-glasses-dev-guide.
 SKIP_PREFIXES = ("_presync", "_reconcile", "_redeploy", "localwip", "reconcile-backup")
 SKIP_PROJECT_NAMES = frozenset({"demo_sandbox"})
-# Resume recovery remains on its dedicated branch while newer Windows-local work is reconciled.
-# Wire its local safety hooks, but do not add wrapper files that would dirty that held branch.
-DEFERRED_WRAPPER_PROJECT_NAMES = frozenset({"bhanu-resume-system"})
+DEFERRED_WRAPPER_PROJECT_NAMES: frozenset[str] = frozenset()
 
 
 def is_worktree_path(p: Path) -> bool:
@@ -276,7 +274,7 @@ def interface_authority_warnings() -> list[str]:
     """Return migration warnings without turning legacy projects into sync drift."""
     findings: list[str] = []
     for project in project_dirs():
-        result = project_agent_contract.check_repo(project)
+        result = project_agent_contract.check_estate_repo(project)
         findings.extend(f"{project.name}: {finding}" for finding in result.findings)
     return findings
 
@@ -578,7 +576,9 @@ def build_global_rulebook_artifacts() -> dict[Path, str]:
         "<!-- Generated from the agent-instructions repository. "
         "Edit the tracked source and rerun snippets/sync_agent_stubs.py. -->\n\n"
     )
-    agents = AGENTS_MD.read_text(encoding="utf-8", errors="replace")
+    agents = project_agent_contract.without_interface_section(
+        AGENTS_MD.read_text(encoding="utf-8", errors="replace")
+    )
     claude = CLAUDE_MD.read_text(encoding="utf-8", errors="replace")
     gemini = GEMINI_MD.read_text(encoding="utf-8", errors="replace")
     out = {

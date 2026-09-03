@@ -1,6 +1,6 @@
 # Agent Instructions
 
-This is the contract for coding and research agents. Project rulebooks add repository facts; reusable workflows load only when relevant.
+This is the contract for coding and research agents. Achieve the user-visible outcome through the smallest safe sufficient path: preserve named authorities, gather evidence proportional to risk, and stop when the requested result and delivery conditions are satisfied. Project rulebooks add repository facts; reusable workflows load only when relevant.
 
 ## Context and authority
 
@@ -10,6 +10,8 @@ This is the contract for coding and research agents. Project rulebooks add repos
 - `CLAUDE.md` and `GEMINI.md` contain runtime mechanics only. Generated runtime artifacts are adapters, never canonical sources.
 - `procedures/<name>.md` is the canonical source for a reusable workflow. Load a matching procedure completely; keep unrelated procedures out of context.
 - Prefer source code, tests, schemas, rubrics, mockups, and directives when they express a requirement more precisely.
+- A material user correction replaces the prior framing for the rest of the task. Restate the changed objective when ambiguity remains and recheck affected work before continuing.
+- Preserve a compact outcome contract through the task: the requested deliverable or decision, required distinctions and takeaways, authorized state changes, and the proof and delivery conditions. Keep it implicit unless showing it helps the user; use it to prevent technically correct details from displacing the actual outcome.
 - Keep product semantics, prompts, schemas, tests, evals, and deterministic verification locally owned and runtime-neutral. Treat provider SDKs, model IDs, hosted services, and runtime skills as replaceable adapters.
 - Personal tools default to local and single-user. Preserve a documented transition seam, but add authentication, tenancy, billing, public infrastructure, or commercial operations only when the requested product profile needs them.
 
@@ -34,12 +36,9 @@ Ask early when goal, success, scope, authority, or a consequential product trade
 - Do not switch branches unless asked or resolve unrelated changes.
 - Prefer existing scripts, tests, schemas, and utilities.
 - Keep mutable state under one writer; overlapping writers need explicit ownership.
-- Keep this public instruction repository free of live governance state. Judge ledgers, hardening policy ratification, capability receipts, and raw evaluation evidence belong under the ignored private state root (`.private-state/` by default or the absolute `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT`). The tracked evaluation policy is always an unratified template, and public tests use clearly synthetic data. A research artifact is not private merely because it is a DCF, memo, or brief; exclude it when it reveals personal portfolio, account, identity, or nonpublic research state.
 - Use canonical domain terms from the closest `DEFINITIONS.md`. Add an ambiguous or missing concept through `procedures/definitions.md` instead of inventing a competing synonym.
 
-Cross-machine listeners use live network identity, never remembered identity. Loopback names only the client machine; never use it for another host. Do not derive service URLs from remembered hostnames, users, Tailnet addresses, or DNS suffixes. For Tailscale Serve, keep the backend loopback-only and use the live serving host's exact HTTPS origin from `tailscale serve status`, not `tailscale status`. After an identity change, reset and reapply Serve, update exact-origin controls such as CORS, restart, and verify locally and cross-machine. Never enable Funnel or a public listener without authorization.
-
-Behavior-changing work uses the matching code, feature, data, and frontend procedures routed below.
+Cross-machine access uses the live target's network identity; loopback names only the client machine. Never expose a public listener without authorization. Project rulebooks own provider-specific serving, origin, and recovery mechanics.
 
 ## Progressive procedures
 
@@ -52,17 +51,18 @@ Use the smallest procedure that owns the work:
 | deliberate temporary shortcut to accelerate learning or iteration | `procedures/iteration-shortcut.md` |
 | consequential ambiguity or explicit interview | `procedures/grill-me.md` |
 | domain vocabulary or conflicting terms | `procedures/definitions.md` |
-| substantive coding/research validation, Judge, Critic, or Evaluation Suite work | `procedures/judging.md` |
+| explicit Judge/Critic/Evaluation Suite work or consequential review with an incomplete deterministic oracle | `procedures/judging.md` |
 | code implementation, fix, refactor, or review | `procedures/code-change.md` |
 | frontend creation, visible UI change, redesign, mockup, or frontend review | `procedures/frontend-quality.md` with the applicable code/mockup/scaffold procedure |
 | branch or PR lifecycle transition with an exact Linear key | `procedures/linear-pr-sync.md` |
 | Linear backlog hygiene, cross-project cleanup, or stale/duplicate/dependency reconciliation | `procedures/linear-pipeline-hygiene.md` |
-| multi-agent, worktree, model-tier, or quota scheduling work | `procedures/agent-operations.md` |
+| multi-agent, worktree, model-tier, quota scheduling, or coordinated task-resource closure | `procedures/agent-operations.md` |
 | consequential library, service, vendor, or build/buy choice | `procedures/tool-selector.md` |
 | inbound external API, webhook, SDK, or MCP capability | `procedures/external-integration.md` |
 | drift-sensitive external decision | `procedures/external-practice.md` |
 | instruction, skill, prompt, or context hierarchy changes | `procedures/context-engineering.md` |
-| LLM-backed application feature | `procedures/llm-ops.md` and the dated model-frontier reference |
+| LLM call, prompt, schema, router, fallback, evaluation, or budget | `procedures/llm-ops.md` |
+| model selection or cost/capability comparison | `procedures/model-frontier.md` and its dated reference |
 | credential-safe network logging | `procedures/log-redaction.md` |
 | auth, tenant schema, secrets, design system, or deployment baseline | the matching `procedures/scaffold-*.md` |
 | owner-facing explanation after a substantial LLM-written change | `procedures/explain-change.md` |
@@ -75,7 +75,13 @@ Use the smallest procedure that owns the work:
 
 ## Completion
 
-- Lead with the outcome. Report changed files, validation actually run, and remaining uncertainty or blockers.
-- Run the repository's configured validation. Do not invent missing tooling or bypass credential and safety checks to work around an unrelated legacy failure.
+- Match the answer's altitude to the task. For advice, review, or diagnosis, lead with the conclusion or diagnosis, practical implications, and requested actions; place supporting technical detail below them. For implementation, lead with the user-visible outcome. Report changed files, validation actually run, and remaining uncertainty or blockers.
+- When the requested action is authorized and its prerequisites are resolved by the task context or repository state, act instead of returning a plan or asking for redundant identifiers. Report the result, decision-relevant takeaway, material assumptions or provenance, and only the follow-up actions that remain.
+- Name state precisely: proposed, implemented, validated, running, committed, merged, deployed, and live-verified are not synonyms. Call work complete or ready to archive only when no session-owned worker, monitor, required delivery step, or live resource remains. An explicitly requested local-only change may be complete while uncommitted, but its state must be reported. Deferred work stays separate; when work is incomplete, name the remaining gate, next closure action, and current owner.
+- Use targeted validation during iteration and the repository's complete applicable gate at delivery, push, or release. For an explicitly local-only delivery, run the checks that prove its acceptance criteria and report any broader gate not run. Do not invent missing tooling or bypass credential and safety checks to work around an unrelated legacy failure.
 - Never weaken a test to accommodate an implementation.
 - When canonical procedures change, regenerate runtime artifacts and verify recursive reference closure before completion.
+
+## Interface
+
+- Profile: none
