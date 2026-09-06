@@ -10,7 +10,7 @@ Implement the authorized outcome. Use the surrounding code for conventions and c
 ## Work loop
 
 1. Inspect the affected interface, nearby tests, repository commands, and current diff.
-2. State the next behavior in one sentence.
+2. Resolve the next behavior from the shared task understanding; expose an unresolved consequential choice through the global collaboration contract.
 3. For a bug or new behavior, add the smallest regression or behavior test that should fail without the change and confirm the failure is relevant. For a mechanical refactor or documentation-only change, use adequate existing coverage unless inspection reveals a real gap.
 4. Implement the coherent solution, including adjacent improvements that directly remove the task’s friction or risk. Refactor where it improves information hiding, removes genuine duplication, or replaces an obsolete mechanism; keep unrelated improvements as proposals.
 5. Run targeted validation after each behavior. At the push or release boundary, finish with the repository’s applicable format, lint, typecheck, tests, and build checks in that order.
@@ -32,8 +32,8 @@ For architecture or review work, read [code-change.REVIEW.md](code-change.REVIEW
 
 Keep secrets in headers or typed secret configuration, never query strings or logs. Sanitize exceptions before logging, replace credential-bearing HTTP failures with a safe public exception, and ensure telemetry also redacts retained exception context. Use `procedures/log-redaction.md` for implementation details.
 
-Call out database/schema, authentication/authorization, money, deletion, credential, external-write, and production-migration surfaces in the handoff. Use the matching scaffold or hardening expert when that risk is material.
+Use the matching scaffold or hardening expert when an affected sensitive boundary presents a material risk. Carry that risk and its evidence into the shared task record.
 
 ## Handoff
 
-Lead with the outcome, changed paths, validation run, and any unverified behavior. For a material frontend change, include the task exercised, rendered proof, and any verification gap required by `frontend-quality`. After a substantial LLM-written change, use `explain-change` so the owner can understand the effect and blast radius without reading the diff.
+Use the global completion contract. `frontend-quality` supplies rendered evidence for visible changes; `explain-change` supplies deeper owner comprehension when a substantial change needs it. Combine their relevant findings into one explanation.
