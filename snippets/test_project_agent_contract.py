@@ -124,6 +124,15 @@ def test_initializer_seeds_but_does_not_overwrite_local_authority(
         "Media and motion policy",
     ):
         assert identity_field in generated_contract
+    for primitive_field in (
+        "Primitive authority",
+        "Catalog location",
+        "Executable source",
+        "Drift gate",
+        "Safe auto-repair boundary",
+    ):
+        assert primitive_field in generated_contract
+    assert "k-chip" not in generated_contract
     with pytest.raises(ValueError, match="already exists"):
         contract.initialize(tmp_path, "touch-first")
 

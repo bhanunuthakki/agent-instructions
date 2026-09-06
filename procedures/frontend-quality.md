@@ -38,10 +38,15 @@ Infer the posture from the user request, current product, and local contract; re
 
 Read [frontend-quality.CREATIVE.md](frontend-quality.CREATIVE.md) completely for `explore` and for consequential expressive `evolve` work. Keep it out of routine `conform` tasks.
 
+Read [frontend-quality.PRIMITIVES.md](frontend-quality.PRIMITIVES.md) completely when creating,
+changing, auditing, or automating a reusable primitive, component family, design-system catalog, or
+drift gate. Keep project names, visual recipes, and product mutation semantics in the project-owned
+contract and executable authority.
+
 Before composing an established project interface, resolve the closest `AGENTS.md` `## Interface` block in this order:
 
 1. Read its `Profile`, `Contract`, `Executable authority`, `Render`, and `Gate` fields.
-2. Load the project-owned contract and every executable authority it names before proposing or editing visual code.
+2. Load the project-owned contract, any primitive catalog it links, and every executable authority it names before proposing or editing visual code.
 3. Render the current page plus its nearest shipped sibling and registered family at the declared primary viewport.
 4. Treat a missing field, missing file, repository-escaping reference, or unrunnable recipe as an authority gap. Repair it when the request authorizes project changes; otherwise report it instead of silently borrowing another project's language.
 
@@ -71,8 +76,6 @@ The scope is proportional: inspect affected states and viewports, not an unrelat
 
 ### Motion economy
 
-### Motion economy
-
 When motion is introduced or changed, name its user-serving purpose: feedback, state legibility, spatial continuity, or prevention of a jarring change. If none applies, keep the transition instant. Reduce motion intensity as interaction frequency rises; keyboard-led and repeatedly invoked flows default to immediate response. Do not move information the user is reading or acting on for decoration. Exact timing, easing, geometry, and sanctioned exceptions remain project-owned.
 
 ### Reduction pass
@@ -81,7 +84,7 @@ Inspect the whole affected surface before completion. Remove non-semantic decora
 
 ## Route product behavior to its owner
 
-This procedure does not decide navigation or destinations, overlays and dismissal behavior, control mutation semantics, provenance meaning, or operational truth. Follow the active project owners for those concerns. When an operation, operational observation, or operator action changes, complete that project’s operations-governance disposition. Project design contracts may narrow this procedure with exact roles, recipes, and sanctioned exceptions; they must not duplicate this rubric.
+This procedure does not decide navigation or destinations, overlays and dismissal behavior, control mutation semantics, provenance meaning, or operational truth. The portable primitive reference defines the distinction questions, not a project's answers. Follow the active project owners for those concerns. When an operation, operational observation, or operator action changes, complete that project’s operations-governance disposition. Project design contracts may narrow this procedure with exact roles, recipes, and sanctioned exceptions; they must not duplicate this rubric.
 
 ## Evidence and handoff
 

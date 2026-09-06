@@ -950,6 +950,29 @@ def test_frontend_quality_routes_expression_posture_through_progressive_disclosu
     assert "api key" not in creative_text
 
 
+def test_frontend_primitive_contract_is_portable_and_project_owned() -> None:
+    procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
+    primitives_path = s.PROCEDURES_DIR / "frontend-quality.PRIMITIVES.md"
+    scaffold = (s.PROCEDURES_DIR / "scaffold-design-system.md").read_text(encoding="utf-8")
+
+    assert primitives_path.exists()
+    primitives = primitives_path.read_text(encoding="utf-8")
+    assert "frontend-quality.PRIMITIVES.md" in procedure
+    assert "frontend-quality.PRIMITIVES.md" in scaffold
+    primitive_terms = primitives.lower()
+    for contract in (
+        "project-owned vocabulary",
+        "dismiss, close, and delete",
+        "safe mechanical",
+        "embedded in its ui contract",
+        "linked project document",
+    ):
+        assert contract in primitive_terms
+    assert "`HOLD`" in primitives
+    assert "HuntDesk" not in primitives
+    assert ".k-chip" not in primitives
+
+
 def test_root_uses_one_clarification_economics_invariant() -> None:
     root = s.AGENTS_MD.read_text(encoding="utf-8")
     judging = (s.PROCEDURES_DIR / "judging.md").read_text(encoding="utf-8")
