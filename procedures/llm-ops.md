@@ -11,7 +11,7 @@ An LLM call is complete only when its selection, contract, cost, failures, and q
 
 1. Inventory active provider calls, model strings and aliases, prompts, tools, parsers, fallbacks, budgets, and evals.
 2. Identify the user-visible purpose and whether the workload is an ordinary application call or an explicit Judge. Check `config/llm_usage_index.json` before editing; add or repair the project's registration as part of the change.
-3. Run `external-practice` for current model, endpoint, tool, caching, and provider behavior. Use `model-frontier` for current price and performance; do not select from memory.
+3. Use an existing qualified purpose/route when it fits. Run `external-practice` for changed or uncertain model, endpoint, tool, caching, or provider behavior; use `model-frontier` when selecting or comparing models, price, or performance. Adding a purpose to an established route does not automatically require a frontier study; do not select a new model from memory.
 4. Preserve existing behavior and effective reasoning as the baseline before changing model, prompt, or transport.
 
 ## Build order

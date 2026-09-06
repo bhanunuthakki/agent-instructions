@@ -68,22 +68,21 @@ def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None
     assert s.CLAUDE_GLOBAL_RULES in artifacts
     assert s.GEMINI_GLOBAL_RULES in artifacts
     local_agents = s.AGENTS_MD.read_text(encoding="utf-8")
-    global_agents = s.project_agent_contract.without_interface_section(local_agents)
-    assert global_agents in artifacts[s.CODEX_GLOBAL_AGENTS]
+    global_agents = s.relocate_markdown_links(
+        s.GLOBAL_MD.read_text(encoding="utf-8"), s.ROOT_REPO
+    )
+    for artifact in artifacts.values():
+        assert global_agents in artifact
+        assert local_agents not in artifact
+        assert "@AGENTS.md" not in artifact
+        assert "@./AGENTS.md" not in artifact
+        assert "## Interface" not in artifact
     assert "## Interface" in local_agents
-    assert "## Interface" not in artifacts[s.CODEX_GLOBAL_AGENTS]
     assert s.project_agent_contract.check_repo(s.ROOT_REPO).ok
     assert "Generated from" in artifacts[s.CLAUDE_GLOBAL_RULES]
-    if s.GEMINI_GLOBAL_RULES.resolve() == s.GEMINI_MD.resolve():
-        assert artifacts[s.GEMINI_GLOBAL_RULES] == s.GEMINI_MD.read_text(
-            encoding="utf-8"
-        )
-    else:
-        assert "Generated from" in artifacts[s.GEMINI_GLOBAL_RULES]
-        assert f"`{s.PROCEDURES_DIR}`" in artifacts[s.GEMINI_GLOBAL_RULES]
-        assert "Canonical procedure root for manual fallback" in artifacts[
-            s.GEMINI_GLOBAL_RULES
-        ]
+    assert "Generated from" in artifacts[s.GEMINI_GLOBAL_RULES]
+    assert f"`{s.PROCEDURES_DIR}`" in artifacts[s.GEMINI_GLOBAL_RULES]
+    assert s.detect_global_reference_drift(artifacts) == []
 
 
 def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
@@ -432,10 +431,12 @@ def test_frontier_expiry_is_checked_with_explicit_artifact_docs(
 
 
 def test_root_routes_standalone_tool_and_integration_workflows() -> None:
-    agents = s.AGENTS_MD.read_text(encoding="utf-8")
+    shared = s.GLOBAL_MD.read_text(encoding="utf-8")
+    catalog = (s.PROCEDURES_DIR / "INDEX.md").read_text(encoding="utf-8")
+    assert "procedures/INDEX.md" in shared
 
     for procedure in ("tool-selector.md", "external-integration.md"):
-        assert f"`procedures/{procedure}`" in agents
+        assert f"]({procedure})" in catalog
         assert (s.PROCEDURES_DIR / procedure).exists()
         skill_name = Path(procedure).stem
         assert skill_name in s.OUR_SKILLS
@@ -913,10 +914,12 @@ def test_progressive_disclosure_skills_are_generated_for_both_runtimes() -> None
 
 def test_frontend_quality_has_one_canonical_route_and_no_stale_global_owner() -> None:
     procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
-    agents = s.AGENTS_MD.read_text(encoding="utf-8")
+    shared = s.GLOBAL_MD.read_text(encoding="utf-8")
+    catalog = (s.PROCEDURES_DIR / "INDEX.md").read_text(encoding="utf-8")
     assert procedure.count("# Frontend Quality") == 1
-    assert agents.count("`procedures/frontend-quality.md`") == 1
-    assert "Frontend Correctness" not in agents
+    assert "procedures/INDEX.md" in shared
+    assert "](frontend-quality.md)" in catalog
+    assert "Frontend Correctness" not in shared + catalog
     assert "frontend-quality" in s.OUR_SKILLS
     assert "design-conformance-audit" not in s.OUR_SKILLS
 
@@ -938,8 +941,8 @@ def test_frontend_quality_routes_expression_posture_through_progressive_disclosu
 
     creative_text = creative.read_text(encoding="utf-8").lower()
     for contract in (
-        "two or three",
-        "three meaningful axes",
+        "when important taste or interaction choices remain open",
+        "clear supplied direction or already-resolved choice may proceed directly",
         "fresh context",
         "at most one re-critique",
         "media checkpoint",
@@ -974,13 +977,15 @@ def test_frontend_primitive_contract_is_portable_and_project_owned() -> None:
 
 
 def test_root_uses_one_clarification_economics_invariant() -> None:
-    root = s.AGENTS_MD.read_text(encoding="utf-8")
+    root = s.GLOBAL_MD.read_text(encoding="utf-8")
     judging = (s.PROCEDURES_DIR / "judging.md").read_text(encoding="utf-8")
     context = (s.PROCEDURES_DIR / "context-engineering.md").read_text(encoding="utf-8")
     assert "## Effort calibration" not in root
     assert "quick reversible iteration" not in root
-    assert "short answer is likely to prevent materially greater rework" in root
-    assert "smallest reversible technical default" in root
+    assert "Ask early when" in root
+    assert "permission, or risk boundary" in root
+    assert "materially change the solution" in root
+    assert "state consequential assumptions and proceed" in root
     assert "J0 is the default when deterministic proof closes the task" in judging
     assert "confirm the expanded scope with the owner" in judging
     assert "expensive multi-model evaluation" in context
@@ -1368,7 +1373,8 @@ def test_generated_claude_files_use_lf_newlines() -> None:
 
 def test_gemini_routing_marker_inherits_the_canonical_table() -> None:
     marker = s.build_gemini_triggers()
-    assert marker == "Procedure routing is inherited from `AGENTS.md`."
+    assert "procedures/INDEX.md" in marker
+    assert "AGENTS.md" not in marker
     assert "| Trigger |" not in marker
     assert "procedures/agents/" not in marker
 

@@ -5,100 +5,64 @@ description: Design, modify, review, or scaffold a rendered interface around the
 
 # Frontend Quality
 
-Build the smallest coherent interface that makes the user's primary task easier and gives expressive work a deliberate identity. This procedure owns first-principles UX reasoning, expression-posture routing, compositional restraint, the rendered implementation loop, and the evidence record. It composes with `code-change`, `mockup-review`, `scaffold-design-system`, project design contracts, and hardening; it does not replace their engineering, product-behavior, or accessibility owners.
+Improve the user's task and give expressive work a deliberate identity. This procedure owns interaction hierarchy, expression posture, and rendered evidence. Product/domain contracts own behavior, state, and mutation meaning; `code-change` owns implementation; project UI contracts own exact visual language and control geometry. Share one task hypothesis and evidence record across those owners.
 
-## Applicability and posture
+## Applicability and task hypothesis
 
-A **material frontend change** adds, removes, rearranges, or materially restyles a visible region, control, hierarchy, navigation path, state, or responsive behavior. Typo-only copy corrections, nonvisual handler changes, and mechanically regenerated mirrors with no rendered delta are not material.
+A material frontend change alters a visible region, hierarchy, interaction, state, or responsive behavior. Typo-only corrections, nonvisual handlers, and generated mirrors with no rendered delta do not require a full visual cycle.
 
-For a material change to a runnable existing interface, rendered evidence is part of implementation. For an unrunnable or non-web interface, use the closest renderer, simulator, or device evidence available and report the gap precisely. Never claim visual, hierarchy, responsive, or interaction verification that could not be observed.
+For material work, inspect the request, affected workflow, authentic product data, and current surface. Identify the primary user, desired outcome, information/interaction order, observed friction, and expected improvement. Keep this concise working reasoning rather than a questionnaire. Use `grill-me` only for an unresolved choice that would materially change the solution.
 
-## Start with the task, not the component
+Never invent financial or operational metrics and present them as product truth. Isolated mockups and tests may use clearly labeled synthetic fixtures that fit supported domain shapes and protect private inputs. Distinguish proposed capability from implemented capability.
 
-Before choosing cards, grids, accents, or variants, record a concise implementation hypothesis from the request, current workflow, product data, and active contracts:
+## Expression and improvement latitude
 
-- primary user and the task or decision being made;
-- the one action or outcome the surface makes easiest;
-- minimum information and intended reading/interaction order;
-- what is primary, supporting, or progressively disclosed;
-- observed friction and the smallest visible change expected to improve it;
-- **grounded domain data:** never invent or simulate metrics, percentages, margins, burn rates, or KPIs not supported by the project’s data models or verified primary sources. In private-company, financial, and operational tools, surface authentic state attributes (stage, round, lead investor, census, ATS status, verified citations) rather than generic venture-dashboard proxies.
+- **`conform`:** repair or extend an established language when it serves the task. Reuse its semantics and sound recipes; do not manufacture alternatives.
+- **`evolve`:** improve hierarchy, interaction, composition, or identity while preserving recognizable context and domain meaning. Change the shell, density, navigation arrangement, or recipe when observed friction justifies it and the task authorizes that boundary.
+- **`explore`:** establish or replace a visual direction when the task calls for it or the existing family cannot express the outcome. Compare meaningful directions when the choice is genuinely open; a clear supplied direction does not require artificial alternatives.
 
-This is working reasoning, not a mandatory questionnaire. Inspect available evidence and make reversible product judgments. Use `grill-me` only when an unresolved product choice would materially change the result; use a mockup when recognition is more useful than prose. Prototype approval never authorizes production changes.
+Infer posture from the task and local contract. For expressive work, name the intended response, identity constraints, references or inspiration, and anti-goals. Read [frontend-quality.CREATIVE.md](frontend-quality.CREATIVE.md) for `explore` or consequential expressive `evolve`. Do not silently reduce expressive work to a generic utility treatment.
 
-## Choose the expression posture
+Mockup approval concerns the shown direction and revision. Production edits require task authorization, which may already be present in a build request; do not ask again for an authorized implementation. An isolated prototype never acquires live state or publication authority from its appearance.
 
-Expression posture is orthogonal to the interface profile and describes how much visual continuity or exploration the task needs:
+## Resolve project authority
 
-- **`conform`:** preserve an established family, supplied template, or familiar platform convention. Use for routine additions, repairs, and utility-first greenfield work unless the request or contract calls for a distinct identity. Do not manufacture alternatives by default.
-- **`evolve`:** preserve the shell, semantic roles, control behavior, state anatomy, and product truth while materially improving hierarchy, composition, or identity. Use when the current language should remain recognizable but the requested outcome cannot be reached by a local adjustment.
-- **`explore`:** create or replace a distinctive visual direction. Use for explicitly expressive, memorable, brand-led, immersive, or greenfield identity work, and for an authorized departure from an established family. Bounded divergence is required before selecting a direction.
+Before a material change to an established interface:
 
-Infer the posture from the user request, current product, and local contract; record it when the change is material. For `evolve` and `explore`, extend the hypothesis with the intended response, identity constraints, one candidate signature idea, supplied references or inspiration, and anti-goals. If a missing taste choice would materially change the result, ask once or create an isolated mockup comparison; do not silently collapse expressive work into the safest default.
+1. Read the closest `AGENTS.md` Interface fields: Profile, Contract, Executable authority, Render, and Gate. Profiles are initial hypotheses from [frontend-quality.PROFILES.md](frontend-quality.PROFILES.md), not continuing visual authority.
+2. Read the affected contract and primitive catalog, then inspect the executable owners needed for the changed task. Do not load every listed implementation file when only one component is relevant.
+3. Inspect the affected baseline and nearest shipped sibling and registered family when continuity matters.
+4. Repair a missing field, file, or unusable recipe within an authorized project change; otherwise report the specific gap. Never borrow a sibling project's rules as a silent substitute.
 
-Read [frontend-quality.CREATIVE.md](frontend-quality.CREATIVE.md) completely for `explore` and for consequential expressive `evolve` work. Keep it out of routine `conform` tasks.
+Extend registered masters for legitimate new needs; do not create a competing page-local styling system. A consequential family departure needs a typed rationale and an adversarial continuity test when the project contract requires those controls. Preserve the tested extension path rather than treating current design choices as immutable. Exact tokens, recipes, exceptions, and geometry remain project-owned.
 
-Read [frontend-quality.PRIMITIVES.md](frontend-quality.PRIMITIVES.md) completely when creating,
-changing, auditing, or automating a reusable primitive, component family, design-system catalog, or
-drift gate. Keep project names, visual recipes, and product mutation semantics in the project-owned
-contract and executable authority.
+Read [frontend-quality.PRIMITIVES.md](frontend-quality.PRIMITIVES.md) when defining or changing reusable primitives, catalogs, drift gates, or automated repair. It supplies semantic questions; the project supplies answers and mutation boundaries.
 
-Before composing an established project interface, resolve the closest `AGENTS.md` `## Interface` block in this order:
+## Observe, change, and verify
 
-1. Read its `Profile`, `Contract`, `Executable authority`, `Render`, and `Gate` fields.
-2. Load the project-owned contract, any primitive catalog it links, and every executable authority it names before proposing or editing visual code.
-3. Render the current page plus its nearest shipped sibling and registered family at the declared primary viewport.
-4. Treat a missing field, missing file, repository-escaping reference, or unrunnable recipe as an authority gap. Repair it when the request authorizes project changes; otherwise report it instead of silently borrowing another project's language.
+For a material change to a runnable surface:
 
-The standard declarations and profile seeds are defined in `frontend-quality.PROFILES.md`; profiles seed new contracts but never override an established local authority. If a repository has no rendered interface, its entire declaration is `## Interface` with `Profile: none`.
+1. Render the baseline and exercise the affected task before editing. For an unavailable renderer, use the closest artifact, simulator, or device evidence and name its limits.
+2. Choose the solution against the task and expression posture. Implement through the project's owners and primitives, extending them when justified.
+3. Re-render after material composition changes. Exercise affected populated, empty, loading, error, stale, focus, overflow, and recovery states where applicable, at supported widths. Inspect console errors and failed requests for browser work.
+4. Compare the result with the task hypothesis and perform the reduction pass below. Source inspection and a single final screenshot do not substitute for observed interaction evidence.
 
-For `conform` and `evolve`, preserve the registered family's shell, navigation, semantic text roles, controls, density, responsive grammar, and state anatomy. Introduce a new family only under `explore`, when the user task cannot be expressed by an existing family or the owner authorizes a new identity, with a typed rationale and an adversarial continuity test. Exact tokens, recipes, exceptions, and verification commands remain project-owned and must not be copied into this shared procedure.
+Scope observation to affected states and surfaces. Unavailable hardware or rendering bounds the verification claim; it does not prevent useful independent work already authorized. Never claim a surface passed without its evidence.
 
-## Observe–reason–change–reobserve
+## Composition as decision rules
 
-For a material change to an existing runnable surface:
+- **Hierarchy:** let the task and reading order determine emphasis. A secondary label, subtitle, or explanation must add information. Distinct typography can carry a semantic role or the chosen identity; an arbitrary font-count rule does not define quality.
+- **Grouping:** use proximity, alignment, whitespace, rules, panels, or cards according to actual relationships and interaction boundaries. Remove nested containers that add no task or identity value.
+- **Consistency:** equivalent meanings should remain recognizable across the product. Different tasks may need different layouts; intentional variation belongs in the owning design contract.
+- **Color and state:** keep status and controls understandable without color alone. Accent, imagery, texture, and decoration may carry an intentional identity as well as interaction; verify readability and priority rather than banning visual richness.
+- **Lists and navigation:** add search, sorting, or facets when record volume and retrieval tasks justify them. A short sequence or bibliography may need none; item count alone never mandates controls.
+- **Motion:** use motion for useful feedback, continuity, comprehension, or an authorized expressive purpose. Preserve reduced-motion behavior and input responsiveness; do not disrupt reading or ongoing actions. Prefer inexpensive properties and verify performance of richer effects.
+- **Density:** optimize access and comprehension for the project task. Empty space may aid reading or expression; dense operational tools may need immediate controls. Neither is a universal aesthetic.
 
-1. Render and inspect the affected baseline before editing. Exercise the primary task and identify the current friction.
-2. When `explore` or consequential `evolve` applies, select a direction through the creative workflow before editing production code. Then compose the fewest roles, primitives, and registered recipes that realize the selected direction. Add or extend styling only for a remaining named semantic, identity, or interaction need.
-3. After each material composition change, re-render and exercise the affected path. Inspect applicable populated, loading, empty, error, focus, and overflow states plus project-supported viewports; check hierarchy, clipping, density, feedback, console errors, and failed requests.
-4. Compare the final surface to the hypothesis, then perform the reduction pass below. Do not replace this loop with source inspection or one final screenshot.
-
-The scope is proportional: inspect affected states and viewports, not an unrelated matrix. `frontend-web` owns implementation fidelity and browser/console mechanics; `ux-design` owns task clarity and whole-page composition.
-
-## Compositional restraint
-
-- **Typography economy:** use one primary family and only established semantic text roles. Another face, including mono, needs a named semantic role. Give one page or region the largest heading; a subtitle must add information, not repeat it. Do not stack size, weight, color, case, and indentation when one cue communicates hierarchy.
-- **Container economy:** begin with ordinary flow. A box, rail, divider, background, shadow, or panel needs a named semantic, state, interaction, or ownership boundary. Prefer whitespace, alignment, and proximity; nested boxes need a distinct boundary at every level. Flatten any container whose removal preserves comprehension and operation.
-- **Layout consistency:** use one dominant layout grammar per surface or registered family. Equivalent sections use equivalent recipes; do not vary adjacent layouts merely for visual novelty. Responsive behavior preserves hierarchy rather than inventing a second visual language.
-- **Semantic differentiation:** accent communicates interaction, selection, focus, or unread state. Status communicates status and keeps a non-color cue. Decorative accent rails, arbitrary tinted panels, gradients, ornamental icons, oversized numerals, and floating shapes require a concrete product purpose and approved recipe.
-- **Structural formatting:** indentation represents a parent-child relationship and bullets represent parallel items. Do not turn isolated facts, labels, or prose into indentation or bullets for texture.
-- **Operating bands over empty space:** prioritize immediate access to working tasks over decorative titles or inactive whitespace. Headings must not push working surfaces below the viewport. Any list, register, or table tracking more than 5 items must include a compact operating band containing instant search and single-select facet filters.
-
-### Motion economy
-
-When motion is introduced or changed, name its user-serving purpose: feedback, state legibility, spatial continuity, or prevention of a jarring change. If none applies, keep the transition instant. Reduce motion intensity as interaction frequency rises; keyboard-led and repeatedly invoked flows default to immediate response. Do not move information the user is reading or acting on for decoration. Exact timing, easing, geometry, and sanctioned exceptions remain project-owned.
-
-### Reduction pass
-
-Inspect the whole affected surface before completion. Remove non-semantic decoration; flatten redundant containers; normalize equivalent text and controls; remove decorative titles, ungrounded proxy KPIs, and empty whitespace that delays user action; remove redundant subtitles, helper text, badges, dividers, and icons; and reject locally attractive components that create another page-level grammar. When in doubt, choose the plainer treatment unless the richer one has a named semantic or interaction purpose.
-
-## Route product behavior to its owner
-
-This procedure does not decide navigation or destinations, overlays and dismissal behavior, control mutation semantics, provenance meaning, or operational truth. The portable primitive reference defines the distinction questions, not a project's answers. Follow the active project owners for those concerns. When an operation, operational observation, or operator action changes, complete that project’s operations-governance disposition. Project design contracts may narrow this procedure with exact roles, recipes, and sanctioned exceptions; they must not duplicate this rubric.
+Project-selected defaults can change through their owner when evidence and task authority justify it. Accessibility, truthful state, data/privacy boundaries, and control semantics remain requirements.
 
 ## Evidence and handoff
 
-For a material frontend change, record compact dual proof:
+Use one compact record: task/outcome; expression posture and selected direction when relevant; baseline/final rendered observations; affected states/widths; deterministic checks; and unverified surfaces or interactions. A reduction pass removes redundant content, containers, controls, or effects whose removal improves the task without losing the chosen identity; retain useful richness and explain material tradeoffs, not every styling decision.
 
-| Field | Record |
-|---|---|
-| Task and outcome | surface/route, primary task exercised, and observed user-visible result |
-| Expression | posture and, when applicable, selected direction and intended response |
-| Rendered evidence | browser/renderer used, affected viewports and states, baseline/final observation |
-| Deterministic proof | applicable design, accessibility, frontend, and repository checks |
-| Reduction | what was removed or flattened, or why nothing qualified |
-| Gaps | unavailable rendering, states, widths, or interactions; do not imply they passed |
-
-For reviews and hardening, ask: Does the result fit the selected posture and intended response? What recognizable idea carries its identity? What boundary does each container express? Why does each indentation exist? What does each text treatment or accent communicate? Why is an equivalent section visually different? What becomes harder if this element is removed? An unclear answer is a finding, not permission to keep it.
-
-Shadow fixtures and task trajectories may calibrate this procedure. They do not prove that it was invoked on every task; invocation coverage needs an independent task population frame under `judging`.
+For reviews, assess task success, clarity, product fit, distinctiveness where requested, interaction correctness, accessibility, and evidence. Do not equate prose compliance, visual novelty, or a plain layout with quality. Representative rendered comparisons can evaluate this procedure; they do not establish invocation coverage across all agent work.

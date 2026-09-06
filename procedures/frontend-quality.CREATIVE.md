@@ -12,19 +12,19 @@ Extend the frontend hypothesis with:
 - user- or project-supplied references when available, treated as a quality bar or moodboard rather than a copying target; and
 - anti-goals: impressions, conventions, or visual behaviors that would make this product feel wrong.
 
-Create two or three full-surface directions before committing production code. They must differ across at least three meaningful axes such as composition, typography, visual material, imagery, information reveal, or interaction character. Palette swaps and component-level skins are not separate directions. Keep exploratory code and fixtures outside production imports and preserve the same task, content truth, and required states so the comparison is about design rather than changing the problem.
+When important taste or interaction choices remain open, create a small number of full-surface directions that differ in composition, typography, visual material, imagery, information reveal, or interaction character. Choose enough contrast to resolve the uncertainty; palette swaps alone rarely help. A clear supplied direction or already-resolved choice may proceed directly to one prototype. Keep exploratory code outside production imports and preserve the task, truthful content, required states, and privacy boundary across comparisons.
 
-When the brief is genuinely underdetermined and the user supplied no strong direction, an external seed may widen the search. Generate a random alphanumeric string, derive one or more bounded creative decisions from it, and keep it out of the interface. The seed is inspiration, not authority or evidence of quality; discard any derived choice that conflicts with the brief, product continuity, accessibility, or feasibility. Do not use seed variation for a task with one correct visual answer or an established contract that already resolves the choice.
+Use the brief, domain structure, observations, or references to widen the search. Inspiration is not evidence or authority; discard ideas that conflict with task success, accessibility, feasibility, or protected product semantics.
 
 ## Define: render, compare, and select
 
-Render each direction as a complete surface at the primary viewport with realistic content. Compare task clarity, brief fit, identity coherence, continuity, execution craft, responsive feasibility, and obvious template defaults. A direction does not win merely because it is unusual.
+Render the selected prototype or each compared direction as a complete surface at the primary viewport with realistic, privacy-safe content. Compare task clarity, brief fit, identity coherence, continuity, execution craft, responsive feasibility, and obvious template defaults. A direction does not win merely because it is unusual.
 
 For `explore`, and for consequential expressive `evolve` work when an independent reviewer is available and proportional, use a visual Critic in a fresh context. Give it the brief, active continuity constraints, rendered screenshots, and optional references. Withhold source code, implementation effort, earlier critiques, the implementer's preferred verdict, and any hidden answer. Ask for a ranking, the strongest and weakest reasons for each direction, and a short list of material gaps. A Critic is advisory; the root agent retains synthesis and the user or named project authority retains consequential taste decisions.
 
 Run one initial critique and at most one re-critique after addressing the highest-value gaps. Do not loop toward an arbitrary numeric score. Stop when the bounded pass is complete, improvement no longer converges, or the remaining choice is an owner preference; surface the unresolved choice instead of spending indefinitely.
 
-Choose one direction before production implementation. Record why it best balances the intended response, primary task, continuity, and feasibility, plus what was deliberately rejected. Approval applies only to the rendered revision shown.
+Choose one direction before production implementation. Record why it best balances the intended response, primary task, continuity, and feasibility, plus what was deliberately rejected. When direction approval is required, it applies only to the rendered revision shown; do not request separate implementation approval when the task already authorizes it.
 
 ## Media checkpoint
 

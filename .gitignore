@@ -5,6 +5,7 @@
 !/.gitignore
 !/README.md
 !/AGENTS.md
+!/GLOBAL.md
 !/CLAUDE.md
 !/GEMINI.md
 !/AGENTS_GUIDE.md
@@ -51,6 +52,7 @@ snippets/mcp_registry.json
 !/evals/agent_system/procedure_routing_cases.jsonl
 !/evals/agent_system/interaction_outcome_cases.jsonl
 !/evals/agent_system/README.md
+!/evals/agent_system/instruction_quality_rubric.json
 !/evals/frontend_quality/
 !/evals/frontend_quality/shadow_cases.json
 !/evals/frontend_quality/creative_cases.json

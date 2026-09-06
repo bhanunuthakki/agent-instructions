@@ -6,7 +6,7 @@
   "projects": [
     {
       "project": "agent-instructions",
-      "instruction_section": "## Evidence and delegation",
+      "instruction_section": "## Source and state ownership",
       "entrypoint": "snippets/interaction_outcome_eval.py",
       "purpose_registry": "config/judge_registries/1.1.0.json",
       "ledger_authority": "snippets/interaction_outcome_eval.py:execute_attempt",
@@ -38,7 +38,7 @@
     },
     {
       "project": "date-suggester",
-      "instruction_section": "## Secrets & data",
+      "instruction_section": "## Authority and state",
       "entrypoint": "src/llm.py",
       "purpose_registry": "src/llm.py:PURPOSE_ROLES",
       "ledger_authority": "data/llm_ledger.jsonl",

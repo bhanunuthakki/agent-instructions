@@ -28,9 +28,31 @@ safety boundaries, and progressive execution procedures.
 
 ## Layout
 
-- `AGENTS.md`: The canonical, cross-runtime contract.
+- `GLOBAL.md`: The canonical cross-project contract, generated into each runtime’s global rules.
+- `AGENTS.md`: This repository’s local purpose, improvement mandate, authorities, and checks.
+- `CLAUDE.md` / `GEMINI.md`: Local imports plus runtime mechanics. Global generation strips the local import.
+- `procedures/INDEX.md`: The fallback route catalog when native skill discovery is unavailable.
 - `procedures/`: Markdown procedure definitions for specific engineering workflows.
 - `snippets/`: Sync scripts and governance tools that maintain consistency across tools.
+
+## Runtime installation and relocation
+
+Run `python snippets/sync_agent_stubs.py` from the source checkout to regenerate the
+runtime adapters. The global destinations remain `~/.codex/AGENTS.md`,
+`~/.claude/CLAUDE.md`, and `~/.gemini/GEMINI.md`; local project wrappers import only
+their own `AGENTS.md`. Generated global references point to absolute paths in this
+checkout, and sync checks their recursive Markdown reference closure. After moving
+the checkout, regenerate before using the moved source.
+
+Keep the source checkout outside runtime configuration directories. A legacy source
+checkout directly in `~/.gemini` collides with Gemini's global destination: sync now
+stops before writing anything. Preserve local changes and private state, move that
+checkout to a separate project directory, and rerun sync from the moved checkout.
+No remote machine is migrated automatically. Direct readers and runtimes without
+native discovery should load `GLOBAL.md`, the applicable local `AGENTS.md`, and
+`procedures/INDEX.md`; the catalog selects further procedures. The
+`machine-operations` skill owns host-sensitive paths and the Mac Linear/OpenRouter
+credential-loading rules, while credentials themselves remain outside Git.
 
 ## Procedure-routing check
 
@@ -41,7 +63,7 @@ python snippets/procedure_routing_eval.py
 ```
 
 The report is written to `.tmp/procedure_routing_eval.json`. It measures whether the shared
-contract distinguishes procedure boundaries; it does not claim that live runtimes invoked every
+contract plus fallback catalog distinguish procedure boundaries; it does not claim that live runtimes invoked every
 required procedure.
 
 ## Private operational state

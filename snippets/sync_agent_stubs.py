@@ -81,6 +81,7 @@ DIRECT_HARDEN_PACKAGE_DIR = ROOT_REPO / "runtime" / "harden"
 ANTIGRAVITY_SKILLS_CONFIG = GEMINI_CONFIG_ROOT / "config" / "skills.json"
 PROCEDURES_DIR = ROOT_REPO / "procedures"
 PROCEDURES_AGENTS_DIR = PROCEDURES_DIR / "agents"
+GLOBAL_MD = ROOT_REPO / "GLOBAL.md"
 AGENTS_MD = ROOT_REPO / "AGENTS.md"
 GEMINI_MD = ROOT_REPO / "GEMINI.md"
 CLAUDE_MD = ROOT_REPO / "CLAUDE.md"
@@ -98,6 +99,7 @@ OUR_SKILLS = [
     "judging",
     "llm-ops",
     "model-frontier",
+    "machine-operations",
     "mockup-review",
     "product-feature",
     "log-redaction",
@@ -571,14 +573,94 @@ def _without_local_import(text: str) -> str:
     ).strip()
 
 
+MARKDOWN_LINK = re.compile(r"(\[[^\]]+\]\()([^)]+)(\))")
+
+
+def local_markdown_target(target: str) -> tuple[str, str] | None:
+    """Recognize concrete local links; leave URLs, anchors and templates alone."""
+    target = target.strip().strip("<>")
+    is_drive_path = bool(re.match(r"^[a-zA-Z]:[/\\]", target))
+    if (not is_drive_path and re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", target)) or target.startswith("#"):
+        return None
+    raw_path, separator, fragment = target.partition("#")
+    if not raw_path or any(char in raw_path for char in "*<>"):
+        return None
+    return raw_path, separator + fragment
+
+
+def relocate_markdown_links(text: str, source_dir: Path) -> str:
+    """Keep progressive references reachable after moving a root into a runtime home."""
+    def replace(match: re.Match[str]) -> str:
+        target = local_markdown_target(match.group(2))
+        if target is None:
+            return match.group(0)
+        raw_path, fragment = target
+        resolved = (source_dir / raw_path).resolve().as_posix() + fragment
+        return f"{match.group(1)}<{resolved}>{match.group(3)}"
+
+    relocated = MARKDOWN_LINK.sub(replace, text)
+    # Backticked repository paths are also used as operational references. Bare
+    # AGENTS.md remains project-relative; concrete shared paths belong to this clone.
+    return re.sub(
+        r"`((?:procedures|config|snippets)/[^`\s]+)`",
+        lambda match: f"`{(source_dir / match.group(1)).resolve().as_posix()}`"
+        if not any(char in match.group(1) for char in "*<>") else match.group(0),
+        relocated,
+    )
+
+
+def validate_global_source_layout() -> None:
+    """Never overwrite a tracked local wrapper with global generated instructions."""
+    pairs = (
+        (CODEX_GLOBAL_AGENTS, AGENTS_MD),
+        (CLAUDE_GLOBAL_RULES, CLAUDE_MD),
+        (GEMINI_GLOBAL_RULES, GEMINI_MD),
+    )
+    for destination, source in pairs:
+        if destination.resolve() == source.resolve():
+            raise RuntimeError(
+                f"global runtime destination overlaps tracked source: {source}. "
+                "Move the instruction source checkout outside the runtime configuration "
+                "directory, preserve local changes and private state, then rerun sync "
+                "from the moved checkout. No files have been changed."
+            )
+
+
+def detect_global_reference_drift(
+    artifacts: dict[Path, str] | None = None,
+) -> list[str]:
+    """Walk generated root links and their Markdown descendants, including cycles."""
+    pending = list((artifacts if artifacts is not None else build_global_rulebook_artifacts()).items())
+    visited: set[Path] = set()
+    findings: list[str] = []
+    while pending:
+        path, text = pending.pop()
+        path = path.resolve()
+        if path in visited:
+            continue
+        visited.add(path)
+        for match in MARKDOWN_LINK.finditer(text):
+            target = local_markdown_target(match.group(2))
+            if target is None:
+                continue
+            raw_path, _fragment = target
+            resolved = (path.parent / raw_path).resolve()
+            if not resolved.exists():
+                findings.append(f"{path}: unreachable global Markdown target {raw_path!r}")
+            elif resolved.is_file() and resolved.suffix.casefold() == ".md":
+                pending.append((resolved, resolved.read_text(encoding="utf-8")))
+    return sorted(findings)
+
+
 def build_global_rulebook_artifacts() -> dict[Path, str]:
     """Build global runtime guidance from the clone's canonical, tracked rulebooks."""
+    validate_global_source_layout()
     banner = (
         "<!-- Generated from the agent-instructions repository. "
         "Edit the tracked source and rerun snippets/sync_agent_stubs.py. -->\n\n"
     )
-    agents = project_agent_contract.without_interface_section(
-        AGENTS_MD.read_text(encoding="utf-8", errors="replace")
+    agents = relocate_markdown_links(
+        GLOBAL_MD.read_text(encoding="utf-8", errors="replace"), GLOBAL_MD.parent
     )
     claude = CLAUDE_MD.read_text(encoding="utf-8", errors="replace")
     gemini = GEMINI_MD.read_text(encoding="utf-8", errors="replace")
@@ -587,22 +669,19 @@ def build_global_rulebook_artifacts() -> dict[Path, str]:
         CLAUDE_GLOBAL_RULES: banner
         + agents
         + "\n\n"
-        + _without_local_import(claude)
+        + relocate_markdown_links(_without_local_import(claude), CLAUDE_MD.parent)
         + "\n",
     }
-    # On Windows the canonical source checkout itself normally is ~/.gemini. Do not
-    # replace the source GEMINI.md with an embedded generated copy in that layout.
-    if GEMINI_GLOBAL_RULES.resolve() == GEMINI_MD.resolve():
-        out[GEMINI_GLOBAL_RULES] = gemini
-    else:
-        fallback = (
-            "\nCanonical procedure root for manual fallback: "
-            f"`{PROCEDURES_DIR}`. Resolve `procedures/<name>.md` references against "
-            "that directory.\n"
-        )
-        out[GEMINI_GLOBAL_RULES] = (
-            banner + agents + "\n\n" + _without_local_import(gemini) + fallback
-        )
+    fallback = (
+        "\nCanonical procedure root for manual fallback: "
+        f"`{PROCEDURES_DIR}`. The catalog links above resolve to this checkout; "
+        "load only the procedures needed for the current task.\n"
+    )
+    out[GEMINI_GLOBAL_RULES] = (
+        banner + agents + "\n\n"
+        + relocate_markdown_links(_without_local_import(gemini), GEMINI_MD.parent)
+        + fallback
+    )
     return out
 
 
@@ -1021,7 +1100,7 @@ def detect_doc_path_drift() -> list[str]:
     (HOOKS_DIR.name), wired per-repo via core.hooksPath. Flag the stale token so prose can't drift
     from the filesystem (the kind of mismatch the inventory generators otherwise prevent)."""
     drift: list[str] = []
-    for doc in (AGENTS_MD, GEMINI_MD, CLAUDE_MD):
+    for doc in (GLOBAL_MD, AGENTS_MD, GEMINI_MD, CLAUDE_MD):
         if doc.exists() and ".githooks" in doc.read_text(
             encoding="utf-8", errors="replace"
         ):
@@ -1051,14 +1130,14 @@ def detect_hook_capability_drift() -> list[str]:
 
 
 def semantic_documents() -> list[Path]:
-    docs = [AGENTS_MD, GEMINI_MD, CLAUDE_MD, GUIDE_PATH]
+    docs = [GLOBAL_MD, AGENTS_MD, GEMINI_MD, CLAUDE_MD, GUIDE_PATH]
     docs.extend(sorted(PROCEDURES_DIR.rglob("*.md")))
     docs.extend(proj / "AGENTS.md" for proj in project_dirs())
     return [path for path in docs if path.exists()]
 
 
 def detect_semantic_drift(
-    docs: list[Path] | None = None, *, root_doc: Path = AGENTS_MD
+    docs: list[Path] | None = None, *, root_doc: Path = GLOBAL_MD
 ) -> list[str]:
     """Catch meaning-level contradictions that byte identity cannot detect."""
     findings: list[str] = []
@@ -1096,10 +1175,10 @@ def detect_semantic_drift(
             if heading.strip().casefold() not in root_headings:
                 findings.append(f"{path}: missing root heading reference {heading!r}")
         ordinary_refs = re.findall(
-            r"(?:global\s+)?`AGENTS\.md`\s*§\s*([^\n.,;)]+)", text, re.IGNORECASE
+            r"(?:global\s+)?`(?:GLOBAL|AGENTS)\.md`\s*§\s*([^\n.,;)]+)", text, re.IGNORECASE
         )
         ordinary_refs += re.findall(
-            r"(?:global\s+)?`AGENTS\.md`\s*(?:→|->)\s*[\"“]([^\"”]+)",
+            r"(?:global\s+)?`(?:GLOBAL|AGENTS)\.md`\s*(?:→|->)\s*[\"“]([^\"”]+)",
             text,
             re.IGNORECASE,
         )
@@ -1144,12 +1223,12 @@ def _md_table(header: tuple[str, str], rows: list[tuple[str, str]]) -> str:
 
 
 def build_gemini_triggers() -> str:
-    """Pure: one provider-neutral pointer; AGENTS.md owns procedure routing."""
-    return "Procedure routing is inherited from `AGENTS.md`."
+    """Pure: runtime-neutral pointer to the canonical fallback catalog."""
+    return "Procedure routing follows the [canonical catalog](procedures/INDEX.md)."
 
 
 def materialize_gemini_triggers(dry: bool) -> list[str]:
-    """Keep GEMINI.md's routing marker compact and inherited from AGENTS.md."""
+    """Keep GEMINI.md's routing marker compact and inherited from the canonical catalog."""
     if not GEMINI_MD.exists():
         return ["SKIP GEMINI.md (not found)"]
     current = GEMINI_MD.read_text(encoding="utf-8", errors="replace")
@@ -1179,7 +1258,7 @@ def detect_gemini_drift() -> list[str]:
         return [f"GEMINI.md: {exc}"]
     if _norm(updated) != _norm(current):
         return [
-            "GEMINI.md: routing marker is not the compact AGENTS.md pointer — run "
+            "GEMINI.md: routing marker is not the compact procedure-catalog pointer — run "
             "/sync-agent-stubs to regenerate"
         ]
     return []
@@ -1277,7 +1356,7 @@ def build_guide_sections() -> dict[str, str]:
     )
     if unwired:
         projects += (
-            "\n\n_Not wired (no `AGENTS.md`, so the global rulebook is not inherited — run "
+            "\n\n_Not wired (no `AGENTS.md`, so project-specific guidance is missing — run "
             "`/sync-agent-stubs` after adding one): "
             + ", ".join(f"`{n}`" for n in unwired)
             + "._"
@@ -1416,6 +1495,8 @@ def detect_llm_usage_index_drift(*, check_projects: bool) -> list[str]:
 
 
 def main() -> None:
+    # Check before hooks, wrappers, skills or any other managed mutation.
+    validate_global_source_layout()
     dry = "--dry-run" in sys.argv
     check = (
         "--check" in sys.argv
@@ -1513,7 +1594,7 @@ def main() -> None:
 
     gemini_actions = materialize_gemini_triggers(readonly)
     if gemini_actions:
-        print("[GEMINI.md — compact routing marker inherited from AGENTS.md]")
+        print("[GEMINI.md — compact routing marker inherited from the canonical catalog]")
         for a in gemini_actions:
             print(f"  - {a}")
     if readonly:  # in SYNC mode the trigger table is regenerated (auto-fixed)
@@ -1525,7 +1606,7 @@ def main() -> None:
     global_actions = materialize_global_rulebook_artifacts(readonly)
     if global_actions:
         print(
-            "[global runtime rulebooks — generated from tracked AGENTS/CLAUDE/GEMINI sources]"
+            "[global runtime rulebooks — generated from tracked GLOBAL/CLAUDE/GEMINI sources]"
         )
         for action in global_actions:
             print(f"  - {action}")
@@ -1543,6 +1624,7 @@ def main() -> None:
     drift += (
         detect_doc_path_drift()
     )  # always read-only — a prose fix needs human attention
+    drift += detect_global_reference_drift()
     drift += detect_hook_capability_drift()
     drift += detect_command_orphans()
     drift += detect_llm_usage_index_drift(check_projects=machine_inventory)
@@ -1552,7 +1634,7 @@ def main() -> None:
     else:
         drift += detect_definition_override_drift(definition_files=[])
         drift += detect_semantic_drift(
-            docs=[AGENTS_MD, GEMINI_MD, CLAUDE_MD, GUIDE_PATH]
+            docs=[GLOBAL_MD, AGENTS_MD, GEMINI_MD, CLAUDE_MD, GUIDE_PATH]
             + sorted(PROCEDURES_DIR.rglob("*.md"))
         )
 

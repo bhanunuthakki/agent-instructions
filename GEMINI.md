@@ -9,5 +9,5 @@ Gemini-specific mechanics:
 - Cross-service session handoffs: When coordinating with Codex or Claude from Gemini/Antigravity without desktop GUI automation, dispatch non-interactively via the repository's membership CLI transports (`snippets/codex_cli.py`, `snippets/claude_cli.py`).
 
 <!-- BEGIN:triggers -->
-Procedure routing is inherited from `AGENTS.md`.
+Procedure routing follows the [canonical catalog](procedures/INDEX.md).
 <!-- END:triggers -->

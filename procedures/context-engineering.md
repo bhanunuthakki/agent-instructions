@@ -23,7 +23,7 @@ Read [context-engineering.REFERENCE.md](context-engineering.REFERENCE.md) when p
 
 ## Placement
 
-- Put product identity and true cross-task invariants in the always-loaded root.
+- Put cross-task invariants and bounded initiative in the always-loaded global contract. Put product identity and improvement priorities in the local project rulebook; keep this repository’s global source (`GLOBAL.md`) separate from its own `AGENTS.md`.
 - Put repo purpose, exact commands, state ownership, data boundaries, and codebase-specific traps in the closest project or subtree rulebook.
 - Keep runtime wrappers to imports and runtime-only mechanics.
 - Put reusable workflows in skills. Keep the skill body to its decision flow and load detailed references only when needed.
@@ -36,7 +36,7 @@ Read [context-engineering.REFERENCE.md](context-engineering.REFERENCE.md) when p
 - State the user-visible outcome, success criteria, hard constraints, evidence needs, authority boundaries, and stop rules.
 - Use absolute language only for genuine invariants. Express judgment calls as decision rules.
 - State each instruction once at the narrowest scope that reliably applies.
-- Merge overlapping routes around one owner and make adjacent owners name their handoff. A routing table should be collectively exhaustive for supported work without making every task load every procedure.
+- Merge overlapping routes around one owner and make adjacent owners name their handoff. The routing catalog should be collectively exhaustive for supported work without making every task load every procedure: one primary deliverable owner plus controls for actual changed boundaries, sharing one outcome and evidence record.
 - Remove scaffolding for behavior the target model and tool interface already perform reliably.
 - Do not add repeated verification prompts for a model that already verifies proactively. Keep explicit checks only where they define required evidence, a risk control, or a completion gate.
 - Preserve provider-specific differences; cross-provider similarity is a hypothesis to validate, not permission to erase documented guidance.

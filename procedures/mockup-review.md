@@ -17,7 +17,7 @@ Keep mockup approval separate from production implementation. A prototype may be
 
 Use focused structural tests where the repository supports them. Do not modify APIs, persistence, migrations, jobs, or live routes during a mockup-only request.
 
-Under `explore` and consequential expressive `evolve`, compare two or three variants as required by the creative workflow even when the user did not use the word “alternatives.” For an otherwise `conform` task, compare variants only when the user or project contract requests them. Render one variant at a time, full-size and in realistic context; switching between variants is instant. Keep exploration outside production imports, state each direction's cost, and promote only the explicitly selected direction.
+Compare alternatives only when the user requests comparison or a material open choice would benefit from it, using the creative workflow. A clear direction may proceed to one complete prototype. Render in realistic, privacy-safe context and keep exploration outside production imports. State material implementation implications and select a direction before implementing it.
 
 ## Compact handoff
 
@@ -28,9 +28,9 @@ For normal personal/local work, hand off:
 - data-truth and interaction notes for changed visible values/controls;
 - a short Keep / Change / Unknown implementation note with exact seams.
 
-Approval covers only the revision shown. A later material revision reopens visual approval; production implementation still needs separate authorization.
+Approval covers only the revision shown. A later material revision reopens visual approval; production implementation needs authorization for that action, which may already exist in the current task.
 
-An isolated, non-mergeable mockup may use prototype-only code or CSS only when an authoritative user or project instruction pre-approves that shortcut; otherwise ask once. Label and isolate it, exclude it from production imports and live state, and discard it or recompose the approved direction through the production project's registered masters. Approval never promotes prototype code into production.
+A requested isolated mockup authorizes prototype-only code or CSS that does not touch production imports, live state, or external services. This ordinary prototype is not a waiver of a production control. Ask only when the proposed experiment crosses an additional protected boundary. Label and isolate it, exclude it from production imports and live state, and discard it or recompose the approved direction through the production project's registered masters. Approval never promotes prototype code into production.
 
 ## Escalate only when the handoff is consequential
 

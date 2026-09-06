@@ -5,8 +5,7 @@ description: Audit and synchronize canonical procedures, generated runtime artif
 
 # Sync agent stubs
 
-Run the canonical generator. Procedures are the source; generated Claude and Codex artifacts are
-outputs and are overwritten.
+Run the canonical generator. `GLOBAL.md` is the shared contract; this repository’s `AGENTS.md` is local guidance. Procedures are reusable sources; generated runtime artifacts are outputs and are overwritten. Preserve real generated-only additions in their canonical owners before regeneration.
 
 ```shell
 python snippets/sync_agent_stubs.py --check

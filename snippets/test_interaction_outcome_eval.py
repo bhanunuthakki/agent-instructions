@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import asdict
 from pathlib import Path
 
@@ -10,7 +11,7 @@ import pytest
 
 def test_corpus_is_valid_unique_and_binds_instruction_context() -> None:
     cases = outcome.load_cases(outcome.DEFAULT_CASES)
-    assert len(cases) == 22
+    assert len(cases) == 32
     assert len({case.case_id for case in cases}) == len(cases)
     assert all(case.instruction_paths for case in cases)
     assert all(
@@ -131,13 +132,14 @@ def test_a_minus_attempt_allows_one_nonpersistent_required_outcome_miss() -> Non
     assert score.meets_acceptance
 
 
-def test_a_minus_attempt_requires_twenty_whole_cases() -> None:
+def test_a_minus_attempt_enforces_whole_case_rate_independently_of_recall() -> None:
     cases = outcome.load_cases(outcome.DEFAULT_CASES)
+    misses = len(cases) - math.ceil(len(cases) * outcome.MIN_CASE_PASS_RATE) + 1
     dimensions = {dimension: 5 for dimension in outcome.QUALITY_DIMENSIONS}
     verdicts = [
         outcome.OutcomeVerdict(
             case.case_id,
-            case.must_include[1:] if index < 3 else case.must_include,
+            case.must_include[1:] if index < misses else case.must_include,
             (),
             dimensions,
             "bounded judgment",
@@ -148,7 +150,7 @@ def test_a_minus_attempt_requires_twenty_whole_cases() -> None:
 
     score = outcome.score_verdicts(cases, verdicts, responses)
 
-    assert score.passed_cases == 19
+    assert score.passed_cases == len(cases) - misses
     assert score.include_recall >= outcome.MIN_INCLUDE_RECALL
     assert not score.meets_acceptance
 
@@ -404,3 +406,37 @@ def test_second_invalid_judge_output_ends_attempt_with_raw_evidence(
         case.case_id: ['{"invalid": true}', '{"invalid": true}']
     }
     assert len(error["progress"]["judge_schema_errors"][case.case_id]) == 2
+
+
+def test_candidate_context_hash_includes_global_and_fallback_but_only_named_local_guides(
+    tmp_path, monkeypatch
+) -> None:
+    from dataclasses import replace
+
+    # Use a real case schema; fixture paths model another project's task.
+    case = outcome.load_cases(outcome.DEFAULT_CASES)[0]
+    root = tmp_path / "agent-instructions"
+    (root / "procedures").mkdir(parents=True)
+    shared = root / "GLOBAL.md"
+    shared.write_text("SHARED RULES")
+    fallback = root / "procedures/INDEX.md"
+    fallback.write_text("ROUTE OWNERS")
+    (root / "AGENTS.md").write_text("INSTRUCTION REPO LOCAL ONLY")
+    other = tmp_path / "other"
+    other.mkdir()
+    (other / "AGENTS.md").write_text("OTHER PROJECT RULES")
+    monkeypatch.setattr(outcome, "ROOT", root)
+    monkeypatch.setattr(outcome, "WORKSPACE_ROOT", tmp_path)
+    case = replace(case, instruction_paths=("agent-instructions/GLOBAL.md", "other/AGENTS.md"))
+    prompt, first_hash = outcome.build_candidate_prompt(case)
+    assert prompt.count("SHARED RULES") == 1
+    assert "ROUTE OWNERS" in prompt
+    assert "OTHER PROJECT RULES" in prompt
+    assert "INSTRUCTION REPO LOCAL ONLY" not in prompt
+    fallback.write_text("NEW ROUTE OWNERS")
+    assert outcome.build_candidate_prompt(case)[1] != first_hash
+    fallback_hash = outcome.build_candidate_prompt(case)[1]
+    shared.write_text("NEW SHARED RULES")
+    assert outcome.build_candidate_prompt(case)[1] != fallback_hash
+    own_case = replace(case, instruction_paths=("agent-instructions/AGENTS.md",))
+    assert "INSTRUCTION REPO LOCAL ONLY" in outcome.build_candidate_prompt(own_case)[0]

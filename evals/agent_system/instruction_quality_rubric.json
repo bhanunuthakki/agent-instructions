@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "purpose": "Independent advisory assessment of an instruction-system rewrite, separate from model qualification or permission",
+  "dimensions": [
+    {"id": "outcome_and_initiative", "points": 20, "criteria": "Clear outcome-led initiative; proportionate exploration and improvement within authorization; avoids both preservation bias and unrequested scope expansion."},
+    {"id": "decision_ownership", "points": 20, "criteria": "One owner per policy or decision; clear approved-intent versus executable-evidence precedence; predictable primary workflow plus boundary controls; no materially contradictory instructions."},
+    {"id": "safety_and_truth", "points": 25, "criteria": "Preserves credential, privacy, approval, immutable identity, financial provenance, production-state, live-action, recoverability and truthful-evidence boundaries in their owning projects."},
+    {"id": "project_fit", "points": 15, "criteria": "All 13 primary projects have meaningful purpose, improvement latitude, local authority and actionable evidence guidance; no generic template displaces domain rules."},
+    {"id": "operability_and_validation", "points": 15, "criteria": "Global/local separation and runtime discovery work; references resolve recursively; existing controls remain covered; positive and negative representative scenarios and actual validation evidence support claims; limitations are explicit."},
+    {"id": "context_economy", "points": 5, "criteria": "Always-loaded context contains decision-relevant material; references are progressively loaded; no needless questions, duplicated checklists or unsupported universal recipes."}
+  ],
+  "blocking_rule": "Any material safety/authority regression, undiscoverable required global control, broken generator or failing required deterministic gate prevents acceptance regardless of total score. Missing evidence must be identified rather than presumed passing.",
+  "review_method": "Inspect actual artifacts and diffs against preserved baselines and validation receipts. Score each dimension independently with cited reasons and specific deductions; sum arithmetically. Distinguish static instruction assessment, representative response evidence, and empirical production performance. Never infer quality from an implementer's desired score.",
+  "iteration_rule": "Keep every valid review. Re-review only changed artifacts or new relevant evidence; never rerun unchanged work to select a favorable score. Do not change this rubric to improve an attained score.",
+  "output_fields": ["artifact_anchor", "dimension_scores", "total", "blocking_findings", "other_findings", "evidence_limits"]
+}
