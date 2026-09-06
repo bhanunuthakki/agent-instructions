@@ -11,7 +11,7 @@ Improve the user's task and give expressive work a deliberate identity. This pro
 
 A material frontend change alters a visible region, hierarchy, interaction, state, or responsive behavior. Typo-only corrections, nonvisual handlers, and generated mirrors with no rendered delta do not require a full visual cycle.
 
-For material work, inspect the request, affected workflow, authentic product data, and current surface. Identify the primary user, desired outcome, information/interaction order, observed friction, and expected improvement. Keep this concise working reasoning rather than a questionnaire. Use `grill-me` only for an unresolved choice that would materially change the solution.
+For material work, inspect the affected workflow, authentic product data, and current surface. Extend the shared outcome with information/interaction order, observed friction, and expected improvement. Use the global collaboration contract for preferences and decisions; `grill-me` adds discovery only when an unresolved choice warrants it.
 
 Never invent financial or operational metrics and present them as product truth. Isolated mockups and tests may use clearly labeled synthetic fixtures that fit supported domain shapes and protect private inputs. Distinguish proposed capability from implemented capability.
 
@@ -21,7 +21,7 @@ Never invent financial or operational metrics and present them as product truth.
 - **`evolve`:** improve hierarchy, interaction, composition, or identity while preserving recognizable context and domain meaning. Change the shell, density, navigation arrangement, or recipe when observed friction justifies it and the task authorizes that boundary.
 - **`explore`:** establish or replace a visual direction when the task calls for it or the existing family cannot express the outcome. Compare meaningful directions when the choice is genuinely open; a clear supplied direction does not require artificial alternatives.
 
-Infer posture from the task and local contract. For expressive work, name the intended response, identity constraints, references or inspiration, and anti-goals. Read [frontend-quality.CREATIVE.md](frontend-quality.CREATIVE.md) for `explore` or consequential expressive `evolve`. Do not silently reduce expressive work to a generic utility treatment.
+Infer posture from the task and local contract. For expressive work, establish the intended response, identity constraints, and useful references or inspiration in the shared task understanding. Read [frontend-quality.CREATIVE.md](frontend-quality.CREATIVE.md) for `explore` or consequential expressive `evolve`. Do not silently reduce expressive work to a generic utility treatment. When taste is unresolved, provide an observable example of the recommended direction before asking the user to choose: a viewable reference, inline sketch, or isolated mockup. Mark it exploratory. If rendering is unavailable, a clearly labeled text wireframe can support the initial preference, with rendered verification still outstanding. Style adjectives and promises to produce a mockup do not resolve the visual choice.
 
 Mockup approval concerns the shown direction and revision. Production edits require task authorization, which may already be present in a build request; do not ask again for an authorized implementation. An isolated prototype never acquires live state or publication authority from its appearance.
 
@@ -63,6 +63,6 @@ Project-selected defaults can change through their owner when evidence and task 
 
 ## Evidence and handoff
 
-Use one compact record: task/outcome; expression posture and selected direction when relevant; baseline/final rendered observations; affected states/widths; deterministic checks; and unverified surfaces or interactions. A reduction pass removes redundant content, containers, controls, or effects whose removal improves the task without losing the chosen identity; retain useful richness and explain material tradeoffs, not every styling decision.
+Add baseline/final observations, affected states/widths, and verification gaps to the shared evidence record. The global completion contract owns the user-facing explanation. A reduction pass removes content, containers, controls, or effects whose removal improves the task without losing the chosen identity; retain useful richness and explain material tradeoffs.
 
 For reviews, assess task success, clarity, product fit, distinctiveness where requested, interaction correctness, accessibility, and evidence. Do not equate prose compliance, visual novelty, or a plain layout with quality. Representative rendered comparisons can evaluate this procedure; they do not establish invocation coverage across all agent work.

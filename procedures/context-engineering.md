@@ -39,9 +39,12 @@ Read [context-engineering.REFERENCE.md](context-engineering.REFERENCE.md) when p
 - Merge overlapping routes around one owner and make adjacent owners name their handoff. The routing catalog should be collectively exhaustive for supported work without making every task load every procedure: one primary deliverable owner plus controls for actual changed boundaries, sharing one outcome and evidence record.
 - Remove scaffolding for behavior the target model and tool interface already perform reliably.
 - Do not add repeated verification prompts for a model that already verifies proactively. Keep explicit checks only where they define required evidence, a risk control, or a completion gate.
-- Preserve provider-specific differences; cross-provider similarity is a hypothesis to validate, not permission to erase documented guidance.
+- Keep the same outcome, authority, and evidence standard across models. Preserve provider-specific differences in thin runtime adjustments only when current documentation or observed failures justify them; identify the model/runtime version and a recheck condition. A new model is not a reason to copy its full prompting guide into the global contract. Cross-provider similarity remains a hypothesis to validate.
 - For long-running work, allow conservative adaptation when implementation reveals a load-bearing unknown, and surface the deviation with evidence.
 
 ## Validate
+
+Include owner enablement when auditing collaboration instructions: routine decisions proceed without unnecessary homework; consequential decisions carry recommendations and practical tradeoffs; references or prototypes resolve vague preferences; useful challenges preserve user authority; delivery is inspectable and honest about evidence. Review assembled contexts, including the host's existing instructions, so a local improvement does not compound an inherited rule.
+
 
 Change one instruction group at a time when practical. Validate only representative routes affected by the change during iteration; at a release boundary or after cross-route authority changes, broaden to the applicable matrix: a simple change, material feature, frontend change, and high-risk operation. Before expanding a focused instruction edit into a fleet-wide rewrite or expensive multi-model evaluation, confirm that broader outcome with the user unless they already requested it. Compare correctness, authority, and required evidence before token savings, then remove context that adds cost without decision value. Retain a rollback diff, verify generated artifacts, and check that every relative reference is reachable in each generated runtime layout.

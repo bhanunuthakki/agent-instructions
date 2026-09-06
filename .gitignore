@@ -53,6 +53,8 @@ snippets/mcp_registry.json
 !/evals/agent_system/interaction_outcome_cases.jsonl
 !/evals/agent_system/README.md
 !/evals/agent_system/instruction_quality_rubric.json
+!/evals/agent_system/user_enablement_cases.jsonl
+!/evals/agent_system/user_enablement_review_contract.json
 !/evals/frontend_quality/
 !/evals/frontend_quality/shadow_cases.json
 !/evals/frontend_quality/creative_cases.json

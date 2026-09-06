@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "purpose": "Independent artifact review of the approved user-enablement consolidation; fixed before first review",
+  "scoring_authority": "evals/agent_system/instruction_quality_rubric.json",
+  "grade_bands": {
+    "A": "95-100 with no blocking findings and all acceptance obligations met",
+    "B": "85-94 or a material unmet acceptance obligation",
+    "C": "70-84",
+    "D": "below 70",
+    "HOLD": "required evidence unavailable or a blocking authority/safety/deterministic failure"
+  },
+  "acceptance_obligations": [
+    "Global instructions enable a capable product owner without assuming technical expertise or suppressing requested expert depth.",
+    "Routine engineering proceeds autonomously; consequential decisions have supported recommendations, understandable tradeoffs, and preserved approval boundaries.",
+    "Useful product/design challenge, meaningful replacement, and concrete exploratory artifacts remain possible without mandatory alternatives or uncontrolled scope.",
+    "Questions, task understanding, and final explanations have one owner; specialized procedures retain their substantive evidence and local controls without repeated ceremony.",
+    "All 13 project rulebooks are reviewed for this change; retained domain authorities and safety boundaries have a recorded disposition.",
+    "Model portability separates shared quality requirements from dated, conditional runtime adjustments; no unmeasured fleet-wide qualification claim.",
+    "Regeneration, recursive reference closure, repository gates, and focused response evidence are reported at their actual level. Failures and uncertainty remain visible."
+  ],
+  "review_rules": "Inspect actual baseline-to-final artifacts, disposition map, and validation receipts. Score existing dimensions without changing their weights. Return cited deductions, blockers, unmet obligations, numeric score and grade. Keep every valid review. Re-review only substantive corrections or new relevant evidence; never rerun unchanged work to select a favorable verdict. Response smoke tests cannot establish execution behavior or production model parity."
+}

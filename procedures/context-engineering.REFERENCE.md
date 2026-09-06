@@ -1,6 +1,18 @@
 # Context-engineering source register
 
-Verified 2026-08-25.
+Source register with access dates per entry. Current collaboration guidance checked 2026-09-06; older entries below retain their historical scope.
+
+## Current model applicability — 2026-09-06
+
+Use these findings when diagnosing a runtime or evaluating a migration. They do not add model-specific policy to every task, change the fleet route, or establish cross-model qualification. Keep the shared outcome, authorization, and evidence requirements unchanged. Test any adjustment against the actual host instructions and tool/display behavior; remove it when the observed need disappears.
+
+- **Astra:** [OpenAI model guidance](https://developers.openai.com/api/docs/guides/latest-model), accessed 2026-09-06, now describes GPT-6 Astra. It identifies extra clarification, sensitivity to conflicting skills, detailed prose, and broad verification as behaviors to calibrate. Preserve explicit follow-through and completion boundaries; prune competing process. The URL is mutable and is no longer current evidence for Sol-specific behavior.
+- **Sol:** the GPT-5.6 conclusions below are a historical 2026-08-25 observation. Reuse the common contract provisionally; qualify Sol separately on the same scenarios rather than inferring performance from Astra or silently treating a changed URL as fresh Sol evidence.
+- **Opus 5:** [Anthropic prompting guidance](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5), accessed 2026-09-06, advises calibrating verbose narration and removing generic repeated checks that amplify proactive verification. Preserve repository-specific acceptance gates.
+- **Fable 5.1:** [Anthropic prompting guidance](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-1), accessed 2026-09-06, describes sparse progress updates and recommends inspecting client display behavior and suppressive instructions first. Also check follow-through and unintended scope expansion when observed. This is a distinct version from the Fable 5 reference below.
+- **Gemini/Flash:** [Google prompt strategies](https://ai.google.dev/gemini-api/docs/prompting-strategies), accessed 2026-09-06, recommends direct structure, prominent critical constraints, and explicit task requirements. Preserve these during pruning. Model-specific date/cutoff or grounding examples apply only to their named version and task; do not freeze dates or impose extraction-only behavior on creative/product work.
+
+The shared user experience is purposeful progress and a self-contained result. Corrections for an overly talkative model and a quiet model need not use identical wording. Host rendering, available tools, model version, and effort belong in the evaluation record; effort names do not demonstrate equivalent capability. This register is guidance, not evidence that every named model/runtime has passed the local suite.
 
 ## Anthropic
 

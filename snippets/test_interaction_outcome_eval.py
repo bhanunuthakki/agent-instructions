@@ -21,6 +21,25 @@ def test_corpus_is_valid_unique_and_binds_instruction_context() -> None:
     )
 
 
+def test_owner_enablement_corpus_loads_complete_context_without_judge_criteria() -> None:
+    cases = outcome.load_cases(
+        outcome.ROOT / "evals/agent_system/user_enablement_cases.jsonl"
+    )
+    assert len(cases) == 8
+    assert len({case.case_id for case in cases}) == len(cases)
+    for case in cases:
+        paths = outcome.resolve_instruction_paths(case)
+        assert all(path.is_file() for path in paths)
+        assert len(paths) == len(set(paths))
+        prompt, digest = outcome.build_candidate_prompt(case)
+        assert case.request in prompt
+        assert len(digest) == 64
+        assert "must_include" not in prompt
+        assert "must_avoid" not in prompt
+        assert all(criterion not in prompt for criterion in case.must_include)
+        assert all(criterion not in prompt for criterion in case.must_avoid)
+
+
 def test_candidate_prompt_hides_judge_only_criteria() -> None:
     case = outcome.load_cases(outcome.DEFAULT_CASES)[0]
     prompt, _digest = outcome.build_candidate_prompt(case)

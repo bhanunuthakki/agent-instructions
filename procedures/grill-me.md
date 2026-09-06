@@ -5,35 +5,12 @@ description: Resolve load-bearing product unknowns before a feature, design, pla
 
 # Grill Me
 
-Inspect the repository and supplied references first, then ask only questions whose answers could change the outcome, scope, authority, data, user-visible behavior, or another expensive-to-reverse decision.
+Resolve consequential unknowns using the global collaboration contract. Inspect supplied references, prior decisions, and recoverable repository facts before asking. Reuse the task's existing outcome and acceptance record.
 
-## Choose the mode
+**Lightweight clarification:** use one focused round for an unresolved decision that materially changes the solution. **Deep interview:** use iterative discovery when the user asks for an interview or explicitly invokes `/grill-me`; do not turn a normal build into an interview by default.
 
-- **Lightweight clarification:** use one concise initial round when an unresolved goal, success condition, scope boundary, or product tradeoff is load-bearing, or when a short answer is likely to avoid materially more user/agent effort. Recommend a default and continue once the branch is resolved.
-- **Deep interview:** use iterative rounds only when the user explicitly invokes `/grill-me`, asks to be interviewed, or asks to restart requirements discovery. Do not silently turn the lightweight route into a prolonged interview.
+Start with the highest-cost-to-reverse unknown and resolve dependencies before leaf preferences. Distinguish choices the user needs to make from facts the agent can investigate, routine implementation decisions, and uncertainty best tested with a prototype. Translate technical options into their consequences for the product and its owner. Recommend a supported default; when evidence is insufficient, identify the smallest useful investigation instead of guessing.
 
-## Find the unknowns
+Use a reference, mockup, or disposable prototype when it makes a preference recognizable. Label exploratory work and preserve its isolation from live state. Probe only the affected behavior, state ownership, failure, permission, or data boundary.
 
-Separate:
-
-- known unknowns the user already recognizes;
-- assumptions recoverable from code, tests, prior decisions, or a safe default;
-- unknowns the user may only recognize when shown an interface, reference, or reversible prototype;
-- implementation details that can remain with the agent.
-
-Start with the highest-cost-to-reverse unknown. Resolve dependencies before leaf preferences.
-
-## Interview
-
-- In lightweight mode, ask one concise round. In deep mode, ask one focused round at a time, sized for a real answer.
-- Name a recommended default and its tradeoff when the options are understood.
-- Probe interfaces, state ownership, failure behavior, permissions, data handling, out-of-scope cases, and the proof of success.
-- Do not ask for facts available in the repository or current context.
-- Use a reference, mockup, or disposable prototype when recognition is more informative than abstract questioning. Label it exploratory and do not let it silently become the accepted design.
-- If implementation later reveals a load-bearing unknown, pause at that decision and resume the interview rather than forcing the original map onto the codebase.
-
-## Stop
-
-Stop when the consequential branches are resolved or the user explicitly asks to proceed. Summarize the agreed outcome, decision boundaries, open assumptions, and validation bar. Ask for confirmation only when a remaining ambiguity would materially change the deliverable.
-
-For frontend work, `frontend-quality` remains the normal task-reasoning owner. Use this interview only for a material unresolved product choice; do not turn ordinary visual judgment into a ceremony.
+If implementation reveals a new consequential unknown, pause the dependent decision and continue independent authorized work. Stop interviewing when the relevant choices are resolved or the user directs proceeding on assumptions. That direction does not grant a missing protected action approval; the global authorization boundary still applies. Update the shared task understanding without requesting a second approval of settled decisions.
