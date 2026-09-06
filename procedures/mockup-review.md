@@ -10,14 +10,14 @@ Keep mockup approval separate from production implementation. A prototype may be
 ## Default review loop
 
 1. Inspect the current diff, existing rendered page, active design contract, executable guards, and production import path. Determine whether a mockup is isolated or production-derived.
-2. Use the lightweight `grill-me` route when an unresolved product choice would materially change the design. For a material runnable surface, capture the baseline and exercise the primary task. State the primary user, dominant action, information order, observable friction, and smallest expected improvement under `frontend-quality`.
+2. Use the lightweight `grill-me` route when an unresolved product choice would materially change the design. Select the `conform`, `evolve`, or `explore` expression posture under `frontend-quality`. For a material runnable surface, capture the baseline and exercise the primary task. State the primary user, dominant action, information order, observable friction, and smallest expected improvement; for expressive work, also state the intended response, identity constraints, candidate signature idea, references, and anti-goals.
 3. Preserve truth: identify visible data as live, derived, owner-ratified, draft, stale, unavailable, illustrative, or proposed. For retained or added controls, note user intent, read-only versus mutating behavior, and unresolved behavior.
-4. Record whether the mockup composes an existing registered family or explores a proposed family. Compose the fewest existing roles and primitives. Perform the whole-page reduction pass: remove decorative variation, redundant containers, repeated titles/subtitles, and secondary grammars before adding styling.
+4. Record whether the mockup composes an existing registered family or explores a proposed family. For `explore` and consequential expressive `evolve`, complete the creative workflow routed by `frontend-quality`. For `conform`, compose the fewest existing roles and primitives. After selection, perform the whole-page reduction pass: remove decorative variation, redundant containers, repeated titles/subtitles, and secondary grammars that do not carry the task or chosen identity.
 5. Verify the mockup at affected widths and states, including applicable keyboard/focus, overflow, console, and network evidence. Record browser/renderer evidence and explicit gaps.
 
 Use focused structural tests where the repository supports them. Do not modify APIs, persistence, migrations, jobs, or live routes during a mockup-only request.
 
-When the user explicitly asks to explore alternatives, compare two or three variants that diverge on a named axis such as hierarchy, density, or interaction model. Render one variant at a time, full-size and in realistic context; switching between variants is instant. Keep exploration outside production imports, state each direction's cost, and promote only the explicitly selected direction.
+Under `explore` and consequential expressive `evolve`, compare two or three variants as required by the creative workflow even when the user did not use the word “alternatives.” For an otherwise `conform` task, compare variants only when the user or project contract requests them. Render one variant at a time, full-size and in realistic context; switching between variants is instant. Keep exploration outside production imports, state each direction's cost, and promote only the explicitly selected direction.
 
 ## Compact handoff
 

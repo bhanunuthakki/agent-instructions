@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import json
 import os
+import struct
 import subprocess
 import sys
+import zlib
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import SimpleNamespace
@@ -919,6 +921,35 @@ def test_frontend_quality_has_one_canonical_route_and_no_stale_global_owner() ->
     assert "design-conformance-audit" not in s.OUR_SKILLS
 
 
+def test_frontend_quality_routes_expression_posture_through_progressive_disclosure() -> None:
+    procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
+    creative = s.PROCEDURES_DIR / "frontend-quality.CREATIVE.md"
+    mockup = (s.PROCEDURES_DIR / "mockup-review.md").read_text(encoding="utf-8")
+    scaffold = (s.PROCEDURES_DIR / "scaffold-design-system.md").read_text(encoding="utf-8")
+    ux_design = (s.PROCEDURES_DIR / "agents" / "ux-design.md").read_text(encoding="utf-8")
+
+    assert creative.exists()
+    for posture in ("`conform`", "`evolve`", "`explore`"):
+        assert posture in procedure
+    assert "frontend-quality.CREATIVE.md" in procedure
+    assert "creative workflow" in mockup
+    assert "expression posture" in scaffold.lower()
+    assert "directed distinctiveness" in ux_design.lower()
+
+    creative_text = creative.read_text(encoding="utf-8").lower()
+    for contract in (
+        "two or three",
+        "three meaningful axes",
+        "fresh context",
+        "at most one re-critique",
+        "media checkpoint",
+        "reduced-motion",
+    ):
+        assert contract in creative_text
+    assert "9/10" not in creative_text
+    assert "api key" not in creative_text
+
+
 def test_root_uses_one_clarification_economics_invariant() -> None:
     root = s.AGENTS_MD.read_text(encoding="utf-8")
     judging = (s.PROCEDURES_DIR / "judging.md").read_text(encoding="utf-8")
@@ -1016,6 +1047,126 @@ def test_frontend_quality_shadow_runner_has_a_schema_checked_dry_run(
     monkeypatch.setattr(sys, "argv", ["run_shadow_eval.py", "--limit", "1"])
     runner.main()
     assert json.loads(capsys.readouterr().out)["selected"] == ["container-economy"]
+
+
+def test_frontend_creative_eval_builds_blind_rendered_comparisons(tmp_path: Path) -> None:
+    runner_path = s.ROOT_REPO / "evals" / "frontend_quality" / "run_creative_eval.py"
+    spec = spec_from_file_location("frontend_quality_creative", runner_path)
+    assert spec and spec.loader
+    runner = module_from_spec(spec)
+    spec.loader.exec_module(runner)
+
+    cases = runner.load_cases()
+    assert {case["posture"] for case in cases["cases"]} == {"conform", "evolve", "explore"}
+
+    def png_pixel(red: int, green: int, blue: int) -> bytes:
+        def chunk(kind: bytes, payload: bytes) -> bytes:
+            checksum = zlib.crc32(kind + payload) & 0xFFFFFFFF
+            return struct.pack(">I", len(payload)) + kind + payload + struct.pack(">I", checksum)
+
+        header = struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0)
+        pixels = zlib.compress(bytes((0, red, green, blue, 255)))
+        return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) + chunk(b"IDAT", pixels) + chunk(b"IEND", b"")
+
+    def evidence() -> dict[str, object]:
+        return {
+            "task_replay": {"status": "pass", "reference": "task replay log"},
+            "accessibility": {"status": "pass", "reference": "accessibility report"},
+            "responsive_states": {"status": "pass", "reference": "capture matrix"},
+            "repository_checks": [{"status": "pass", "reference": "test command"}],
+        }
+
+    baseline = tmp_path / "baseline.png"
+    candidate = tmp_path / "candidate.png"
+    reference = tmp_path / "reference.png"
+    corrupt = tmp_path / "corrupt.png"
+    baseline.write_bytes(png_pixel(255, 0, 0))
+    candidate.write_bytes(png_pixel(0, 255, 0))
+    reference.write_bytes(png_pixel(0, 0, 255))
+    corrupt.write_bytes(b"not a png")
+    with pytest.raises(ValueError, match="invalid PNG signature"):
+        runner._png_artifact(str(corrupt))
+
+    case_id = cases["cases"][0]["id"]
+    manifest = {
+        "run_identifier": "blind-run",
+        "comparisons": [
+            {
+                "case_id": case_id,
+                "shared_conditions": {
+                    "project_fixture": "fixture-revision-1",
+                    "model_runtime": "runtime-revision-1",
+                    "generation_seed": "shared-seed",
+                    "capture_matrix": [{"state": "populated", "viewport": "1x1"}],
+                },
+                "family_reference_images": [str(reference)],
+                "baseline": {
+                    "instruction_revision": "baseline-revision",
+                    "images": [{"state": "populated", "viewport": "1x1", "path": str(baseline)}],
+                    "deterministic_evidence": evidence(),
+                },
+                "candidate": {
+                    "instruction_revision": "candidate-revision",
+                    "images": [{"state": "populated", "viewport": "1x1", "path": str(candidate)}],
+                    "deterministic_evidence": evidence(),
+                },
+            }
+        ],
+    }
+    packet = runner.prepare_review(manifest, cases, tmp_path / "blind")
+    comparison = packet["comparisons"][0]
+    assert set(comparison["images"]) == {"a", "b"}
+    assert "assignment" not in comparison
+    assert all(
+        "baseline" not in Path(image["path"]).name and "candidate" not in Path(image["path"]).name
+        for images in comparison["images"].values()
+        for image in images
+    )
+    assert comparison["dimensions"] == cases["dimensions"]
+
+    assignment = runner._assignment("blind-run", case_id)
+    candidate_slot = next(slot for slot, treatment in assignment.items() if treatment == "candidate")
+    response = {
+        "case_id": comparison["case_id"],
+        "preferred": "a",
+        "dimension_winners": {dimension: "a" for dimension in cases["dimensions"]},
+        "blockers": {"a": [], "b": []},
+        "reason": "A better fits the brief without obscuring the task.",
+    }
+    result = runner.score_responses(manifest, [response], cases)
+    assert result["comparison_count"] == 1
+    assert result["results"][0]["candidate_preference"] in {"win", "loss"}
+    assert result["results"][0]["provenance"]["comparison_sha256"]
+    assert result["by_posture"]["conform"]["comparison_count"] == 1
+    assert result["automatic_gate"] == "disabled"
+
+    blocked_response = {**response, "blockers": {"a": [], "b": []}}
+    blocked_response["blockers"][candidate_slot] = ["task_obscured"]
+    blocked = runner.score_responses(manifest, [blocked_response], cases)
+    assert blocked["results"][0]["candidate_preference"] == "blocked"
+    assert blocked["by_posture"]["conform"]["preference_counts"]["blocked"] == 1
+
+    failed_evidence_manifest = json.loads(json.dumps(manifest))
+    failed_evidence_manifest["comparisons"][0]["candidate"]["deterministic_evidence"][
+        "accessibility"
+    ]["status"] = "fail"
+    failed_evidence = runner.score_responses(failed_evidence_manifest, [response], cases)
+    assert failed_evidence["results"][0]["candidate_preference"] == "blocked"
+    assert "accessibility:fail" in failed_evidence["results"][0]["candidate_blockers"]
+
+    missing_reference_manifest = json.loads(json.dumps(manifest))
+    missing_reference_manifest["comparisons"][0]["family_reference_images"] = []
+    with pytest.raises(ValueError, match="family reference"):
+        runner.validate_manifest(missing_reference_manifest, cases)
+
+    mismatched_viewport_manifest = json.loads(json.dumps(manifest))
+    mismatched_viewport_manifest["comparisons"][0]["shared_conditions"]["capture_matrix"][0][
+        "viewport"
+    ] = "2x1"
+    mismatched_viewport_manifest["comparisons"][0]["baseline"]["images"][0]["viewport"] = "2x1"
+    mismatched_viewport_manifest["comparisons"][0]["candidate"]["images"][0]["viewport"] = "2x1"
+    with pytest.raises(ValueError, match="dimensions do not match"):
+        runner.validate_manifest(mismatched_viewport_manifest, cases)
 
 
 def test_committed_frontend_quality_receipts_match_current_schema() -> None:

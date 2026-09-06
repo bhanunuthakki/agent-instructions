@@ -66,6 +66,10 @@ _setup_verified: bool = False
 _claude_cli_path: str | None = None
 
 
+class ClaudeExecutionError(RuntimeError):
+    """Claude CLI completed without a usable response."""
+
+
 def _verify_setup_once() -> None:
     """Lazy environment check on first call — fails loud rather than mis-billing."""
     global _setup_verified, _claude_cli_path
@@ -113,6 +117,7 @@ def call_claude(
 
     Raises:
       RuntimeError: setup is wrong (CLI not installed, or ANTHROPIC_API_KEY set).
+      ClaudeExecutionError: CLI completed without a usable response.
       subprocess.CalledProcessError: CLI returned non-zero exit; stderr in .stderr.
       subprocess.TimeoutExpired: prompt didn't finish within timeout_seconds.
     """
@@ -133,7 +138,7 @@ def call_claude(
     )
     text = result.stdout.strip()
     if not text:
-        raise RuntimeError(f"claude -p returned empty stdout. stderr: {result.stderr.strip()}")
+        raise ClaudeExecutionError("Claude membership call returned empty output.")
     return text
 
 
@@ -160,8 +165,8 @@ def call_claude_stream(
     drained stderr attached.
 
     Raises:
-      RuntimeError: setup is wrong (CLI not installed, or ANTHROPIC_API_KEY set),
-        or the CLI exited non-zero. Stderr is in the message.
+      RuntimeError: setup is wrong (CLI not installed, or ANTHROPIC_API_KEY set).
+      ClaudeExecutionError: CLI exited non-zero without a usable response.
       subprocess.TimeoutExpired: process didn't exit within timeout_seconds.
     """
     _verify_setup_once()
@@ -229,9 +234,8 @@ def call_claude_stream(
         rc = proc.wait(timeout=timeout_seconds)
         stderr_thread.join(timeout=5)
         if rc != 0:
-            stderr_text = "".join(stderr_buf).strip()
-            raise RuntimeError(
-                f"claude -p (stream-json) exited {rc}. stderr: {stderr_text[:1000]}"
+            raise ClaudeExecutionError(
+                f"Claude membership streaming call failed with status {rc}."
             )
     except GeneratorExit:
         # Consumer closed the generator early (e.g. client disconnected).

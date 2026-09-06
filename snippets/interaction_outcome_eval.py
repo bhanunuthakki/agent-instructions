@@ -546,6 +546,12 @@ def _sum_usage(results: list[ModelResult]) -> Usage:
     )
 
 
+def validate_model_independence(candidate_model: str, judge_model: str) -> None:
+    """Fail closed when the same model would create and judge an answer."""
+    if candidate_model == judge_model:
+        raise OutcomeEvalError("candidate_model and judge_model must be independent")
+
+
 def run_evaluation(
     cases: list[OutcomeCase],
     *,
@@ -555,6 +561,7 @@ def run_evaluation(
     generated_at: str | None = None,
     progress: dict[str, object] | None = None,
 ) -> dict[str, object]:
+    validate_model_independence(candidate_model, judge_model)
     candidate_results: list[ModelResult] = []
     responses: dict[str, str] = {}
     instruction_hashes: dict[str, str] = {}

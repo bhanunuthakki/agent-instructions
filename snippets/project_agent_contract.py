@@ -188,8 +188,20 @@ def render_contract(profile: str) -> str:
         "# Interface contract\n\n"
         f"Profile seed: `{profile}`. This project-owned document is the continuing authority; "
         "the shared profile is only a starting hypothesis.\n\n"
-        "Define the primary task, density and viewport, semantic typography, spacing, controls, "
-        "state feedback, responsive behavior, sanctioned exceptions, and rendered evidence here.\n"
+        "## User and task\n\n"
+        "- Primary user: TODO\n"
+        "- Primary task and dominant action: TODO\n"
+        "- Information and interaction order: TODO\n\n"
+        "## Expression\n\n"
+        "- Expression posture (`conform`, `evolve`, or `explore`): TODO\n"
+        "- Intended response: TODO\n"
+        "- Signature principles: TODO\n"
+        "- Anti-goals: TODO\n"
+        "- References: TODO or none supplied\n"
+        "- Media and motion policy: TODO\n\n"
+        "## System and evidence\n\n"
+        "Define density and viewport, semantic typography, spacing, controls, state feedback, "
+        "responsive behavior, sanctioned exceptions, and rendered evidence here.\n"
     )
 
 

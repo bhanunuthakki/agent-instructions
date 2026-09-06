@@ -30,6 +30,8 @@ snippets/mcp_registry.json
 !/config/judge_policy.json
 !/config/judge_registry.json
 !/config/judge_rollout.json
+!/config/llm_routing_policy.json
+!/config/llm_usage_index.json
 !/config/judge_policies/
 /config/judge_policies/*
 !/config/judge_policies/1.0.0.json
@@ -51,6 +53,8 @@ snippets/mcp_registry.json
 !/evals/agent_system/README.md
 !/evals/frontend_quality/
 !/evals/frontend_quality/shadow_cases.json
+!/evals/frontend_quality/creative_cases.json
+!/evals/frontend_quality/run_creative_eval.py
 !/evals/harden/
 /evals/harden/*
 !/evals/harden/cases.jsonl

@@ -10,8 +10,8 @@ Create the smallest durable foundation for the product at hand. This is a genera
 ## Establish the fit first
 
 1. Inspect the repository, existing design system, framework, component primitives, accessibility utilities, tests, and current rendered surfaces. Preserve a chosen stack and its conventions.
-2. For a genuine greenfield project with no selected stack, present a neutral, small foundation that fits the deployment and team constraints. Do not presume Next.js, Tailwind, Radix, shadcn, or a specific font/aesthetic. Propose a library only when it materially removes a real accessibility or maintenance burden.
-3. Follow `frontend-quality` before styling: define the primary task, information hierarchy, reading order, and minimum content. Start with ordinary document flow and one neutral page frame, then compose the fewest roles and primitives needed.
+2. For a genuine greenfield project with no selected stack, select both an interface profile and the `frontend-quality` expression posture. Complete its creative workflow when `explore` applies; otherwise establish a small, restrained foundation that fits the deployment and team constraints. Do not presume Next.js, Tailwind, Radix, shadcn, or a specific font/aesthetic. Propose a library only when it materially removes a real accessibility or maintenance burden.
+3. Follow `frontend-quality` before styling: define the primary task, information hierarchy, reading order, minimum content, and expression posture. Select any required creative direction before fixing visual tokens, then compose the fewest roles and primitives needed to carry the task and chosen identity.
 
 ## Foundation contract
 
@@ -23,7 +23,7 @@ Create or complete the closest `AGENTS.md` `## Interface` declaration before sty
 - `Render`: the runnable command and primary viewport or renderer;
 - `Gate`: the deterministic command that checks the local contract.
 
-The profile is scaffolding input only. Write the task-specific density, typography, spacing, interaction, responsive, state, exception, and rendered-evidence decisions into the local contract, then make the executable authority and gate enforce them. Do not leave another project's paths or design values in the scaffold.
+The profile and expression posture are scaffolding inputs only. Write the task-specific density, typography, spacing, interaction, responsive, state, exception, and rendered-evidence decisions into the local contract, then make the executable authority and gate enforce them. For expressive work, also record intended response, signature principles, anti-goals, references when supplied, and the media/motion policy in that contract rather than adding parser fields to the compact `AGENTS.md` declaration. Do not leave another project's paths or design values in the scaffold.
 
 Use the existing stack’s equivalent mechanisms, not copied framework samples. The foundation should have one source of truth for:
 

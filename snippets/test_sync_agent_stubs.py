@@ -24,6 +24,10 @@ def expected_static_paths() -> set[str]:
     }
 
 
+def test_sync_gate_includes_the_llm_usage_index() -> None:
+    assert sync.detect_llm_usage_index_drift(check_projects=False) == []
+
+
 def test_hardening_package_has_exact_nineteen_rubrics_and_runtime_closure(
     tmp_path: Path,
 ) -> None:

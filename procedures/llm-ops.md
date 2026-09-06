@@ -10,7 +10,7 @@ An LLM call is complete only when its selection, contract, cost, failures, and q
 ## Start at the seam
 
 1. Inventory active provider calls, model strings and aliases, prompts, tools, parsers, fallbacks, budgets, and evals.
-2. Identify the user-visible purpose and whether the output is deterministic data, classification, prose judgment, or an action proposal.
+2. Identify the user-visible purpose and whether the workload is an ordinary application call or an explicit Judge. Check `config/llm_usage_index.json` before editing; add or repair the project's registration as part of the change.
 3. Run `external-practice` for current model, endpoint, tool, caching, and provider behavior. Use `model-frontier` for current price and performance; do not select from memory.
 4. Preserve existing behavior and effective reasoning as the baseline before changing model, prompt, or transport.
 
@@ -26,6 +26,7 @@ An LLM call is complete only when its selection, contract, cost, failures, and q
 Read only the reference needed for the task:
 
 - Core API, schemas, ledger, budgets, and completion contract: [llm-ops.CONTRACTS.md](llm-ops.CONTRACTS.md)
+- Fleet routing authority, canonical variables, usage registration, and migration rules: [llm-ops.FLEET.md](llm-ops.FLEET.md)
 - Golden sets, rubric judges, downgrade gates, and judge governance: [llm-ops.EVALS.md](llm-ops.EVALS.md)
 - This machine’s subscription wrappers, isolation, fallback order, and metered exception: [llm-ops.TRANSPORTS.md](llm-ops.TRANSPORTS.md)
 

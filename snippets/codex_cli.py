@@ -120,6 +120,13 @@ def _verify_setup_once() -> None:
         return
 
     cli_path = _resolve_cli()
+    user_codex_auth = Path.home() / ".codex" / "auth.json"
+    membership_auth = MEMBERSHIP_CODEX_HOME / "auth.json"
+    if user_codex_auth.is_file():
+        if not membership_auth.is_file() or user_codex_auth.stat().st_mtime > membership_auth.stat().st_mtime:
+            MEMBERSHIP_CODEX_HOME.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(user_codex_auth, membership_auth)
+
     try:
         status = subprocess.run(
             [cli_path, "login", "status"],

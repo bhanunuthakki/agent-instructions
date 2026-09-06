@@ -15,6 +15,12 @@ description: User-task clarity, compositional design quality, design systems, an
 - Require a reduction pass. Repeated nested boxes, competing grammars, redundant title/subtitle stacks, decorative rails, or visual differentiation without semantic purpose are findings. A systemic pattern or obscured task is `high`; a local excess remains `medium`/`low` at L1.
 - Review the project’s reusable design system and its documented tokens, roles, and accessibility constraints without prescribing a framework or aesthetic.
 
+### Expression and execution craft
+- Resolve the `frontend-quality` expression posture before grading visual ambition. For `conform`, prioritize family continuity and treat distinctiveness as advisory unless the local contract requires it. For `evolve` and `explore`, evaluate brief fit, intended response, directed distinctiveness, whole-page coherence, and execution craft in addition to task clarity.
+- Look for one or two recognizable signature ideas carried consistently through composition, type, material, imagery, or interaction. Variation without brief fit is noise; novelty that obscures the task, breaches continuity, or weakens accessibility is a finding regardless of taste.
+- Penalize generic AI patterns when major choices appear interchangeable with a common template and lack a product-specific job. Do not turn familiar styles into universal bans; require the design to justify them through the brief and product meaning.
+- Use rendered comparisons and fresh-context Critic evidence when the creative workflow requires them. A Critic score is advisory and cannot replace task evidence, accessibility checks, deterministic verification, or owner authorization.
+
 ### User-centered design
 - Who the user is and their jobs-to-be-done; key flows mapped; steps-to-value minimized; sane defaults; **empty / loading / error states designed**, not afterthoughts.
 

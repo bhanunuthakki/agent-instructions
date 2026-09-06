@@ -34,6 +34,7 @@ from pathlib import Path
 from typing import Any
 
 import definition_governance
+import check_llm_usage_index
 import project_agent_contract
 
 ROOT_REPO = Path(__file__).resolve().parents[1]
@@ -1402,6 +1403,18 @@ def includes_guide_validation(argv: list[str]) -> bool:
     return "--check" in argv
 
 
+def detect_llm_usage_index_drift(*, check_projects: bool) -> list[str]:
+    """Return central policy/index failures as instruction-system drift."""
+    return [
+        f"LLM usage index: {error}"
+        for error in check_llm_usage_index.validate_index(
+            root=ROOT_REPO,
+            developer_root=PROJECT_ROOT,
+            check_projects=check_projects,
+        )
+    ]
+
+
 def main() -> None:
     dry = "--dry-run" in sys.argv
     check = (
@@ -1532,6 +1545,7 @@ def main() -> None:
     )  # always read-only — a prose fix needs human attention
     drift += detect_hook_capability_drift()
     drift += detect_command_orphans()
+    drift += detect_llm_usage_index_drift(check_projects=machine_inventory)
     if machine_inventory:
         drift += detect_definition_override_drift()
         drift += detect_semantic_drift()

@@ -271,6 +271,18 @@ def test_live_flow_generates_isolated_candidates_then_blind_judges() -> None:
     }
 
 
+def test_live_flow_rejects_a_self_judging_model() -> None:
+    case = outcome.load_cases(outcome.DEFAULT_CASES)[0]
+
+    with pytest.raises(outcome.OutcomeEvalError, match="must be independent"):
+        outcome.run_evaluation(
+            [case],
+            candidate_model="same-model",
+            judge_model="same-model",
+            call_model=lambda *_args, **_kwargs: pytest.fail("must fail before calling"),
+        )
+
+
 def test_judge_schema_failure_gets_one_recorded_format_repair() -> None:
     case = outcome.load_cases(outcome.DEFAULT_CASES)[0]
     calls: list[str] = []
