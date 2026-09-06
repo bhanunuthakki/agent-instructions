@@ -93,12 +93,12 @@
       "budget_authority": null,
       "eval_authority": "huntdesk/evals.py",
       "workload_classes": ["application"],
-      "application_route": "migration_required",
+      "application_route": "fleet_default",
       "judge_route_state": null,
       "judge_route_authority": null,
       "judge_independence_authority": null,
       "judge_migration_note": null,
-      "migration_note": "Application calls still use Claude before Codex."
+      "migration_note": null
     },
     {
       "project": "repo-maintenance",
