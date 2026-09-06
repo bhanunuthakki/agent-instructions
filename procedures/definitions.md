@@ -14,9 +14,9 @@ Definitions form a scope chain: global root -> project -> closest owning subtree
 1. Scan exported types, public interfaces, tables, state labels, user-visible copy, and existing `DEFINITIONS.md`.
 2. Group true synonyms and flag one term used for several concepts.
 3. Propose a canonical term for each consequential cluster, naming the current alternatives, locations, and migration tradeoff.
-4. Get owner confirmation before changing a public or persisted name.
+4. For a public or persisted name, verify the task authorizes its meaning and compatibility change; ask only for a consequential decision that remains unresolved.
 5. Check the effective ancestor chain. Reject a duplicate term even when the descendant labels it an override or refinement.
-6. Add or update the definition. Keep code renames as a separately approved change with an occurrence inventory and migration plan.
+6. Add or update the definition and apply authorized renames with an occurrence inventory and migration plan when compatibility requires one. Do not ask again for the exact rename already requested.
 
 ## Entry shape
 
@@ -35,15 +35,15 @@ Omit a field only when it adds no information. A definition that merely repeats 
 
 - Use existing canonical identifiers verbatim in code, schemas, commits, and PRs.
 - Provisional language is allowed during discovery and isolated mockups. Mark it provisional when someone could mistake it for a ratified product state.
-- Before a term becomes a code symbol, typed state, schema/API field, persisted value, canonical UI status, or governing directive concept, ratify it in the effective definition chain.
+- Record a consequential domain meaning in its owning definition chain before propagating it into persisted values, public interfaces, canonical decision states, or cross-project contracts. Owner confirmation is for disputed meaning or consequential compatibility choices, not every new identifier.
 - When a new non-durable concept is local and obvious, name it consistently without blocking exploration on a vocabulary ceremony.
-- When the name crosses modules, persistence, APIs, or durable user decisions—or overlaps an existing term—propose the definition before propagating it.
+- When a domain name crosses persistence, public APIs, durable user decisions, or overlaps an existing term, resolve its definition before propagating it. A local helper crossing modules alone does not create a governance gate.
 - Surface ambiguity instead of silently picking whichever synonym appears first.
 - Load only the effective definition chain for the task. Cross-project work loads the global file plus the provider and consumer chains, never every glossary.
 - Treat same-spelling local concepts across projects as qualified terms, not evidence that their meanings should be merged.
 
 ## Vocabulary lifecycle
 
-Track maturity (`observed -> candidate -> ratified`) separately from ownership scope (`subtree -> project -> cross-project -> global`). Recommend Definition-Scope Promotion only after repeated real use with identical meaning: at least two uses for a candidate, three owner-ratified uses for ratified maturity, and at least six uses across two projects for a cross-project/global candidate. Global scope remains owner-ratified. Any downstream override request blocks promotion and puts Definition-Scope Demotion on `HOLD` until a concrete owning `DEFINITIONS.md` is named and proven to be a strict descendant through its declared `Inherits` chain.
+Track maturity (`observed -> candidate -> ratified`) separately from ownership scope (`subtree -> project -> cross-project -> global`). Usage counts are evidence, not approval thresholds. Recommend scope review only when independent project uses have the same meaning and shared ownership would reduce ambiguity. Ratification records an actual owner decision; do not infer it from repetition. A broader definition requires that broader owner’s authorization. A downstream override request suspends promotion and requires a concrete narrower owner, verified as a strict descendant through its `Inherits` chain. Keep a definition at its current scope until that scope decision is resolved.
 
-Validate a chain with `snippets/definition_governance.py`. Lifecycle changes are reviewable recommendations; never auto-rename public or persisted identifiers.
+Validate a chain with `snippets/definition_governance.py`. Lifecycle changes are reviewable recommendations; never auto-rename public or persisted identifiers from a lifecycle recommendation.

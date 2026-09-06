@@ -5,17 +5,17 @@ description: Implement, fix, refactor, or review code with the repository’s te
 
 # Code Change
 
-Match the surrounding code and preserve the repository’s public behavior unless the request changes it. Let the codebase supply ordinary conventions; use this procedure for the non-obvious engineering contract.
+Implement the authorized outcome. Use the surrounding code for conventions and current behavior, while approved intent and domain contracts define what should happen. Preserve unrelated public behavior; replace an inadequate implementation when evidence shows that a larger coherent change better serves the task.
 
 ## Work loop
 
 1. Inspect the affected interface, nearby tests, repository commands, and current diff.
 2. State the next behavior in one sentence.
 3. For a bug or new behavior, add the smallest regression or behavior test that should fail without the change and confirm the failure is relevant. For a mechanical refactor or documentation-only change, use adequate existing coverage unless inspection reveals a real gap.
-4. Implement the minimum coherent change, then refactor only where it improves information hiding or removes genuine duplication.
+4. Implement the coherent solution, including adjacent improvements that directly remove the task’s friction or risk. Refactor where it improves information hiding, removes genuine duplication, or replaces an obsolete mechanism; keep unrelated improvements as proposals.
 5. Run targeted validation after each behavior. At the push or release boundary, finish with the repository’s applicable format, lint, typecheck, tests, and build checks in that order.
 
-Do not weaken, disable, or rewrite a failing test merely to make it pass. Exact prose assertions are appropriate only when wording is the contract; prefer structural and semantic checks.
+Do not weaken or disable a test merely to make it pass. When requested behavior changes or evidence shows the oracle is wrong, revise the affected expectation and preserve tests for the underlying invariant and nearby failure paths. Compare against existing expectations before regenerating goldens; review intended changes, then run comparison mode. Exact prose assertions are appropriate only when wording is the contract; prefer structural and semantic checks.
 
 ## Design contract
 

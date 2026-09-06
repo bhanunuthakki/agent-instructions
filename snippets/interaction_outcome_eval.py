@@ -13,8 +13,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol, cast
 
-import project_agent_contract
-
 ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_ROOT = ROOT.parent
 DEFAULT_CASES = ROOT / "evals/agent_system/interaction_outcome_cases.jsonl"
@@ -203,8 +201,12 @@ def load_cases(path: Path) -> list[OutcomeCase]:
 
 
 def resolve_instruction_paths(case: OutcomeCase) -> tuple[Path, ...]:
+    # Shared sources apply to every project; local guides load only when named.
+    # The catalog is part of the effective routing contract and therefore its hash.
+    shared = (ROOT / "GLOBAL.md", ROOT / "procedures/INDEX.md")
+    sources = [str(path.relative_to(WORKSPACE_ROOT)) for path in shared]
     paths: list[Path] = []
-    for raw in case.instruction_paths:
+    for raw in (*sources, *case.instruction_paths):
         path = (WORKSPACE_ROOT / raw).resolve()
         try:
             path.relative_to(WORKSPACE_ROOT.resolve())
@@ -216,7 +218,8 @@ def resolve_instruction_paths(case: OutcomeCase) -> tuple[Path, ...]:
             raise OutcomeEvalError(
                 f"case {case.case_id}: missing instruction file {raw}"
             )
-        paths.append(path)
+        if path not in paths:
+            paths.append(path)
     return tuple(paths)
 
 
@@ -232,10 +235,6 @@ def build_candidate_prompt(case: OutcomeCase) -> tuple[str, str]:
     sections = []
     for path in resolve_instruction_paths(case):
         instruction_text = path.read_text(encoding="utf-8")
-        if path == ROOT / "AGENTS.md":
-            instruction_text = project_agent_contract.without_interface_section(
-                instruction_text
-            )
         sections.append(
             f"### {path.relative_to(WORKSPACE_ROOT)}\n{instruction_text}"
         )

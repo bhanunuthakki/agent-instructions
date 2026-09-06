@@ -25,7 +25,7 @@ Ask once before a material shortcut unless its exact category is already authori
 
 A shortcut never waives credential protection, authorization, destructive-action confirmation, money controls, production or external mutation authority, provenance truth, irreplaceable data integrity, or recovery for retained canonical state. Experiment on a snapshot, disposable copy, derived projection, or isolated mockup rather than the only copy of canonical data.
 
-An isolated, non-mergeable UI mockup may use prototype-only code or CSS only when that category is pre-approved. Label it, exclude it from production imports and live state, and discard it or recompose it through production masters before implementation. Mockup approval authorizes direction, not production code.
+A requested isolated, non-mergeable UI mockup may use prototype-only code or CSS under the `mockup-review` scope; that alone is not a material shortcut requiring another approval. Label it, exclude it from production imports and live state, and discard it or recompose it through production masters before implementation. Mockup approval authorizes direction, not production code.
 
 ## Exit
 

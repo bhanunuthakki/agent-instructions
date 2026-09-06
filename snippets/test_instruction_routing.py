@@ -12,15 +12,26 @@ def _text(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
-def test_root_is_invariant_and_routing_only() -> None:
-    root = _text("AGENTS.md")
-    assert "quick reversible iteration" not in root
-    assert "## Effort calibration" not in root
-    assert "short answer is likely to prevent materially greater rework" in root
-    assert root.count("procedures/iteration-shortcut.md") == 1
-    assert "A material user correction replaces the prior framing" in root
-    assert "proposed, implemented, validated, running, committed, merged, deployed" in root
-    assert "conclusion or diagnosis, practical implications, and requested actions" in root
+def test_global_contract_and_local_guide_have_distinct_owners() -> None:
+    global_rules = _text("GLOBAL.md")
+    local = _text("AGENTS.md")
+    routes = _text("procedures/INDEX.md")
+    machine = _text("procedures/machine-operations.md")
+    assert "## Outcome and initiative" in global_rules
+    assert "Approved product intent governs required behavior" in global_rules
+    assert "do not switch branches" in global_rules
+    assert "never" in global_rules.lower() and "credentials" in global_rules
+    assert "procedures/INDEX.md" in global_rules
+    assert "procedures/machine-operations.md" in global_rules
+    assert "source" in local and "sync_agent_stubs.py" in local
+    assert "## Outcome and initiative" not in local
+    assert "OPENROUTER_API_KEY" not in global_rules
+    assert "LINEAR_API_KEY" not in global_rules
+    assert "without searching for other credentials" in machine
+    assert "Load only that variable at runtime" in machine
+    assert "before execution" in routes
+    assert "a primary deliverable owner" in global_rules
+    assert "proposed, implemented, validated, committed, merged, deployed" in global_rules
 
 
 def test_operations_owns_resource_handoff_and_truthful_closure() -> None:
@@ -55,6 +66,9 @@ def test_frontend_route_preserves_project_family_and_prototype_boundary() -> Non
     mockup = _text("procedures/mockup-review.md")
     assert "nearest shipped sibling and registered family" in frontend
     assert "typed rationale and an adversarial continuity test" in frontend
+    assert "when the project contract requires" in frontend
+    assert "item count alone never mandates controls" in frontend
+    assert "useful richness" in frontend
     assert "Exact tokens, recipes, exceptions" in frontend
     assert "recompose the approved direction through the production project's registered masters" in mockup
     assert "Approval never promotes prototype code into production" in mockup
@@ -162,3 +176,24 @@ def test_interaction_outcome_corpus_covers_observed_failure_modes() -> None:
         assert case["context"] and case["request"]
         assert case["instruction_paths"]
         assert case["must_include"] and case["must_avoid"]
+
+
+def test_instruction_quality_cases_cover_initiative_and_its_boundaries() -> None:
+    cases = [json.loads(line) for line in _text("evals/agent_system/interaction_outcome_cases.jsonl").splitlines() if line]
+    ids = {case["case_id"] for case in cases}
+    assert {
+        "internal-rename-positive", "layout-replacement-positive", "six-citations-no-facets",
+        "changed-golden-expectation", "unexplained-golden-drift", "bounded-prototype-positive",
+        "intent-over-bug", "adjacent-scope-boundary",
+    } <= ids
+    for case in cases:
+        assert "agent-instructions/GLOBAL.md" in case["instruction_paths"]
+        assert "agent-instructions/AGENTS.md" not in case["instruction_paths"]
+
+
+def test_instruction_quality_rubric_is_complete_and_gated() -> None:
+    rubric = json.loads(_text("evals/agent_system/instruction_quality_rubric.json"))
+    assert sum(item["points"] for item in rubric["dimensions"]) == 100
+    assert len({item["id"] for item in rubric["dimensions"]}) == len(rubric["dimensions"])
+    assert "regardless of total score" in rubric["blocking_rule"]
+    assert "never rerun unchanged work" in rubric["iteration_rule"]

@@ -39,7 +39,7 @@ def test_corpus_is_valid_and_uses_known_procedures() -> None:
     catalog = routing.load_procedure_catalog(ROOT)
     cases = routing.load_cases(CASES_PATH, known_procedures=set(catalog))
 
-    assert len(cases) == 22
+    assert len(cases) == 31
     assert len({case.case_id for case in cases}) == len(cases)
     assert any(not case.required_procedures for case in cases)
     assert any(case.should_clarify for case in cases)
@@ -159,3 +159,18 @@ def test_response_must_cover_each_case_exactly_once() -> None:
             expected_case_ids=("change-state", "second-case"),
             known_procedures={"code-change", "data-foundation"},
         )
+
+
+def test_routing_context_uses_global_contract_and_fallback_without_local_guide(tmp_path) -> None:
+    (tmp_path / "procedures").mkdir()
+    (tmp_path / "GLOBAL.md").write_text("SHARED RULES")
+    (tmp_path / "AGENTS.md").write_text("LOCAL REPOSITORY RULES")
+    fallback = tmp_path / "procedures/INDEX.md"
+    fallback.write_text("ROUTE OWNERS")
+    first = routing.assemble_context(tmp_path, {"code-change": "Implementation"})
+    assert "SHARED RULES" in first
+    assert "ROUTE OWNERS" in first
+    assert "LOCAL REPOSITORY RULES" not in first
+    fallback.write_text("CHANGED ROUTE OWNERS")
+    second = routing.assemble_context(tmp_path, {"code-change": "Implementation"})
+    assert routing._sha256(first.encode()) != routing._sha256(second.encode())

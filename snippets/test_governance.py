@@ -1339,3 +1339,40 @@ def test_ledger_audit_separates_routing_from_execution_and_sampling(
     failed_report = judges.audit_ledger(ledger)
     assert failed_report["sampled_audits_due"] == 0
     assert failed_report["routing_failures"] == 1
+
+
+def test_definition_usage_does_not_grant_broader_authority(tmp_path: Path) -> None:
+    result = definitions.recommend_definition_change(
+        real_uses=100, project_count=5, identical_meaning=True,
+        override_requests=0, owner_ratified=True, current_scope="project",
+        current_maturity="ratified", current_definition_file=tmp_path / "DEFINITIONS.md",
+        owning_definition_file=None,
+    )
+    assert result["action"] == "review_scope"
+    assert result["target_scope"] == "project"
+    assert result["reason"] == "shared_meaning_requires_scope_owner_decision"
+
+
+def test_definition_owner_decision_has_no_arbitrary_usage_threshold(tmp_path: Path) -> None:
+    result = definitions.recommend_definition_change(
+        real_uses=1, project_count=1, identical_meaning=True,
+        override_requests=0, owner_ratified=True, current_scope="project",
+        current_maturity="observed", current_definition_file=tmp_path / "DEFINITIONS.md",
+        owning_definition_file=None,
+    )
+    assert result["target_maturity"] == "ratified"
+    assert result["target_scope"] == "project"
+    assert result["action"] == "promote_maturity"
+
+
+def test_definition_repetition_cannot_ratify_or_demote_maturity(tmp_path: Path) -> None:
+    for maturity in ("candidate", "ratified"):
+        result = definitions.recommend_definition_change(
+            real_uses=0, project_count=1, identical_meaning=False,
+            override_requests=0, owner_ratified=False, current_scope="project",
+            current_maturity=maturity, current_definition_file=tmp_path / "DEFINITIONS.md",
+            owning_definition_file=None,
+        )
+        assert result["target_maturity"] == maturity
+        assert result["target_scope"] == "project"
+        assert result["action"] == "hold"

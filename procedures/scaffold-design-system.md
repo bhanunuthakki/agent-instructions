@@ -38,18 +38,18 @@ explicit without prescribing a framework vocabulary.
 Use the existing stack’s equivalent mechanisms, not copied framework samples. The foundation should have one source of truth for:
 
 - semantic color, typography, spacing, sizing, shape, depth, motion, and breakpoint tokens; document foreground/background contrast pairings to WCAG AA where text or controls use them;
-- a small semantic text-role set and one primary type family; another family is allowed only for a named semantic role;
+- a small semantic text-role set and typography that serves the task and selected identity; avoid unmotivated variation rather than imposing a universal font count;
 - accessible primitives for the actual early controls (normally buttons, fields, overlays, navigation, and feedback), using native semantics first and mature focus/keyboard primitives where available;
 - neutral empty, loading, and error states with clear meaning and recovery action when one exists; they do not need card treatment by default;
 - locale-aware date, number, and currency formatting at a shared boundary.
 
-Avoid raw visual literals outside the foundation, open-ended style APIs, hand-rolled focus traps or widgets when maintained primitives are available, `outline: none` without a visible focus replacement, layout-property animation, and `transition: all`.
+Avoid raw visual literals outside the foundation, open-ended style APIs, hand-rolled focus traps or widgets when maintained primitives are available, `outline: none` without a visible focus replacement, unmeasured expensive animation, and indiscriminate `transition: all`.
 
 ## Accessibility and responsive baseline
 
 - Preserve visible focus, keyboard operation, semantic labels, and non-color state cues.
-- Keep targets at least 24px (44px on touch-first mobile contexts); mobile text inputs remain at least 16px.
-- Respect reduced motion; animate only `transform` and `opacity` for brief feedback.
+- Set usable target geometry and spacing in the project contract. Start new web interfaces at 24px pointer and 44px touch targets and 16px mobile input text, then verify the applicable accessibility and device requirements; these seeds do not override an established accessible local contract.
+- Respect reduced motion and input responsiveness; prefer inexpensive animation properties and measure richer effects when they serve the task or selected identity.
 - Design empty, loading, error, overflow, and controlled-input states deliberately. Allow paste, validate after input, move focus to submitted errors, and preserve password-manager/2FA behavior.
 - Use responsive layout primitives appropriate to the stack, dynamic viewport sizing and safe-area handling for fixed mobile surfaces, and locale-aware formatting.
 
