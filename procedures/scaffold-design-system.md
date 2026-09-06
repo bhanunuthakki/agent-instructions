@@ -7,6 +7,10 @@ description: Establish a small, accessible, stack-appropriate UI foundation afte
 
 Create the smallest durable foundation for the product at hand. This is a generation workflow, not a generic aesthetic or framework recipe. `frontend-quality` owns the user-task hypothesis, composition, reduction pass, and rendered proof; `ux-design` later audits the resulting experience.
 
+Read [frontend-quality.PRIMITIVES.md](frontend-quality.PRIMITIVES.md) before defining the project's
+primitive catalog or drift gate. Apply its semantic questions through the selected stack; do not
+copy another project's component names or visual recipes.
+
 ## Establish the fit first
 
 1. Inspect the repository, existing design system, framework, component primitives, accessibility utilities, tests, and current rendered surfaces. Preserve a chosen stack and its conventions.
@@ -24,6 +28,12 @@ Create or complete the closest `AGENTS.md` `## Interface` declaration before sty
 - `Gate`: the deterministic command that checks the local contract.
 
 The profile and expression posture are scaffolding inputs only. Write the task-specific density, typography, spacing, interaction, responsive, state, exception, and rendered-evidence decisions into the local contract, then make the executable authority and gate enforce them. For expressive work, also record intended response, signature principles, anti-goals, references when supplied, and the media/motion policy in that contract rather than adding parser fields to the compact `AGENTS.md` declaration. Do not leave another project's paths or design values in the scaffold.
+
+The local contract also embeds or links a primitive catalog that names its executable source, drift
+gate, and safe auto-repair boundary. Existing projects preserve their established catalog format;
+new projects begin with only the primitives required by their first coherent task. The catalog makes
+action, annotation/status, responsive record, dismiss/close/delete, and state-feedback distinctions
+explicit without prescribing a framework vocabulary.
 
 Use the existing stack’s equivalent mechanisms, not copied framework samples. The foundation should have one source of truth for:
 
@@ -45,6 +55,11 @@ Avoid raw visual literals outside the foundation, open-ended style APIs, hand-ro
 
 ## Finish
 
-Add focused structural tests for the foundation’s actual contracts. Render the scaffold at applicable widths and states, then complete the `frontend-quality` reduction pass: remove decorative variants, redundant containers, unused tokens, and components that create a second grammar. Handoff identifies the task the starter surface supports, the primitives/tokens established, rendered proof, deterministic checks, and any verification gap.
+Add focused structural tests for the foundation’s actual contracts. A self-healing checker may repair
+only safe mechanical drift whose semantics are already fixed; ambiguous behavior fails for review.
+Render the scaffold at applicable widths and states, then complete the `frontend-quality` reduction
+pass: remove decorative variants, redundant containers, unused tokens, and components that create a
+second grammar. Handoff identifies the task the starter surface supports, the primitives/tokens
+established, rendered proof, deterministic checks, and any verification gap.
 
 Framework-specific examples belong in optional repository templates or references after stack selection, not in this universal procedure.
