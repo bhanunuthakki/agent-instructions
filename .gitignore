@@ -18,6 +18,9 @@
 !/.githooks/
 !/config/
 !/.github/
+!/audits/
+/audits/*
+!/audits/2026-09-08-agent-portability-catalog.md
 
 # Machine migration, launchd, MCP topology, and runtime evidence are private.
 MAC_MIGRATION_PLAN.md

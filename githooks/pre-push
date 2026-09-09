@@ -21,6 +21,23 @@ hook_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 hook_repo=$(CDPATH= cd -- "$hook_dir/.." && pwd)
 instructions_home=${AGENT_INSTRUCTIONS_HOME:-$hook_repo}
 stubs="$instructions_home/snippets/sync_agent_stubs.py"
+if [ "$root" != "$hook_repo" ]; then
+  if [ -n "${PYTHON_BIN:-}" ]; then
+    python_bin=$PYTHON_BIN
+  elif has python3; then
+    python_bin=python3
+  elif has python; then
+    python_bin=python
+  else
+    printf 'PRE-PUSH BLOCKED: no Python interpreter; set PYTHON_BIN or install python3.\n' >&2
+    exit 1
+  fi
+  if [ ! -f "$stubs" ]; then
+    printf 'PRE-PUSH BLOCKED: instruction portability gate is missing: %s\n' "$stubs" >&2
+    exit 1
+  fi
+  run "$python_bin" "$stubs" --check-project-portability "$root"
+fi
 if [ "$root" = "$hook_repo" ]; then
   if [ -n "${PYTHON_BIN:-}" ]; then
     python_bin=$PYTHON_BIN
@@ -62,6 +79,7 @@ if [ "$root" = "$hook_repo" ]; then
     "$instructions_home/snippets/test_linear_cli.py" \
     "$instructions_home/snippets/test_procedure_routing_eval.py" \
     "$instructions_home/snippets/test_project_agent_contract.py" \
+    "$instructions_home/snippets/test_sync_agent_stubs.py" \
     "$instructions_home/snippets/test_interaction_outcome_eval.py" -q
   governance="$instructions_home/snippets/judge_governance.py"
   private_state_root=${AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT:-$instructions_home/.private-state}
