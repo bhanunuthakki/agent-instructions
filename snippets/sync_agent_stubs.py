@@ -18,6 +18,7 @@ inventory tables inside AGENTS_GUIDE.md's
 
 Run from the instruction clone via:
   python snippets/sync_agent_stubs.py [--dry-run | --check] [--artifacts-only]
+  python snippets/sync_agent_stubs.py --check-project-portability <project-root>
 Or the /sync-agent-stubs Claude command. --check is read-only and exits non-zero on any drift
 (usable from CI / the pre-push hook). --artifacts-only skips project wrappers and hook wiring.
 """
@@ -117,7 +118,9 @@ CODEX_ONLY_SKILLS = ["harden"]
 # Exact, managed generated artifacts that are no longer globally discoverable. This is
 # deliberately a name allowlist: synchronization may prune only these SKILL.md files,
 # never an arbitrary user skill or a directory tree.
-RETIRED_GENERATED_SKILLS = frozenset({"design-conformance-audit"})
+RETIRED_GENERATED_SKILLS = frozenset(
+    {"design-conformance-audit", "gemini-instruction-artifact-sync"}
+)
 RETIRED_PROCEDURE_NAMES = frozenset({"design-conformance-audit.md"})
 RETIRED_GENERATED_AGENTS = frozenset(
     {
@@ -159,6 +162,28 @@ GUIDE_MARKERS = ("skills", "commands", "agents", "procedures", "projects")
 # A healthy project CLAUDE.md/GEMINI.md is a thin @import wrapper. More than this much prose
 # (beyond the title + import line) suggests a one-off leaked into the wrapper instead of the rulebook.
 WRAPPER_MAX_CHARS = 500
+
+# Canonical project instructions must describe capabilities and policy without
+# binding them to one agent, model family, or vendor. Runtime wrappers and
+# provider adapters are deliberately outside this scan.
+PORTABILITY_PROVIDER_PATTERN = re.compile(
+    r"\b(?:codex|claude(?:\s+code)?|gemini|antigravity|chatgpt|openai|anthropic|"
+    r"copilot|windsurf|aider|gpt-[0-9][\w.-]*|sonnet|opus|haiku)\b|"
+    r"(?:^|[/`])\.(?:codex|claude|gemini)(?:[/`]|$)",
+    re.IGNORECASE,
+)
+PORTABILITY_RUNTIME_DIRS = frozenset(
+    {
+        ".claude",
+        ".codex",
+        ".gemini",
+        ".git",
+        ".private-state",
+        ".tmp",
+        ".venv",
+        "node_modules",
+    }
+)
 
 HARDEN_PACKAGE_CONFIGS = (
     "harden_state_v2.schema.json",
@@ -1467,6 +1492,53 @@ def detect_wrapper_drift(proj: Path) -> list[str]:
     return drift
 
 
+def _canonical_instruction_paths(project: Path) -> list[Path]:
+    """Return project policy surfaces that must stay runtime-neutral."""
+    paths: list[Path] = []
+    for path in project.rglob("*.md"):
+        relative = path.relative_to(project)
+        if any(part.casefold() in PORTABILITY_RUNTIME_DIRS for part in relative.parts):
+            continue
+        is_memory = path.name.casefold() == "memory.md" or any(
+            part.casefold() == "memory" for part in relative.parts[:-1]
+        )
+        if path.name in {"AGENTS.md", "SKILL.md"} or is_memory:
+            paths.append(path)
+    return sorted(paths)
+
+
+def detect_instruction_portability_drift(
+    projects: list[Path] | None = None,
+) -> list[str]:
+    """Reject provider policy leaked into canonical project instructions."""
+    findings: list[str] = []
+    for project in projects if projects is not None else project_dirs():
+        for path in _canonical_instruction_paths(project):
+            text = path.read_text(encoding="utf-8", errors="replace")
+            for line_number, line in enumerate(text.splitlines(), 1):
+                match = PORTABILITY_PROVIDER_PATTERN.search(line)
+                if match is None:
+                    continue
+                relative = path.relative_to(project).as_posix()
+                findings.append(
+                    f"{project.name}/{relative}:{line_number}: canonical instruction names "
+                    f"runtime/provider token {match.group(0)!r} — express the capability "
+                    "generically and keep provider mechanics in a runtime adapter"
+                )
+    return findings
+
+
+def requested_portability_project(argv: list[str]) -> Path | None:
+    """Resolve the narrow per-project pre-push mode, if requested."""
+    option = "--check-project-portability"
+    if option not in argv:
+        return None
+    index = argv.index(option)
+    if index + 1 >= len(argv):
+        raise ValueError(f"{option} requires a project path")
+    return Path(argv[index + 1]).resolve()
+
+
 def includes_project_wiring(argv: list[str]) -> bool:
     """Whether this invocation may update per-project wrappers and Git hooks."""
     return "--artifacts-only" not in argv
@@ -1497,6 +1569,19 @@ def detect_llm_usage_index_drift(*, check_projects: bool) -> list[str]:
 def main() -> None:
     # Check before hooks, wrappers, skills or any other managed mutation.
     validate_global_source_layout()
+    portability_project = requested_portability_project(sys.argv)
+    if portability_project is not None:
+        if not portability_project.is_dir():
+            print(f"project root not found: {portability_project}")
+            sys.exit(1)
+        drift = detect_instruction_portability_drift([portability_project])
+        if drift:
+            print("[instruction portability drift]")
+            for finding in drift:
+                print(f"  ! {finding}")
+            sys.exit(1)
+        print(f"instruction portability passed: {portability_project}")
+        return
     dry = "--dry-run" in sys.argv
     check = (
         "--check" in sys.argv
@@ -1630,6 +1715,7 @@ def main() -> None:
     drift += detect_llm_usage_index_drift(check_projects=machine_inventory)
     if machine_inventory:
         drift += detect_definition_override_drift()
+        drift += detect_instruction_portability_drift()
         drift += detect_semantic_drift()
     else:
         drift += detect_definition_override_drift(definition_files=[])

@@ -260,3 +260,45 @@ def test_windows_drive_links_remain_in_local_reference_closure() -> None:
     )
     assert sync.local_markdown_target("https://example.com/INDEX.md") is None
     assert sync.local_markdown_target("skill://package/INDEX.md") is None
+
+
+def test_project_instruction_portability_gate_covers_rulebooks_skills_and_memory(
+    tmp_path: Path,
+) -> None:
+    project = tmp_path / "project"
+    (project / ".agents" / "skills" / "review").mkdir(parents=True)
+    (project / "memory").mkdir()
+    (project / ".claude" / "skills" / "adapter").mkdir(parents=True)
+    (project / "AGENTS.md").write_text("Always ask Codex to review this.\n")
+    (project / ".agents" / "skills" / "review" / "SKILL.md").write_text(
+        "Use the Claude Code CLI.\n"
+    )
+    (project / "memory" / "MEMORY.md").write_text("Prefer GPT-5.6 for this task.\n")
+    (project / ".claude" / "skills" / "adapter" / "SKILL.md").write_text(
+        "Claude-only adapter mechanics are allowed here.\n"
+    )
+
+    findings = sync.detect_instruction_portability_drift([project])
+
+    assert len(findings) == 3
+    assert any("AGENTS.md:1" in finding for finding in findings)
+    assert any("SKILL.md:1" in finding for finding in findings)
+    assert any("MEMORY.md:1" in finding for finding in findings)
+
+
+def test_project_instruction_portability_gate_accepts_capability_language(
+    tmp_path: Path,
+) -> None:
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "AGENTS.md").write_text(
+        "Use the active agent and the shared subscription route.\n"
+    )
+
+    assert sync.detect_instruction_portability_drift([project]) == []
+
+
+def test_narrow_portability_mode_resolves_exact_project(tmp_path: Path) -> None:
+    assert sync.requested_portability_project(
+        ["sync_agent_stubs.py", "--check-project-portability", str(tmp_path)]
+    ) == tmp_path.resolve()

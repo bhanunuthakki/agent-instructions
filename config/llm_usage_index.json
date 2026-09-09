@@ -23,18 +23,18 @@
     {
       "project": "angel-memos",
       "instruction_section": "## Agent and application model routing",
-      "entrypoint": "src/angel_memos/claude.py",
-      "purpose_registry": "src/angel_memos/claude.py:MODEL_ROUTES",
-      "ledger_authority": "src/angel_memos/claude.py:_append_ledger",
+      "entrypoint": "src/angel_memos/llm.py",
+      "purpose_registry": "src/angel_memos/llm.py:MODEL_ROUTES",
+      "ledger_authority": "src/angel_memos/llm.py:_append_ledger",
       "budget_authority": null,
       "eval_authority": "tests/test_claude.py",
       "workload_classes": ["application", "judge"],
-      "application_route": "migration_required",
-      "judge_route_state": "migration_required",
-      "judge_route_authority": "src/angel_memos/claude.py:MODEL_ROUTES",
+      "application_route": "fleet_default",
+      "judge_route_state": "shared_subscription",
+      "judge_route_authority": "src/angel_memos/llm.py:_subscription_backends",
       "judge_independence_authority": "src/angel_memos/scoring.py:judge_factor",
-      "judge_migration_note": "Judge and Critic purposes still share the legacy application route instead of an explicit governed Judge route.",
-      "migration_note": "Application calls still order Claude and metered OpenRouter before Codex."
+      "judge_migration_note": null,
+      "migration_note": null
     },
     {
       "project": "date-suggester",
@@ -45,12 +45,12 @@
       "budget_authority": null,
       "eval_authority": "tests/test_llm.py",
       "workload_classes": ["application"],
-      "application_route": "migration_hold",
+      "application_route": "fleet_default",
       "judge_route_state": null,
       "judge_route_authority": null,
       "judge_independence_authority": null,
       "judge_migration_note": null,
-      "migration_note": "Codex-first behavior is compatible, but the active routing files use a project-specific fallback variable and have uncommitted work."
+      "migration_note": null
     },
     {
       "project": "earnings-summary",
@@ -61,12 +61,12 @@
       "budget_authority": "src/llm_budget.py",
       "eval_authority": "src/evals/coverage.py",
       "workload_classes": ["application", "judge"],
-      "application_route": "migration_hold",
-      "judge_route_state": "migration_hold",
+      "application_route": "fleet_default",
+      "judge_route_state": "project_explicit",
       "judge_route_authority": "src/llm/backend_judge.py:judge_pair",
       "judge_independence_authority": "src/llm/backend_judge.py:cross_judge_agreement",
-      "judge_migration_note": "Explicit backend comparison exists, but its active files have uncommitted work and do not yet consume the shared Judge route contract.",
-      "migration_note": "Codex-first behavior and canonical variables are compatible, but the active routing files have uncommitted work."
+      "judge_migration_note": null,
+      "migration_note": null
     },
     {
       "project": "harness",
@@ -104,17 +104,17 @@
       "project": "repo-maintenance",
       "instruction_section": "## Objective and authority",
       "entrypoint": "memory_streamline.py",
-      "purpose_registry": "memory_streamline.py:DEFAULT_PROVIDER",
+      "purpose_registry": "memory_streamline.py:DEFAULT_MODELS",
       "ledger_authority": "memory_streamline.py:_append_ledger",
       "budget_authority": null,
       "eval_authority": "test_memory_streamline.py",
       "workload_classes": ["application"],
-      "application_route": "migration_hold",
+      "application_route": "fleet_default",
       "judge_route_state": null,
       "judge_route_authority": null,
       "judge_independence_authority": null,
       "judge_migration_note": null,
-      "migration_note": "Codex-first behavior is compatible, but the runner uses project-specific provider variables and is currently uncommitted."
+      "migration_note": null
     },
     {
       "project": "wealthplan",

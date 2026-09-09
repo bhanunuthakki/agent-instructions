@@ -213,7 +213,8 @@ def validate_index(
             entrypoint = _reference_path(project_root, entry["entrypoint"])
             if entrypoint.is_file():
                 source = entrypoint.read_text(encoding="utf-8", errors="replace")
-                if "llm_policy" not in source or "subscription_route" not in source:
+                consumes_policy = "llm_policy" in source or "fleet_policy" in source
+                if not consumes_policy or "subscription_route" not in source:
                     errors.append(
                         f"{name}: fleet_default entry point does not consume the shared resolver"
                     )

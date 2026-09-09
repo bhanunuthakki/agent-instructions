@@ -123,7 +123,10 @@ def test_shared_hooks_expose_required_composed_capabilities() -> None:
 
 def test_shared_hook_is_the_only_owner_of_global_instruction_gate() -> None:
     shared = (s.HOOKS_DIR / "pre-push").read_text(encoding="utf-8")
-    assert shared.count('run "$python_bin" "$stubs" --check') == 1
+    assert shared.splitlines().count(
+        '  run "$python_bin" "$stubs" --check --artifacts-only'
+    ) == 1
+    assert '--check-project-portability "$root"' in shared
     earnings_hook = s.SCRATCH / "earnings-summary" / ".githooks" / "pre-push"
     if earnings_hook.exists():
         assert "sync_agent_stubs.py" not in earnings_hook.read_text(encoding="utf-8")
