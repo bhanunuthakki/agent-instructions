@@ -27,7 +27,9 @@ def test_global_contract_and_local_guide_have_distinct_owners() -> None:
     assert "At task start, after material user input" in global_rules
     assert "Do not wait for the user to request delegation explicitly" in global_rules
     assert "For every substantive task, load agent operations" in global_rules
-    assert "highest-capability available agent at the root" in global_rules
+    assert "frontier-synthesizer-class agent at the root" in global_rules
+    assert "load it once alongside the primary workflow" in global_rules
+    assert "keep it active through later turns unless the user deactivates it" in global_rules
     assert "source" in local and "sync_agent_stubs.py" in local
     assert "## Outcome and initiative" not in local
     assert "OPENROUTER_API_KEY" not in global_rules
@@ -65,6 +67,29 @@ def test_code_change_calibrates_tests_and_release_gates() -> None:
     assert "For a bug or new behavior" in code_change
     assert "mechanical refactor or documentation-only change" in code_change
     assert "At the push or release boundary" in code_change
+
+
+def test_skill_composition_has_one_owner_and_scoped_callees() -> None:
+    routes = _text("procedures/INDEX.md")
+    assert "Compose workflows semantically" in routes
+    assert "Choose one primary owner" in routes
+    assert "the caller keeps authority over why and when the callee runs" in routes
+    assert "may not reopen the selected route or broaden the deliverable" in routes
+    assert "contribute only the boundary, domain, or execution mechanics unique to them" in routes
+    assert "hardening rubrics, not ordinary skills" in routes
+
+
+def test_generation_workflows_route_specialist_reviews_through_harden() -> None:
+    expected_routes = {
+        "procedures/scaffold-auth.md": "harden --audit sec-authz",
+        "procedures/scaffold-secrets.md": "harden --audit sec-appsec",
+        "procedures/scaffold-tenant-schema.md": "harden --audit tenant-boundaries",
+        "procedures/scaffold-deploy.md": "harden --audit operations-readiness",
+        "procedures/scaffold-design-system.md": "harden --audit ux-design",
+        "procedures/external-integration.md": "harden --audit api-surface-designer",
+    }
+    for path, route in expected_routes.items():
+        assert route in _text(path)
 
 
 def test_clarification_and_shortcut_have_one_detailed_owner() -> None:

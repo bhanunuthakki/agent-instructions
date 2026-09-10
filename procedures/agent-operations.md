@@ -5,7 +5,7 @@ description: Reassess and run bounded delegation at the start and between phases
 
 # Agent Operations
 
-Use the highest-capability available root agent as orchestrator and acceptance judge. It owns user intent, decomposition, architecture, synthesis, authority decisions, and final verification. Delegate bounded workstreams whose outputs can be checked independently to the least expensive evaluated capability that fits; delegation changes execution ownership, not decision ownership. Formal Judge or Critic work still follows `judging`, including its independence requirements.
+Use a frontier-synthesizer-class root agent as orchestrator and acceptance judge. It owns user intent, decomposition, architecture, synthesis, authority decisions, and final verification. Resolve the current frontier model through `model-frontier`; do not duplicate provider labels here. Delegate bounded workstreams whose outputs can be checked independently to the least expensive evaluated capability that fits; delegation changes execution ownership, not decision ownership. Formal Judge or Critic seats remain separately briefed, frontier-class, and governed by `judging`, including its purpose-qualification and independence requirements.
 
 ## Delegation check
 
@@ -24,7 +24,7 @@ Reassess delegation at task start, after material user input, and at each new di
 - **blocking-specialist** — narrow expertise required to resolve a material risk, failure, or unknown.
 - **frontier-synthesizer** — ambiguous architecture, cross-domain synthesis, or consequential review where weaker reasoning would dominate the outcome.
 
-Use the least expensive currently evaluated model for the bounded role. For recurring, scheduled, high-risk, or evaluation-governed routing, record a capability receipt with the material evidence. A provider label, model name, context window, or advertised tier alone is not evidence of fitness; insufficient evidence for a consequential route yields `HOLD`, not silent down-tiering.
+Use the least expensive currently evaluated model for each bounded worker role. Cost optimization applies to execution workers, not the root, acceptance, or formal Judge seats. For recurring, scheduled, high-risk, or evaluation-governed routing, record a capability receipt with the material evidence. A provider label, model name, context window, or advertised tier alone is not evidence of fitness; insufficient evidence for a consequential route yields `HOLD`, not silent down-tiering.
 
 ## Dispatch
 

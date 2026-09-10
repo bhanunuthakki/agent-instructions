@@ -1,5 +1,6 @@
 ---
-description: Audit product maturity with profile-aware, evidence-backed gates. Usage: /harden [l0|l1|l2|l3] [--deep] [--audit <expert>] [--status] [--full]
+name: harden
+description: "Audit product maturity with profile-aware, evidence-backed gates. Usage: /harden [l0|l1|l2|l3] [--deep] [--audit EXPERT] [--status] [--full]"
 ---
 
 # Hardening
@@ -169,11 +170,11 @@ The v2 verdict vocabulary is `PASS | BLOCK | ADVISORY | HOLD | N/A`; the state a
 
 - feature contract → `product-feature`
 - local-first data baseline → `data-foundation`
-- auth → `scaffold-auth`, then `sec-authz`
-- multi-tenant storage → `scaffold-tenant-schema`, then `tenant-boundaries`
-- deployment/distribution → `scaffold-deploy`, then `operations-readiness`
-- design foundation → `scaffold-design-system`, then `ux-design` and rendered evidence
-- LLM call → `llm-ops`, then `llm-evals-orchestrator` and `sec-llm`
-- secrets → `scaffold-secrets`, then `sec-appsec`
+- auth → `scaffold-auth`, then `harden --audit sec-authz`
+- multi-tenant storage → `scaffold-tenant-schema`, then `harden --audit tenant-boundaries`
+- deployment/distribution → `scaffold-deploy`, then `harden --audit operations-readiness`
+- design foundation → `scaffold-design-system`, then `harden --audit ux-design` and rendered evidence
+- LLM call → `llm-ops`, then `harden --audit llm-evals-orchestrator` and `harden --audit sec-llm`
+- secrets → `scaffold-secrets`, then `harden --audit sec-appsec`
 
 Scaffolds establish contracts after inspecting the repository and chosen profile. They must not inject a framework, provider, tenant column, public deployment, analytics stack, or billing model merely because one is common.

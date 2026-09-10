@@ -15,9 +15,11 @@ belong to `llm-ops`, even when that evaluation itself uses a governed Judge.
 ## Rigor budget
 
 J0 is the default when deterministic proof closes the task. Add semantic judgment only for an
-oracle gap, material risk, explicit owner request, or the release boundary defined below. Use the
-cheapest calibrated capability that satisfies the selected tier; model novelty or prestige is not
-a reason to escalate. Before adding an otherwise unrequested second Judge, broad audit, or costly
+oracle gap, material risk, explicit owner request, or the release boundary defined below. Every
+Judge seat uses a separately briefed, purpose-qualified frontier-synthesizer resolved through the
+dated `model-frontier`; do not down-tier judgment to save execution cost. An unavailable or
+unqualified blocking seat yields `HOLD`/`ABSTAIN` or clearly advisory evidence. Before adding an
+otherwise unrequested second Judge, broad audit, or costly
 evaluation pass solely for extra confidence, confirm the expanded scope with the owner. Do not ask
 for routine J0 proof or a Judge already required by an observed tier signal. Record a budget or
 latency limit when the owner supplies one; exhaustion yields `HOLD`/`ABSTAIN`, never reduced rigor

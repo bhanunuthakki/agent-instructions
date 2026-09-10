@@ -25,11 +25,12 @@ You rarely touch any of this. It just shapes how the agent behaves.
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**26 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**27 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
 | **agent-operations** | Reassess and run bounded delegation at the start and between phases of substantive work; coordinate subagents, shared worktrees, capability roles, or… |
+| **chisle** | Apply a persistent efficiency layer to code-based chats involving repository inspection, implementation, debugging, refactoring, review, testing, mai… |
 | **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
 | **data-foundation** | Design or change durable application state, schemas, data pipelines, or sources of truth with local-first simplicity, explicit lifecycle, recovery, a… |
@@ -109,9 +110,9 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**44 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 26 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**45 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 27 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`INDEX.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
+`INDEX.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `chisle.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook

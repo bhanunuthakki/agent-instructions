@@ -22,4 +22,4 @@ The resulting baseline must include:
 - backup and a tested restore for durable state, plus export/upgrade behavior for local products;
 - release, rollback, restart, and recovery evidence from the actual target environment.
 
-Do not emit a generic Dockerfile, provider manifest, CI workflow, health route, or database add-on before repository and profile inspection. Use `external-practice` for drift-sensitive platform/security choices and finish with the `operations-readiness` hardening gate.
+Do not emit a generic Dockerfile, provider manifest, CI workflow, health route, or database add-on before repository and profile inspection. Use `external-practice` for drift-sensitive platform/security choices and finish with `harden --audit operations-readiness`; `operations-readiness` is a specialist rubric, not a sibling skill.

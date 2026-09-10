@@ -471,6 +471,7 @@ def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
         )
 
     expected_current_prices = {
+        "claude-fable-5-1": (10.00, 50.00),
         "claude-sonnet-5": (2.00, 10.00),
         "gemini-3.5-flash-lite": (0.30, 2.50),
         "gpt-6-astra": (10.00, 50.00),
@@ -795,9 +796,31 @@ def test_agent_routing_uses_capability_roles_not_provider_labels() -> None:
         assert provider_label not in procedure
     assert "capability receipt" in procedure
     assert "least expensive currently evaluated model" in procedure
+    assert "Cost optimization applies to execution workers" in procedure
     assert "Delegate by default" in procedure
     assert "acceptance judge" in procedure
     assert "after material user input" in procedure
+
+
+def test_frontier_orchestration_and_judging_have_one_model_mapping_owner() -> None:
+    root = s.GLOBAL_MD.read_text(encoding="utf-8")
+    operations = (s.PROCEDURES_DIR / "agent-operations.md").read_text(
+        encoding="utf-8"
+    )
+    judging = (s.PROCEDURES_DIR / "judging.md").read_text(encoding="utf-8")
+    frontier = (s.PROCEDURES_DIR / "model-frontier.REFERENCE.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "frontier-synthesizer-class agent at the root" in root
+    assert "purpose-qualified frontier-synthesizer" in root
+    assert "least expensive evaluated worker" in root
+    assert "Cost optimization applies to execution workers" in operations
+    assert "do not down-tier judgment to save execution cost" in judging
+    assert "`gpt-6-astra` and `claude-fable-5-1`" in frontier
+    for shared in (root, operations, judging):
+        assert "gpt-6-astra" not in shared
+        assert "claude-fable-5-1" not in shared
 
 
 def test_shared_scheduling_reference_has_no_project_specific_windows() -> None:
