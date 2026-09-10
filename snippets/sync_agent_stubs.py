@@ -88,6 +88,7 @@ GEMINI_MD = ROOT_REPO / "GEMINI.md"
 CLAUDE_MD = ROOT_REPO / "CLAUDE.md"
 OUR_SKILLS = [
     "agent-operations",
+    "chisle",
     "code-change",
     "context-engineering",
     "data-foundation",

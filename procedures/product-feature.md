@@ -1,6 +1,6 @@
 ---
 name: product-feature
-description: Define or review a material product feature before implementation: user outcome, smallest coherent behavior, state and authority, non-goals, acceptance evidence, and kill criteria.
+description: "Define or review a material product feature before implementation: user outcome, smallest coherent behavior, state and authority, non-goals, acceptance evidence, and kill criteria."
 ---
 
 # Product Feature
@@ -27,6 +27,6 @@ Prefer a derived projection over unnecessary persistence and a coherent behavior
 
 - Product feature owns the feature outcome, behavior boundary, non-goals, and acceptance contract. Identify affected action authorities; do not redefine their approval rules.
 - `frontend-quality` owns task hierarchy, composition, and rendered UX evidence.
-- `architecture-reviewer` owns system/module structure; `data-foundation` owns durable truth and lifecycle; `code-change` owns implementation; QA owns test sufficiency.
+- `data-foundation` owns durable truth and lifecycle; `code-change` owns implementation. When the task requires formal architecture or test-sufficiency review, route those checks through the applicable `harden --audit architecture-reviewer` or `harden --audit qa-test-strategy` rubric rather than treating rubric names as sibling skills.
 
 Carry these decisions into implementation through the shared task record. Additional procedures contribute their constraints and evidence; the global collaboration and completion contracts govern questions and delivery.

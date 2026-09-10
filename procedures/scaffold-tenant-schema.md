@@ -21,4 +21,4 @@ Inspect the current database, identity boundary, jobs, caches, blobs, search, an
 - Reversible, data-preserving migration and backfill plan with reconciliation evidence. `run_id` is lineage, not a universal business key.
 - Negative tests proving tenant A cannot read, mutate, infer, search, export, prompt-leak, or bill tenant B, including privileged and background paths.
 
-Keep vendor-specific RLS/policy examples in optional dated references selected after stack inspection. Finish with `tenant-boundaries`, `sec-authz`, and the applicable data/operations gates before admitting a second tenant.
+Keep vendor-specific RLS/policy examples in optional dated references selected after stack inspection. Before admitting a second tenant, finish with `harden --audit tenant-boundaries`, `harden --audit sec-authz`, and the applicable data or operations hardening gates. These names are specialist rubrics, not sibling skills.

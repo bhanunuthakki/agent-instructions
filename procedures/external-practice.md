@@ -14,7 +14,7 @@ Verify the decision at the real code or configuration seam. This is not a generi
 3. Assign one owner:
    - build/buy, library, service, or vendor comparison → `tool-selector`;
    - algorithm, protocol, configuration, or domain practice → the owning expert;
-   - cross-boundary structure → `architecture-reviewer`.
+   - cross-boundary structure → `harden --audit architecture-reviewer` when a formal architecture audit is required.
 4. Verify with current official documentation, standards, security advisories, primary research, or maintained benchmarks. Secondary sources may help discovery or triangulation but do not solely support a consequential recommendation.
 5. State the applicability conclusion and the remaining uncertainty. A URL list is not a completed check.
 

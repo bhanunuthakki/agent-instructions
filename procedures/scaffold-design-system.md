@@ -5,7 +5,7 @@ description: Establish a small, accessible, stack-appropriate UI foundation afte
 
 # Scaffold: Design System
 
-Create the smallest durable foundation for the product at hand. This is a generation workflow, not a generic aesthetic or framework recipe. `frontend-quality` owns the user-task hypothesis, composition, reduction pass, and rendered proof; `ux-design` later audits the resulting experience.
+Create the smallest durable foundation for the product at hand. This is a generation workflow, not a generic aesthetic or framework recipe. `frontend-quality` owns the user-task hypothesis, composition, reduction pass, and rendered proof. When a formal experience audit is required, run `harden --audit ux-design`; `ux-design` is a specialist rubric, not a sibling skill.
 
 Read [frontend-quality.PRIMITIVES.md](frontend-quality.PRIMITIVES.md) before defining the project's
 primitive catalog or drift gate. Apply its semantic questions through the selected stack; do not

@@ -2,6 +2,14 @@
 
 This catalog is the fallback when native skill discovery is unavailable. `GLOBAL.md` owns cross-project invariants; this index owns workflow selection, and each linked procedure owns its decision flow. Read the selected body completely, then only its applicable references. A task may need several owners; one decision must not have competing owners.
 
+Compose workflows semantically, not by concatenating every instruction from every matching skill:
+
+- Choose one primary owner for the requested deliverable. Additional skills contribute only the boundary, domain, or execution mechanics unique to them; they do not restart discovery, expand scope, duplicate evidence, or impose a second handoff.
+- When one routing skill deliberately calls another, the caller keeps authority over why and when the callee runs. The callee supplies only the requested mechanics and may not reopen the selected route or broaden the deliverable.
+- The most specific artifact or runtime owner governs its execution interface. The product or domain owner governs intended behavior and meaning. The closest project rulebook governs local commands and gates. `GLOBAL.md` governs communication, authority, and completion.
+- Resolve incompatible defaults through that ownership order instead of trying to satisfy both. Preserve explicit user and template requirements. If two candidate owners still claim the same decision, stop loading more skills and resolve the routing ambiguity first.
+- Modifiers such as Chisle can compress work across a code chat but never become a second deliverable owner. Formal specialist names such as `sec-authz` or `ux-design` are hardening rubrics, not ordinary skills; invoke them through `harden --audit <specialist>` only when a proportional audit is actually required.
+
 ## Select the requested deliverable
 
 | Deliverable | Primary owner |
