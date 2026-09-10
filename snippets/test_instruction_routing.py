@@ -23,6 +23,11 @@ def test_global_contract_and_local_guide_have_distinct_owners() -> None:
     assert "never" in global_rules.lower() and "credentials" in global_rules
     assert "procedures/INDEX.md" in global_rules
     assert "procedures/machine-operations.md" in global_rules
+    assert "## Orchestration and delegation" in global_rules
+    assert "At task start, after material user input" in global_rules
+    assert "Do not wait for the user to request delegation explicitly" in global_rules
+    assert "For every substantive task, load agent operations" in global_rules
+    assert "highest-capability available agent at the root" in global_rules
     assert "source" in local and "sync_agent_stubs.py" in local
     assert "## Outcome and initiative" not in local
     assert "OPENROUTER_API_KEY" not in global_rules
@@ -30,12 +35,18 @@ def test_global_contract_and_local_guide_have_distinct_owners() -> None:
     assert "without searching for other credentials" in machine
     assert "Load only that variable at runtime" in machine
     assert "before execution" in routes
+    assert "owns the delegation check even when the result is serial execution" in routes
     assert "a primary deliverable owner" in global_rules
     assert "proposed, implemented, validated, committed, merged, deployed" in global_rules
 
 
 def test_operations_owns_resource_handoff_and_truthful_closure() -> None:
     operations = _text("procedures/agent-operations.md")
+    assert "Reassess delegation at task start, after material user input" in operations
+    assert "Delegate by default" in operations
+    assert "one to three parallel workers" in operations
+    assert "Workers do not recursively fan out by default" in operations
+    assert "makes the final acceptance judgment" in operations
     assert "auto-reconnecting browser or remote-control session" in operations
     assert "After two equivalent failures" in operations
     assert "cancel temporary task-owned monitors" in operations
@@ -184,7 +195,11 @@ def test_instruction_quality_cases_cover_initiative_and_its_boundaries() -> None
     assert {
         "internal-rename-positive", "layout-replacement-positive", "six-citations-no-facets",
         "changed-golden-expectation", "unexplained-golden-drift", "bounded-prototype-positive",
-        "intent-over-bug", "adjacent-scope-boundary",
+        "intent-over-bug", "adjacent-scope-boundary", "ambiguous-cleanup-clarification",
+        "proactive-parallel-discovery", "phase-transition-redelegation",
+        "trivial-work-stays-rooted", "worker-result-needs-root-judgment",
+        "decomposition-decision-before-fanout", "substantive-fanout-negative-economics",
+        "overlapping-writes-serialize", "cheapest-qualified-worker",
     } <= ids
     for case in cases:
         assert "agent-instructions/GLOBAL.md" in case["instruction_paths"]

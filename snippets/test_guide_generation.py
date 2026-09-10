@@ -454,7 +454,7 @@ def test_model_frontier_review_date_matches_near_term_refresh_gate() -> None:
     frontier = (s.PROCEDURES_DIR / "model-frontier.REFERENCE.md").read_text(
         encoding="utf-8"
     )
-    assert "Next review: 2026-09-09" in frontier
+    assert "Next review: 2026-09-16" in frontier
 
 
 def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
@@ -473,6 +473,7 @@ def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
     expected_current_prices = {
         "claude-sonnet-5": (2.00, 10.00),
         "gemini-3.5-flash-lite": (0.30, 2.50),
+        "gpt-6-astra": (10.00, 50.00),
         "gpt-5.6-luna": (0.20, 1.20),
         "gpt-5.6-terra": (2.00, 12.00),
     }
@@ -794,6 +795,9 @@ def test_agent_routing_uses_capability_roles_not_provider_labels() -> None:
         assert provider_label not in procedure
     assert "capability receipt" in procedure
     assert "least expensive currently evaluated model" in procedure
+    assert "Delegate by default" in procedure
+    assert "acceptance judge" in procedure
+    assert "after material user input" in procedure
 
 
 def test_shared_scheduling_reference_has_no_project_specific_windows() -> None:

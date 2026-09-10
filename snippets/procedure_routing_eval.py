@@ -20,6 +20,7 @@ from typing import Literal, Mapping, TypeAlias, cast
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CASES = ROOT / "evals" / "agent_system" / "procedure_routing_cases.jsonl"
 DEFAULT_OUTPUT = ROOT / ".tmp" / "procedure_routing_eval.json"
+DEFAULT_MODEL = "gpt-6-astra"
 Effect: TypeAlias = Literal["inspect", "mutate_local", "external_write"]
 VALID_EFFECTS = frozenset({"inspect", "mutate_local", "external_write"})
 
@@ -348,7 +349,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cases", type=Path, default=DEFAULT_CASES)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--model", default="gpt-5.6-sol")
+    parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument(
         "--reasoning-effort",
         choices=("none", "low", "medium", "high", "xhigh", "max"),

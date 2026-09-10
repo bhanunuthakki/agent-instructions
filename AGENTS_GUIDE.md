@@ -29,7 +29,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 
 | Skill | What it does |
 |---|---|
-| **agent-operations** | Coordinate subagents, shared worktrees, capability roles, or scheduled LLM work. |
+| **agent-operations** | Reassess and run bounded delegation at the start and between phases of substantive work; coordinate subagents, shared worktrees, capability roles, or… |
 | **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
 | **data-foundation** | Design or change durable application state, schemas, data pipelines, or sources of truth with local-first simplicity, explicit lifecycle, recovery, a… |

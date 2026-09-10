@@ -39,12 +39,42 @@ def test_corpus_is_valid_and_uses_known_procedures() -> None:
     catalog = routing.load_procedure_catalog(ROOT)
     cases = routing.load_cases(CASES_PATH, known_procedures=set(catalog))
 
-    assert len(cases) == 31
+    assert len(cases) == 35
     assert len({case.case_id for case in cases}) == len(cases)
     assert any(not case.required_procedures for case in cases)
     assert any(case.should_clarify for case in cases)
     required = {name for case in cases for name in case.required_procedures}
     assert {"agent-operations", "scaffold-secrets"} <= required
+
+
+def test_frontier_routing_default_is_astra() -> None:
+    assert routing.DEFAULT_MODEL == "gpt-6-astra"
+    assert routing._parse_args([]).model == routing.DEFAULT_MODEL
+
+
+def test_substantive_routes_allow_proactive_delegation_and_tiny_work_does_not() -> None:
+    catalog = routing.load_procedure_catalog(ROOT)
+    cases = routing.load_cases(CASES_PATH, known_procedures=set(catalog))
+    by_id = {case.case_id: case for case in cases}
+    for case_id in (
+        "explain-llm-change",
+        "fix-bounded-bug",
+        "shorten-agent-rules",
+        "add-application-llm-call",
+        "choose-observability-vendor",
+        "explicit-deep-interview",
+        "material-frontend-change",
+        "scaffold-authentication",
+        "add-external-api",
+        "confirm-external-publication",
+        "configure-api-secret",
+        "reuse-qualified-llm-route",
+        "publication-unreviewed-candidate",
+        "publication-exact-approval",
+    ):
+        case = by_id[case_id]
+        assert "agent-operations" in case.required_procedures + case.allowed_procedures
+    assert "agent-operations" in by_id["clear-small-change"].forbidden_procedures
 
 
 def test_coverage_summary_separates_required_boundaries_untested_and_deferred() -> None:
