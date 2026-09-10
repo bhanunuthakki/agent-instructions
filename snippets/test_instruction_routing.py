@@ -34,6 +34,12 @@ def test_global_contract_and_local_guide_have_distinct_owners() -> None:
     assert "LINEAR_API_KEY" not in global_rules
     assert "without searching for other credentials" in machine
     assert "Load only that variable at runtime" in machine
+    assert "<private-state-root>/operations/HOSTS.md" in machine
+    assert "absolute `AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT` when set" in machine
+    assert "`<instruction-checkout>/.private-state` by default" in machine
+    assert "its adjacent `JOBS.md` owns the job register" in machine
+    assert "current listener, service, and scheduler configuration" in machine
+    assert "without guessing a fallback or changing production" in machine
     assert "before execution" in routes
     assert "owns the delegation check even when the result is serial execution" in routes
     assert "a primary deliverable owner" in global_rules
