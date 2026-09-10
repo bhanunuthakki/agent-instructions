@@ -2,6 +2,9 @@
 
 Profiles are starting hypotheses for a new project, never continuing authority. Once a project
 has an `## Interface` declaration and local contract, agents follow those project-owned sources.
+Profiles describe usage and device context. They are orthogonal to the `conform`, `evolve`, and
+`explore` expression postures defined by `frontend-quality`; do not infer visual ambition from a
+profile alone.
 
 ## `dense-desktop`
 

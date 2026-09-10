@@ -262,25 +262,27 @@ def recommend_definition_change(
             "reason": "override_request_proves_meaning_is_not_shared",
         }
 
-    target_maturity = "observed"
-    if real_uses >= 2:
-        target_maturity = "candidate"
-    if real_uses >= 3 and owner_ratified:
+    # Repetition supplies evidence, never broader authority. Ratification is an
+    # explicit owner decision; a missing fresh count does not revoke prior maturity.
+    target_maturity = current_maturity
+    if owner_ratified:
         target_maturity = "ratified"
-    target_scope = current_scope
-    if real_uses >= 6 and project_count >= 2 and identical_meaning:
-        target_scope = "global" if owner_ratified else "cross-project"
+    elif real_uses > 0 and current_maturity == "observed":
+        target_maturity = "candidate"
     action = "hold"
+    reason = "owner_decision" if owner_ratified else "usage_evidence"
     if MATURITIES.index(target_maturity) > MATURITIES.index(current_maturity):
         action = "promote_maturity"
-    if target_scope != current_scope:
-        action = "promote_scope"
+    if project_count > 1 and identical_meaning and current_scope in {"project", "subtree"}:
+        action = "review_scope"
+        reason = "shared_meaning_requires_scope_owner_decision"
     return {
         "action": action,
-        "target_scope": target_scope,
+        "target_scope": current_scope,
         "target_maturity": target_maturity,
-        "reason": "usage_evidence",
+        "reason": reason,
     }
+
 
 
 def main() -> None:

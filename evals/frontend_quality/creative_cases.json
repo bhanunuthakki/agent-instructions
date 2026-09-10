@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "mode": "shadow",
+  "coverage_claim": "Rendered comparisons measure only the supplied trials; invocation coverage and general design capability remain unproven.",
+  "dimensions": [
+    "task_clarity",
+    "brief_fit",
+    "distinctiveness",
+    "coherence",
+    "craft",
+    "continuity",
+    "ai_tell_resistance"
+  ],
+  "blockers": [
+    "task_obscured",
+    "accessibility_regression",
+    "continuity_breach",
+    "incoherent_direction",
+    "unpolished_execution"
+  ],
+  "cases": [
+    {
+      "id": "conform-dense-settings",
+      "posture": "conform",
+      "prompt": "Add notification controls to an established dense desktop settings page without changing its family or interaction grammar.",
+      "brief": "Make frequent settings changes fast to scan and safe to perform; visual novelty is not part of the outcome.",
+      "continuity_constraints": ["preserve shell", "preserve control recipes", "preserve density", "preserve keyboard flow"],
+      "required_axes": []
+    },
+    {
+      "id": "conform-editorial-citation",
+      "posture": "conform",
+      "prompt": "Add a source-quality notice to an established editorial reading surface.",
+      "brief": "Keep reading calm and uninterrupted while making source limitations unmistakable.",
+      "continuity_constraints": ["preserve measure", "preserve text roles", "preserve citation grammar"],
+      "required_axes": []
+    },
+    {
+      "id": "evolve-research-workspace",
+      "posture": "evolve",
+      "prompt": "Redesign an existing company research workspace so the daily investment decision is immediate without making the product unrecognizable.",
+      "brief": "Feel decisive, evidence-dense, and calm rather than dashboard-generic; the thesis and disconfirming evidence should form the signature contrast.",
+      "continuity_constraints": ["preserve navigation shell", "preserve data truth", "preserve controls", "preserve state anatomy"],
+      "required_axes": ["composition", "typography", "information_reveal"]
+    },
+    {
+      "id": "evolve-mobile-journal",
+      "posture": "evolve",
+      "prompt": "Give an existing mobile reflection journal a more intimate identity while preserving its familiar capture flow.",
+      "brief": "Feel private, tactile, and quiet without becoming nostalgic or ornamental; the daily entry should remain the dominant action.",
+      "continuity_constraints": ["preserve capture flow", "preserve native controls", "preserve saved-state feedback"],
+      "required_axes": ["composition", "visual_material", "interaction_character"]
+    },
+    {
+      "id": "explore-productivity-landing",
+      "posture": "explore",
+      "prompt": "Create a distinctive landing page for a productivity product that helps small teams recover attention from fragmented work.",
+      "brief": "Feel focused but alive, with reclaimed attention as the central idea; avoid generic split heroes, purple software gradients, and decorative analytics cards.",
+      "continuity_constraints": ["keep the value proposition clear", "keep the primary conversion action obvious"],
+      "required_axes": ["composition", "typography", "visual_material", "imagery"]
+    },
+    {
+      "id": "explore-learning-companion",
+      "posture": "explore",
+      "prompt": "Create a new conversational learning companion for adults studying a difficult subject in short evening sessions.",
+      "brief": "Feel curious, intelligent, and encouraging without becoming childish; make progress through uncertainty the signature experience.",
+      "continuity_constraints": ["preserve readable conversation", "keep the next learning action obvious", "support reduced motion"],
+      "required_axes": ["composition", "typography", "imagery", "interaction_character"]
+    }
+  ]
+}

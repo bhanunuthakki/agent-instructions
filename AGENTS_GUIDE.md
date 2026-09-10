@@ -6,10 +6,11 @@ The **inventory tables** below (skills · commands · agents · procedures · pr
 
 ## The mental model
 
-- **`AGENTS.md`** (in the tracked `agent-instructions` repository) = the always-on rulebook every tool reads. Slim on purpose.
-- **`CLAUDE.md`** / **`GEMINI.md`** = thin wrappers that import `AGENTS.md` and add tool-specific bits.
+- **`GLOBAL.md`** = the canonical cross-project contract. Sync embeds it in each runtime’s global rules; its shared references point back to this checkout.
+- **`AGENTS.md`** = each repository’s local charter: purpose, improvement priorities, authorities, boundaries, and validation. The instruction repository has its own local charter too.
+- **`CLAUDE.md`** / **`GEMINI.md`** = local wrappers that import the local `AGENTS.md` once and add runtime mechanics. Global generation strips the local import, so this repository’s instructions do not leak into other projects.
 - **`procedures/`** = the heavy "how-to" guides (auth, deploy, evals…), as plain markdown any tool can read. **The canonical source** — the Claude skills, the `/harden` command, and the agent fleet (`procedures/agents/`) are generated *from* these.
-- **Skills / commands / hooks** = how Claude (and git) make the above automatic. Other tools (Gemini, Codex, a local model) read `AGENTS.md` → `procedures/` and get the same thing.
+- **Skills / commands / hooks** = runtime adapters and deterministic checks. If native skill discovery is unavailable, [the procedure catalog](procedures/INDEX.md) identifies the relevant canonical workflow. [Machine operations](procedures/machine-operations.md) owns Mac credentials and host-sensitive operations; agents load it when that work is requested.
 
 You rarely touch any of this. It just shapes how the agent behaves.
 
@@ -24,11 +25,11 @@ You rarely touch any of this. It just shapes how the agent behaves.
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**25 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**26 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
-| **agent-operations** | Coordinate subagents, shared worktrees, capability roles, or scheduled LLM work. |
+| **agent-operations** | Reassess and run bounded delegation at the start and between phases of substantive work; coordinate subagents, shared worktrees, capability roles, or… |
 | **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
 | **data-foundation** | Design or change durable application state, schemas, data pipelines, or sources of truth with local-first simplicity, explicit lifecycle, recovery, a… |
@@ -44,6 +45,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **linear-pr-sync** | Synchronize an existing Linear issue with branch and pull-request progress. |
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
 | **log-redaction** | Keep secrets out of logs, exception output, and network diagnostics. |
+| **machine-operations** | Resolve this machine's approved credential source and client before OpenRouter or Linear operations, or the live host authority before cross-machine… |
 | **mockup-review** | Redesign or review an existing application page through an observed mockup, task hypothesis, and proportional implementation notes. |
 | **model-frontier** | Pick a hosted or open-weight LLM/runtime candidate against a dated cost and capability frontier instead of from memory. |
 | **product-feature** | Define or review a material product feature before implementation: user outcome, smallest coherent behavior, state and authority, non-goals, acceptan… |
@@ -107,9 +109,9 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**39 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 25 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**44 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 26 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
+`INDEX.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook
@@ -137,9 +139,13 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 ## Adding a new project
 
 1. Drop an `AGENTS.md` in the repo (or ask the agent to write one).
-2. If it has a rendered interface, add the standard `## Interface` block or seed one with `python snippets/project_agent_contract.py init --repo <path> --profile <profile>`, then replace every `TODO` with the project-owned contract, executable paths, render recipe, and gate. Nonvisual repositories use profile `none`.
+2. If it has a rendered interface, add the standard `## Interface` block or seed one with `python snippets/project_agent_contract.py init --repo <path> --profile <profile>`, then replace every `TODO` with the project-owned contract, primitive catalog authority, executable paths, render recipe, drift gate, and safe-repair boundary. A primitive catalog may stay in the UI contract, a linked project document, or an established component catalog; never copy another project's vocabulary. Nonvisual repositories use profile `none`.
 3. Run `python snippets/project_agent_contract.py check --repo <path>` and `/sync-agent-stubs` — the checker verifies local UI authority; sync adds the `CLAUDE.md`/`GEMINI.md` wrappers, wires the git hooks, re-lists the project, and reports non-blocking migration warnings for any other project without an Interface declaration.
 
 ## If you switch off Claude
 
-Everything still works: `AGENTS.md` + `procedures/` (including the hardening fleet's per-expert criteria in `procedures/agents/`) are plain markdown that another capable runtime or local model can read directly. Procedures remain canonical; runtime skills are replaceable adapters. A candidate model earns blocking work through the same representative role evaluation and typed receipt rather than its provider or parameter count. The git hooks remain runtime-independent.
+The same sources remain usable: `GLOBAL.md` + the applicable local `AGENTS.md` + `procedures/INDEX.md` and selected `procedures/` (including the hardening fleet's per-expert criteria in `procedures/agents/`) are plain markdown that another capable runtime or local model can read directly. Procedures remain canonical; runtime skills are replaceable adapters. A candidate model earns blocking work through the same representative role evaluation and typed receipt rather than its provider or parameter count. The git hooks remain runtime-independent.
+
+## Moving the source checkout
+
+Regenerate adapters after moving this repository: global links resolve to its absolute location. Keep the checkout separate from runtime configuration directories. Legacy installations that put the source directly in `~/.gemini` must move the source first; sync detects the collision before any mutation. See [the installation notes](README.md#runtime-installation-and-relocation).

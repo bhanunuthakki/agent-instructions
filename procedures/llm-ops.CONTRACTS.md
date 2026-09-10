@@ -6,6 +6,8 @@ Use this reference when implementing the central call path, model picker, schema
 
 Provider SDK or CLI integration lives in one module. Feature code passes a closed `Purpose` enum, validated inputs, and an expected output schema; it does not pass an ad hoc model ID.
 
+The project entry point owns purpose semantics and maps the centrally resolved provider order to purpose-qualified transports. It may reject a centrally listed provider that lacks a required capability, but it may not silently reorder the ordinary fleet default. Explicit Judge entry points instead consume their registered project-local Judge route and independence rules.
+
 The central entry point owns:
 
 - purpose-to-model resolution;

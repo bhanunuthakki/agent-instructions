@@ -8,6 +8,8 @@
 python3 snippets/interaction_outcome_eval.py
 ```
 
+The default candidate is the evaluated workhorse `gpt-5.6-terra`; the default frontier Judge is `gpt-6-astra`. Model identity remains hidden from semantic grading, and a completed run is evidence for only the exact runtime/model/effort and corpus recorded in its receipt.
+
 Each run creates a new timestamped attempt directory under `.tmp/interaction_outcome_eval/` and
 refuses to reuse it. `started.json` records corpus, instruction, and evaluation-contract hashes before any model call. A successful run adds
 `result.json`; a transport, interruption, or schema failure adds `error.json` with its stage, case,
@@ -28,7 +30,7 @@ boundaries for Angel Memos, Blog Engine, Resume, Wealthplan, Reading Companion, 
 Each response is judged independently to avoid cross-case anchoring.
 
 The live threshold is calibrated to an A− floor rather than zero-variance perfection. Each attempt
-requires at least 20/22 whole cases passing, 0.95 required-outcome recall, 1.0 avoidance accuracy, no response over 250 words,
+requires at least 37/41 whole cases passing, 0.95 required-outcome recall, 1.0 avoidance accuracy, no response over 250 words,
 every quality-dimension average at least 4.0/5, no case dimension below 3/5, and no scope/authority or
 completion-truth score below 4/5. Quality dimensions are first-screen altitude, scope/authority,
 actionability, technical precision, completion truth, and context economy.
@@ -43,8 +45,28 @@ falls between them, so an unfavorable run cannot be skipped. Run the determinist
 python3 snippets/interaction_outcome_eval.py --qualify-pair FIRST_RESULT SECOND_RESULT
 ```
 
-Two perfect 22/22 attempts remain an A+ signal, not the A− floor. Until the pair check passes this
+Two perfect 41/41 attempts remain an A+ signal, not the A− floor. Until the pair check passes this
 suite is shadow evidence, not a production model qualification. Do not rerun an unchanged revision
 merely to select a favorable stochastic result. A failed current-revision attempt remains evidence
 until the relevant instruction/case/contract is corrected or a documented transport/model error
 invalidates the attempt. Unit tests inject a fake transport and remain deterministic and offline.
+
+## Instruction ownership and initiative
+
+`GLOBAL.md` plus `procedures/INDEX.md` are assembled once for every candidate; explicitly named project files add local boundaries. Hashes include both shared sources. The 41-case response corpus retains all 22 earlier scenarios and adds paired initiative/authority cases: authorized internal naming, meaningful layout replacement, short lists without unnecessary facets, intended versus unexplained golden changes, isolated prototypes, approved intent versus a buggy implementation, unrelated scope expansion, concrete clarification before broader cleanup, concrete publication approval versus an existing exact approval, and proactive delegation versus trivial-work, phase-transition, root-judgment, unresolved-decision, coordination-economics, overlapping-write, and capability-qualification boundaries. The 35-case routing corpus additionally covers machine-operation discovery, reuse of a qualified model route, paired unreviewed/explicitly approved publication boundaries, an ambiguous cleanup request that must be clarified before larger architectural work, and proactive parallel delegation for independent diagnosis, implementation, and later task phases. Substantive existing routes permit or require `agent-operations` when independent streams are plausible, while the tiny deterministic change forbids it. Routing effect means the greatest task side effect already authorized after ordinary prerequisite checks, not the immediate next operation; clarification records missing user input needed to complete the outcome. Metered API execution and GUI ownership handoff are external effects. Source synchronization and account-state design are permitted supporting routes when those boundaries are touched.
+
+`instruction_quality_rubric.json` is a fixed advisory rubric for reviewing the instruction artifact itself. Its 100-point total never overrides a blocking safety/authority regression or failed required gate. Keep every valid independent review; re-review only after substantive correction or new relevant evidence, and do not adjust the rubric to raise an attained score. Artifact review and response smoke evidence do not qualify production model performance.
+
+## Owner enablement and model portability
+
+`user_enablement_cases.jsonl` is a separate eight-case response suite for the collaboration consolidation. It covers routine technical ownership, a consequential cloud/privacy choice, recognizable design exploration, evidence-backed challenge, inspectable delivery, an unexpected irreversible dependency, requested expert detail, and private-data protection in a shareable preview. It leaves the main response corpus and qualification history unchanged. Candidate prompts load the actual global, catalog, and named workflow sources; judge-only criteria remain hidden.
+
+Run a bounded advisory smoke with explicit candidate and independent judge identities:
+
+```bash
+python3 snippets/interaction_outcome_eval.py --cases evals/agent_system/user_enablement_cases.jsonl --candidate-model gpt-5.6-sol --judge-model gpt-6-astra
+```
+
+This command exercises proposed responses, not tool execution. A passing smoke does not prove working software, real user comprehension, or fleet qualification. The independent artifact review uses `user_enablement_review_contract.json` together with the unchanged instruction-quality scoring rubric. Its grade A requires 95 points, no blocker, and the listed acceptance obligations; grade changes require changed artifacts or relevant new evidence.
+
+For a cross-model comparison, hold these cases, canonical instruction revision, and judging criteria fixed across Astra, Fable, Sol, Opus, and Flash. Record exact model version, runtime/host instructions, available tools and display behavior, effort, responses, latency, usage, and failures. Provider-specific adapters may correct an observed need but may not relax authority or evidence criteria. Include tool-executed builds and owner inspection before claiming practical parity. Models or runtimes not actually exercised remain unqualified; do not infer their results from a different model or an upstream benchmark. Broader live fleet trials require task scope and available transports; the bounded smoke above does not run them.

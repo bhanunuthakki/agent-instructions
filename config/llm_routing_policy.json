@@ -1,0 +1,21 @@
+{
+  "$schema": "internal://llm-routing-policy/v1",
+  "schema_version": 1,
+  "default_application_route": [
+    "codex",
+    "claude"
+  ],
+  "allowed_subscription_backends": [
+    "codex",
+    "claude"
+  ],
+  "canonical_environment": {
+    "instructions_home": "AGENT_INSTRUCTIONS_HOME",
+    "primary_subscription_backend": "LLM_PRIMARY_SUBSCRIPTION_BACKEND",
+    "subscription_fallback_disabled": "LLM_SUBSCRIPTION_FALLBACK_DISABLED"
+  },
+  "workload_classes": {
+    "application": "fleet_default",
+    "judge": "explicit_registration_required"
+  }
+}

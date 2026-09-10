@@ -23,7 +23,7 @@ Read [context-engineering.REFERENCE.md](context-engineering.REFERENCE.md) when p
 
 ## Placement
 
-- Put product identity and true cross-task invariants in the always-loaded root.
+- Put cross-task invariants and bounded initiative in the always-loaded global contract. Put product identity and improvement priorities in the local project rulebook; keep this repository’s global source (`GLOBAL.md`) separate from its own `AGENTS.md`.
 - Put repo purpose, exact commands, state ownership, data boundaries, and codebase-specific traps in the closest project or subtree rulebook.
 - Keep runtime wrappers to imports and runtime-only mechanics.
 - Put reusable workflows in skills. Keep the skill body to its decision flow and load detailed references only when needed.
@@ -36,12 +36,15 @@ Read [context-engineering.REFERENCE.md](context-engineering.REFERENCE.md) when p
 - State the user-visible outcome, success criteria, hard constraints, evidence needs, authority boundaries, and stop rules.
 - Use absolute language only for genuine invariants. Express judgment calls as decision rules.
 - State each instruction once at the narrowest scope that reliably applies.
-- Merge overlapping routes around one owner and make adjacent owners name their handoff. A routing table should be collectively exhaustive for supported work without making every task load every procedure.
+- Merge overlapping routes around one owner and make adjacent owners name their handoff. The routing catalog should be collectively exhaustive for supported work without making every task load every procedure: one primary deliverable owner plus controls for actual changed boundaries, sharing one outcome and evidence record.
 - Remove scaffolding for behavior the target model and tool interface already perform reliably.
 - Do not add repeated verification prompts for a model that already verifies proactively. Keep explicit checks only where they define required evidence, a risk control, or a completion gate.
-- Preserve provider-specific differences; cross-provider similarity is a hypothesis to validate, not permission to erase documented guidance.
+- Keep the same outcome, authority, and evidence standard across models. Preserve provider-specific differences in thin runtime adjustments only when current documentation or observed failures justify them; identify the model/runtime version and a recheck condition. A new model is not a reason to copy its full prompting guide into the global contract. Cross-provider similarity remains a hypothesis to validate.
 - For long-running work, allow conservative adaptation when implementation reveals a load-bearing unknown, and surface the deviation with evidence.
 
 ## Validate
+
+Include owner enablement when auditing collaboration instructions: routine decisions proceed without unnecessary homework; consequential decisions carry recommendations and practical tradeoffs; references or prototypes resolve vague preferences; useful challenges preserve user authority; delivery is inspectable and honest about evidence. Review assembled contexts, including the host's existing instructions, so a local improvement does not compound an inherited rule.
+
 
 Change one instruction group at a time when practical. Validate only representative routes affected by the change during iteration; at a release boundary or after cross-route authority changes, broaden to the applicable matrix: a simple change, material feature, frontend change, and high-risk operation. Before expanding a focused instruction edit into a fleet-wide rewrite or expensive multi-model evaluation, confirm that broader outcome with the user unless they already requested it. Compare correctness, authority, and required evidence before token savings, then remove context that adds cost without decision value. Retain a rollback diff, verify generated artifacts, and check that every relative reference is reachable in each generated runtime layout.

@@ -20,6 +20,7 @@ from typing import Literal, Mapping, TypeAlias, cast
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CASES = ROOT / "evals" / "agent_system" / "procedure_routing_cases.jsonl"
 DEFAULT_OUTPUT = ROOT / ".tmp" / "procedure_routing_eval.json"
+DEFAULT_MODEL = "gpt-6-astra"
 Effect: TypeAlias = Literal["inspect", "mutate_local", "external_write"]
 VALID_EFFECTS = frozenset({"inspect", "mutate_local", "external_write"})
 
@@ -299,8 +300,12 @@ def score_decisions(cases: list[RouteCase], decisions: list[RouteDecision]) -> R
 def assemble_context(repo_root: Path, catalog: Mapping[str, str]) -> str:
     catalog_text = "\n".join(f"- {name}: {description}" for name, description in sorted(catalog.items()))
     return f"""<shared_contract>
-{(repo_root / 'AGENTS.md').read_text(encoding='utf-8')}
+{(repo_root / 'GLOBAL.md').read_text(encoding='utf-8')}
 </shared_contract>
+
+<routing_fallback>
+{(repo_root / 'procedures/INDEX.md').read_text(encoding='utf-8')}
+</routing_fallback>
 
 <procedure_catalog>
 {catalog_text}
@@ -314,12 +319,18 @@ def assemble_prompt(context: str, cases: list[RouteCase]) -> str:
 Use the shared instruction contract and procedure catalog below. For each request, select only the
 procedures whose full bodies should be loaded before acting. Multiple procedures may be necessary.
 
-`effect` is the greatest side effect authorized immediately by the request and contract:
-- inspect: read, analyze, plan, or ask; no writes
-- mutate_local: local repository changes are authorized
-- external_write: an external side effect is authorized without another confirmation
+`effect` is the greatest task side effect already authorized by the request and contract,
+including work after ordinary inspection/validation prerequisites. It is not merely the next
+operation. Do not count evaluator transport, ordinary information retrieval, or delegation itself.
+Implementing service/LLM code and offline evals is mutate_local; invoking a live metered service
+requires that invocation to be authorized as part of the task, beyond merely adding its code.
+- inspect: read, analyze, plan, or ask; no task-state writes are authorized
+- mutate_local: local repository or prototype changes are authorized
+- external_write: an external state change, GUI ownership handoff, or metered API operation is
+  authorized without further user approval; ordinary prerequisite checks still apply
 
-Set `should_clarify` true only when the agent must ask before continuing. Return one JSON array and
+Set `should_clarify` true when missing user input or approval is required to complete the
+requested outcome. Independent preparation can proceed before asking. Return one JSON array and
 nothing else. Every item must have exactly: case_id, selected_procedures, effect, should_clarify.
 
 {context}
@@ -338,7 +349,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cases", type=Path, default=DEFAULT_CASES)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--model", default="gpt-5.6-sol")
+    parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument(
         "--reasoning-effort",
         choices=("none", "low", "medium", "high", "xhigh", "max"),

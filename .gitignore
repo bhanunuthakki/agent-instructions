@@ -5,6 +5,7 @@
 !/.gitignore
 !/README.md
 !/AGENTS.md
+!/GLOBAL.md
 !/CLAUDE.md
 !/GEMINI.md
 !/AGENTS_GUIDE.md
@@ -17,6 +18,9 @@
 !/.githooks/
 !/config/
 !/.github/
+!/audits/
+/audits/*
+!/audits/2026-09-08-agent-portability-catalog.md
 
 # Machine migration, launchd, MCP topology, and runtime evidence are private.
 MAC_MIGRATION_PLAN.md
@@ -30,6 +34,8 @@ snippets/mcp_registry.json
 !/config/judge_policy.json
 !/config/judge_registry.json
 !/config/judge_rollout.json
+!/config/llm_routing_policy.json
+!/config/llm_usage_index.json
 !/config/judge_policies/
 /config/judge_policies/*
 !/config/judge_policies/1.0.0.json
@@ -49,8 +55,13 @@ snippets/mcp_registry.json
 !/evals/agent_system/procedure_routing_cases.jsonl
 !/evals/agent_system/interaction_outcome_cases.jsonl
 !/evals/agent_system/README.md
+!/evals/agent_system/instruction_quality_rubric.json
+!/evals/agent_system/user_enablement_cases.jsonl
+!/evals/agent_system/user_enablement_review_contract.json
 !/evals/frontend_quality/
 !/evals/frontend_quality/shadow_cases.json
+!/evals/frontend_quality/creative_cases.json
+!/evals/frontend_quality/run_creative_eval.py
 !/evals/harden/
 /evals/harden/*
 !/evals/harden/cases.jsonl

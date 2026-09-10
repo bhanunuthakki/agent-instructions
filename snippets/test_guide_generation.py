@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import json
 import os
+import struct
 import subprocess
 import sys
+import zlib
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import SimpleNamespace
@@ -66,22 +68,21 @@ def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None
     assert s.CLAUDE_GLOBAL_RULES in artifacts
     assert s.GEMINI_GLOBAL_RULES in artifacts
     local_agents = s.AGENTS_MD.read_text(encoding="utf-8")
-    global_agents = s.project_agent_contract.without_interface_section(local_agents)
-    assert global_agents in artifacts[s.CODEX_GLOBAL_AGENTS]
+    global_agents = s.relocate_markdown_links(
+        s.GLOBAL_MD.read_text(encoding="utf-8"), s.ROOT_REPO
+    )
+    for artifact in artifacts.values():
+        assert global_agents in artifact
+        assert local_agents not in artifact
+        assert "@AGENTS.md" not in artifact
+        assert "@./AGENTS.md" not in artifact
+        assert "## Interface" not in artifact
     assert "## Interface" in local_agents
-    assert "## Interface" not in artifacts[s.CODEX_GLOBAL_AGENTS]
     assert s.project_agent_contract.check_repo(s.ROOT_REPO).ok
     assert "Generated from" in artifacts[s.CLAUDE_GLOBAL_RULES]
-    if s.GEMINI_GLOBAL_RULES.resolve() == s.GEMINI_MD.resolve():
-        assert artifacts[s.GEMINI_GLOBAL_RULES] == s.GEMINI_MD.read_text(
-            encoding="utf-8"
-        )
-    else:
-        assert "Generated from" in artifacts[s.GEMINI_GLOBAL_RULES]
-        assert f"`{s.PROCEDURES_DIR}`" in artifacts[s.GEMINI_GLOBAL_RULES]
-        assert "Canonical procedure root for manual fallback" in artifacts[
-            s.GEMINI_GLOBAL_RULES
-        ]
+    assert "Generated from" in artifacts[s.GEMINI_GLOBAL_RULES]
+    assert f"`{s.PROCEDURES_DIR}`" in artifacts[s.GEMINI_GLOBAL_RULES]
+    assert s.detect_global_reference_drift(artifacts) == []
 
 
 def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
@@ -122,7 +123,10 @@ def test_shared_hooks_expose_required_composed_capabilities() -> None:
 
 def test_shared_hook_is_the_only_owner_of_global_instruction_gate() -> None:
     shared = (s.HOOKS_DIR / "pre-push").read_text(encoding="utf-8")
-    assert shared.count('run "$python_bin" "$stubs" --check') == 1
+    assert shared.splitlines().count(
+        '  run "$python_bin" "$stubs" --check --artifacts-only'
+    ) == 1
+    assert '--check-project-portability "$root"' in shared
     earnings_hook = s.SCRATCH / "earnings-summary" / ".githooks" / "pre-push"
     if earnings_hook.exists():
         assert "sync_agent_stubs.py" not in earnings_hook.read_text(encoding="utf-8")
@@ -430,10 +434,12 @@ def test_frontier_expiry_is_checked_with_explicit_artifact_docs(
 
 
 def test_root_routes_standalone_tool_and_integration_workflows() -> None:
-    agents = s.AGENTS_MD.read_text(encoding="utf-8")
+    shared = s.GLOBAL_MD.read_text(encoding="utf-8")
+    catalog = (s.PROCEDURES_DIR / "INDEX.md").read_text(encoding="utf-8")
+    assert "procedures/INDEX.md" in shared
 
     for procedure in ("tool-selector.md", "external-integration.md"):
-        assert f"`procedures/{procedure}`" in agents
+        assert f"]({procedure})" in catalog
         assert (s.PROCEDURES_DIR / procedure).exists()
         skill_name = Path(procedure).stem
         assert skill_name in s.OUR_SKILLS
@@ -448,7 +454,7 @@ def test_model_frontier_review_date_matches_near_term_refresh_gate() -> None:
     frontier = (s.PROCEDURES_DIR / "model-frontier.REFERENCE.md").read_text(
         encoding="utf-8"
     )
-    assert "Next review: 2026-09-09" in frontier
+    assert "Next review: 2026-09-16" in frontier
 
 
 def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
@@ -467,6 +473,7 @@ def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
     expected_current_prices = {
         "claude-sonnet-5": (2.00, 10.00),
         "gemini-3.5-flash-lite": (0.30, 2.50),
+        "gpt-6-astra": (10.00, 50.00),
         "gpt-5.6-luna": (0.20, 1.20),
         "gpt-5.6-terra": (2.00, 12.00),
     }
@@ -788,6 +795,9 @@ def test_agent_routing_uses_capability_roles_not_provider_labels() -> None:
         assert provider_label not in procedure
     assert "capability receipt" in procedure
     assert "least expensive currently evaluated model" in procedure
+    assert "Delegate by default" in procedure
+    assert "acceptance judge" in procedure
+    assert "after material user input" in procedure
 
 
 def test_shared_scheduling_reference_has_no_project_specific_windows() -> None:
@@ -911,22 +921,78 @@ def test_progressive_disclosure_skills_are_generated_for_both_runtimes() -> None
 
 def test_frontend_quality_has_one_canonical_route_and_no_stale_global_owner() -> None:
     procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
-    agents = s.AGENTS_MD.read_text(encoding="utf-8")
+    shared = s.GLOBAL_MD.read_text(encoding="utf-8")
+    catalog = (s.PROCEDURES_DIR / "INDEX.md").read_text(encoding="utf-8")
     assert procedure.count("# Frontend Quality") == 1
-    assert agents.count("`procedures/frontend-quality.md`") == 1
-    assert "Frontend Correctness" not in agents
+    assert "procedures/INDEX.md" in shared
+    assert "](frontend-quality.md)" in catalog
+    assert "Frontend Correctness" not in shared + catalog
     assert "frontend-quality" in s.OUR_SKILLS
     assert "design-conformance-audit" not in s.OUR_SKILLS
 
 
+def test_frontend_quality_routes_expression_posture_through_progressive_disclosure() -> None:
+    procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
+    creative = s.PROCEDURES_DIR / "frontend-quality.CREATIVE.md"
+    mockup = (s.PROCEDURES_DIR / "mockup-review.md").read_text(encoding="utf-8")
+    scaffold = (s.PROCEDURES_DIR / "scaffold-design-system.md").read_text(encoding="utf-8")
+    ux_design = (s.PROCEDURES_DIR / "agents" / "ux-design.md").read_text(encoding="utf-8")
+
+    assert creative.exists()
+    for posture in ("`conform`", "`evolve`", "`explore`"):
+        assert posture in procedure
+    assert "frontend-quality.CREATIVE.md" in procedure
+    assert "creative workflow" in mockup
+    assert "expression posture" in scaffold.lower()
+    assert "directed distinctiveness" in ux_design.lower()
+
+    creative_text = creative.read_text(encoding="utf-8").lower()
+    for contract in (
+        "when important taste or interaction choices remain open",
+        "clear supplied direction or already-resolved choice may proceed directly",
+        "fresh context",
+        "at most one re-critique",
+        "media checkpoint",
+        "reduced-motion",
+    ):
+        assert contract in creative_text
+    assert "9/10" not in creative_text
+    assert "api key" not in creative_text
+
+
+def test_frontend_primitive_contract_is_portable_and_project_owned() -> None:
+    procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
+    primitives_path = s.PROCEDURES_DIR / "frontend-quality.PRIMITIVES.md"
+    scaffold = (s.PROCEDURES_DIR / "scaffold-design-system.md").read_text(encoding="utf-8")
+
+    assert primitives_path.exists()
+    primitives = primitives_path.read_text(encoding="utf-8")
+    assert "frontend-quality.PRIMITIVES.md" in procedure
+    assert "frontend-quality.PRIMITIVES.md" in scaffold
+    primitive_terms = primitives.lower()
+    for contract in (
+        "project-owned vocabulary",
+        "dismiss, close, and delete",
+        "safe mechanical",
+        "embedded in its ui contract",
+        "linked project document",
+    ):
+        assert contract in primitive_terms
+    assert "`HOLD`" in primitives
+    assert "HuntDesk" not in primitives
+    assert ".k-chip" not in primitives
+
+
 def test_root_uses_one_clarification_economics_invariant() -> None:
-    root = s.AGENTS_MD.read_text(encoding="utf-8")
+    root = s.GLOBAL_MD.read_text(encoding="utf-8")
     judging = (s.PROCEDURES_DIR / "judging.md").read_text(encoding="utf-8")
     context = (s.PROCEDURES_DIR / "context-engineering.md").read_text(encoding="utf-8")
     assert "## Effort calibration" not in root
     assert "quick reversible iteration" not in root
-    assert "short answer is likely to prevent materially greater rework" in root
-    assert "smallest reversible technical default" in root
+    assert "Ask early when" in root
+    assert "permission, or risk boundary" in root
+    assert "materially change the solution" in root
+    assert "state consequential assumptions and proceed" in root
     assert "J0 is the default when deterministic proof closes the task" in judging
     assert "confirm the expanded scope with the owner" in judging
     assert "expensive multi-model evaluation" in context
@@ -1016,6 +1082,126 @@ def test_frontend_quality_shadow_runner_has_a_schema_checked_dry_run(
     monkeypatch.setattr(sys, "argv", ["run_shadow_eval.py", "--limit", "1"])
     runner.main()
     assert json.loads(capsys.readouterr().out)["selected"] == ["container-economy"]
+
+
+def test_frontend_creative_eval_builds_blind_rendered_comparisons(tmp_path: Path) -> None:
+    runner_path = s.ROOT_REPO / "evals" / "frontend_quality" / "run_creative_eval.py"
+    spec = spec_from_file_location("frontend_quality_creative", runner_path)
+    assert spec and spec.loader
+    runner = module_from_spec(spec)
+    spec.loader.exec_module(runner)
+
+    cases = runner.load_cases()
+    assert {case["posture"] for case in cases["cases"]} == {"conform", "evolve", "explore"}
+
+    def png_pixel(red: int, green: int, blue: int) -> bytes:
+        def chunk(kind: bytes, payload: bytes) -> bytes:
+            checksum = zlib.crc32(kind + payload) & 0xFFFFFFFF
+            return struct.pack(">I", len(payload)) + kind + payload + struct.pack(">I", checksum)
+
+        header = struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0)
+        pixels = zlib.compress(bytes((0, red, green, blue, 255)))
+        return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) + chunk(b"IDAT", pixels) + chunk(b"IEND", b"")
+
+    def evidence() -> dict[str, object]:
+        return {
+            "task_replay": {"status": "pass", "reference": "task replay log"},
+            "accessibility": {"status": "pass", "reference": "accessibility report"},
+            "responsive_states": {"status": "pass", "reference": "capture matrix"},
+            "repository_checks": [{"status": "pass", "reference": "test command"}],
+        }
+
+    baseline = tmp_path / "baseline.png"
+    candidate = tmp_path / "candidate.png"
+    reference = tmp_path / "reference.png"
+    corrupt = tmp_path / "corrupt.png"
+    baseline.write_bytes(png_pixel(255, 0, 0))
+    candidate.write_bytes(png_pixel(0, 255, 0))
+    reference.write_bytes(png_pixel(0, 0, 255))
+    corrupt.write_bytes(b"not a png")
+    with pytest.raises(ValueError, match="invalid PNG signature"):
+        runner._png_artifact(str(corrupt))
+
+    case_id = cases["cases"][0]["id"]
+    manifest = {
+        "run_identifier": "blind-run",
+        "comparisons": [
+            {
+                "case_id": case_id,
+                "shared_conditions": {
+                    "project_fixture": "fixture-revision-1",
+                    "model_runtime": "runtime-revision-1",
+                    "generation_seed": "shared-seed",
+                    "capture_matrix": [{"state": "populated", "viewport": "1x1"}],
+                },
+                "family_reference_images": [str(reference)],
+                "baseline": {
+                    "instruction_revision": "baseline-revision",
+                    "images": [{"state": "populated", "viewport": "1x1", "path": str(baseline)}],
+                    "deterministic_evidence": evidence(),
+                },
+                "candidate": {
+                    "instruction_revision": "candidate-revision",
+                    "images": [{"state": "populated", "viewport": "1x1", "path": str(candidate)}],
+                    "deterministic_evidence": evidence(),
+                },
+            }
+        ],
+    }
+    packet = runner.prepare_review(manifest, cases, tmp_path / "blind")
+    comparison = packet["comparisons"][0]
+    assert set(comparison["images"]) == {"a", "b"}
+    assert "assignment" not in comparison
+    assert all(
+        "baseline" not in Path(image["path"]).name and "candidate" not in Path(image["path"]).name
+        for images in comparison["images"].values()
+        for image in images
+    )
+    assert comparison["dimensions"] == cases["dimensions"]
+
+    assignment = runner._assignment("blind-run", case_id)
+    candidate_slot = next(slot for slot, treatment in assignment.items() if treatment == "candidate")
+    response = {
+        "case_id": comparison["case_id"],
+        "preferred": "a",
+        "dimension_winners": {dimension: "a" for dimension in cases["dimensions"]},
+        "blockers": {"a": [], "b": []},
+        "reason": "A better fits the brief without obscuring the task.",
+    }
+    result = runner.score_responses(manifest, [response], cases)
+    assert result["comparison_count"] == 1
+    assert result["results"][0]["candidate_preference"] in {"win", "loss"}
+    assert result["results"][0]["provenance"]["comparison_sha256"]
+    assert result["by_posture"]["conform"]["comparison_count"] == 1
+    assert result["automatic_gate"] == "disabled"
+
+    blocked_response = {**response, "blockers": {"a": [], "b": []}}
+    blocked_response["blockers"][candidate_slot] = ["task_obscured"]
+    blocked = runner.score_responses(manifest, [blocked_response], cases)
+    assert blocked["results"][0]["candidate_preference"] == "blocked"
+    assert blocked["by_posture"]["conform"]["preference_counts"]["blocked"] == 1
+
+    failed_evidence_manifest = json.loads(json.dumps(manifest))
+    failed_evidence_manifest["comparisons"][0]["candidate"]["deterministic_evidence"][
+        "accessibility"
+    ]["status"] = "fail"
+    failed_evidence = runner.score_responses(failed_evidence_manifest, [response], cases)
+    assert failed_evidence["results"][0]["candidate_preference"] == "blocked"
+    assert "accessibility:fail" in failed_evidence["results"][0]["candidate_blockers"]
+
+    missing_reference_manifest = json.loads(json.dumps(manifest))
+    missing_reference_manifest["comparisons"][0]["family_reference_images"] = []
+    with pytest.raises(ValueError, match="family reference"):
+        runner.validate_manifest(missing_reference_manifest, cases)
+
+    mismatched_viewport_manifest = json.loads(json.dumps(manifest))
+    mismatched_viewport_manifest["comparisons"][0]["shared_conditions"]["capture_matrix"][0][
+        "viewport"
+    ] = "2x1"
+    mismatched_viewport_manifest["comparisons"][0]["baseline"]["images"][0]["viewport"] = "2x1"
+    mismatched_viewport_manifest["comparisons"][0]["candidate"]["images"][0]["viewport"] = "2x1"
+    with pytest.raises(ValueError, match="dimensions do not match"):
+        runner.validate_manifest(mismatched_viewport_manifest, cases)
 
 
 def test_committed_frontend_quality_receipts_match_current_schema() -> None:
@@ -1194,7 +1380,8 @@ def test_generated_claude_files_use_lf_newlines() -> None:
 
 def test_gemini_routing_marker_inherits_the_canonical_table() -> None:
     marker = s.build_gemini_triggers()
-    assert marker == "Procedure routing is inherited from `AGENTS.md`."
+    assert "procedures/INDEX.md" in marker
+    assert "AGENTS.md" not in marker
     assert "| Trigger |" not in marker
     assert "procedures/agents/" not in marker
 
