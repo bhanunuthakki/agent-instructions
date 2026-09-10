@@ -11,7 +11,7 @@ import pytest
 
 def test_corpus_is_valid_unique_and_binds_instruction_context() -> None:
     cases = outcome.load_cases(outcome.DEFAULT_CASES)
-    assert len(cases) == 32
+    assert len(cases) == 41
     assert len({case.case_id for case in cases}) == len(cases)
     assert all(case.instruction_paths for case in cases)
     assert all(
@@ -19,6 +19,11 @@ def test_corpus_is_valid_unique_and_binds_instruction_context() -> None:
         for case in cases
         for path in outcome.resolve_instruction_paths(case)
     )
+
+
+def test_default_judge_is_astra_and_candidate_remains_workhorse() -> None:
+    assert outcome.DEFAULT_JUDGE_MODEL == "gpt-6-astra"
+    assert outcome.DEFAULT_CANDIDATE_MODEL == "gpt-5.6-terra"
 
 
 def test_owner_enablement_corpus_loads_complete_context_without_judge_criteria() -> None:

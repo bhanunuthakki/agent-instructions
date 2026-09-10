@@ -16,7 +16,7 @@ This catalog is the fallback when native skill discovery is unavailable. `GLOBAL
 | Verify a drift-sensitive external fact or design choice | [external-practice](external-practice.md) |
 | Explicit Judge/Critic/Evaluation Suite or required semantic review | [judging](judging.md) |
 | Maturity-gated audit or approved remediation | [harden](harden.md), with only the applicable specialist rubrics |
-| Delegate, coordinate resources, schedule LLM work, or assess task closure | [agent-operations](agent-operations.md) |
+| Run the delegation check for any substantive task, delegate work, coordinate resources, schedule LLM work, or assess task closure | [agent-operations](agent-operations.md) |
 | Synchronize Linear from an exact issue's branch/PR state | [linear-pr-sync](linear-pr-sync.md) |
 | Reconcile Linear backlog, duplicates, dependencies, or stale pipeline states | [linear-pipeline-hygiene](linear-pipeline-hygiene.md) |
 | Synchronize canonical instructions and runtime artifacts | [source-command-sync-agent-stubs](source-command-sync-agent-stubs.md) |
@@ -27,6 +27,7 @@ Ordinary answers and research need no artificial engineering workflow. Use appli
 
 | Changed or uncertain boundary | Additional owner |
 |---|---|
+| Any substantive task, at its start and each discovery, implementation, verification, or recovery transition | [agent-operations](agent-operations.md) owns the delegation check even when the result is serial execution; the root retains synthesis and final judgment |
 | Material user behavior in a build task | [product-feature](product-feature.md) owns outcome/acceptance; code-change owns implementation |
 | Durable state, identity, migration, lineage, or recovery | [data-foundation](data-foundation.md) |
 | Visible code change or isolated mockup | [frontend-quality](frontend-quality.md) owns interaction and rendered evidence, including when mockup-review owns the deliverable |
