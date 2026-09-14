@@ -25,7 +25,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**27 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**28 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
@@ -38,6 +38,7 @@ You rarely touch any of this. It just shapes how the agent behaves.
 | **explain-change** | After an LLM writes or edits code, explain the outcome, impact, risk, and proof in plain language at a depth proportional to the change. |
 | **external-integration** | Add or audit an inbound external API, webhook, SDK, or MCP capability through a typed, least-privilege, observable adapter. |
 | **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
+| **finance-case-study** | Work progressively through strategic finance, FP&A, BizOps, or operating case studies from supplied data. |
 | **frontend-quality** | Design, modify, review, or scaffold a rendered interface around the user's task, with compositional restraint and proportional browser or renderer ev… |
 | **grill-me** | Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision. |
 | **iteration-shortcut** | Bound a deliberate temporary shortcut that accelerates learning without silently weakening retained truth, safety, or recovery. |
@@ -110,9 +111,9 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**45 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 27 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**51 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 28 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`INDEX.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `chisle.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
+`INDEX.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `chisle.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `finance-case-study.exploration.md`, `finance-case-study.md`, `finance-case-study.pruning.md`, `finance-case-study.review-and-fluency.md`, `finance-case-study.workbook-standards.md`, `finance-case-study.writing-and-delivery.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `tool-selector.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook
