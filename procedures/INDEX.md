@@ -22,6 +22,7 @@ Compose workflows semantically, not by concatenating every instruction from ever
 | Explicit interview or unresolved consequential product choice | [grill-me](grill-me.md) |
 | Compare a consequential vendor or build/buy choice | [tool-selector](tool-selector.md) |
 | Verify a drift-sensitive external fact or design choice | [external-practice](external-practice.md) |
+| Work through a strategic-finance, FP&A, BizOps, or operating case study in deliberate phases | [finance-case-study](finance-case-study.md) |
 | Explicit Judge/Critic/Evaluation Suite or required semantic review | [judging](judging.md) |
 | Maturity-gated audit or approved remediation | [harden](harden.md), with only the applicable specialist rubrics |
 | Run the delegation check for any substantive task, delegate work, coordinate resources, schedule LLM work, or assess task closure | [agent-operations](agent-operations.md) |

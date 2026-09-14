@@ -95,6 +95,7 @@ OUR_SKILLS = [
     "frontend-quality",
     "external-integration",
     "external-practice",
+    "finance-case-study",
     "grill-me",
     "iteration-shortcut",
     "definitions",
