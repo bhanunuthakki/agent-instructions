@@ -454,7 +454,7 @@ def test_model_frontier_review_date_matches_near_term_refresh_gate() -> None:
     frontier = (s.PROCEDURES_DIR / "model-frontier.REFERENCE.md").read_text(
         encoding="utf-8"
     )
-    assert "Next review: 2026-09-16" in frontier
+    assert "Next review: 2026-10-09" in frontier
 
 
 def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
@@ -472,7 +472,9 @@ def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
 
     expected_current_prices = {
         "claude-fable-5-1": (10.00, 50.00),
-        "claude-sonnet-5": (2.00, 10.00),
+        "claude-sonnet-5-5": (2.00, 10.00),
+        "claude-opus-5-5": (4.00, 20.00),
+        "gpt-6.1-sol": (2.00, 10.00),
         "gemini-3.5-flash-lite": (0.30, 2.50),
         "gpt-6-astra": (10.00, 50.00),
         "gpt-5.6-luna": (0.20, 1.20),
