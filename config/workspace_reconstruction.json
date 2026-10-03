@@ -1,0 +1,1901 @@
+{
+  "schema_version": 1,
+  "canonical_source": "config/workspace_reconstruction.json",
+  "assessment_url": "https://linear.app/bhanu-personal/document/assessment-provider-and-harness-reconstructability-ca616d14accf",
+  "population_authority": "AGENTS_GUIDE.md#projects-under-the-rulebook",
+  "population_note": "Current13 projects from canonical generated inventory; original August assessment counted11. No project is silently omitted to preserve the historical count.",
+  "regeneration": "Canonical hand-maintained inventory; verify with python snippets/workspace_reconstruction.py validate --workspace-root <root>; do not generate over owner edits",
+  "projects": [
+    {
+      "id": "agent-instructions",
+      "repo": "agent-instructions",
+      "documentation": [
+        "AGENTS.md",
+        "README.md",
+        "AGENTS_GUIDE.md"
+      ],
+      "toolchain": [
+        "Python >=3.11; CI Python3.13; requirements-test.lock owns pytest pin"
+      ],
+      "install": [
+        "{python} -m pip install -r requirements-test.lock"
+      ],
+      "install_sources": [
+        "requirements-test.lock"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "GLOBAL.md",
+            "procedures",
+            "config"
+          ],
+          "generated": [
+            "AGENTS_GUIDE.md"
+          ],
+          "regenerate": "{python} snippets/sync_agent_stubs.py --artifacts-only; then materialize_guide(False) if inventories change"
+        }
+      ],
+      "llm": {
+        "status": "registered",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "snippets/interaction_outcome_eval.py"
+        ],
+        "purpose_authority": "config/judge_registries/1.1.0.json",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "snippets/interaction_outcome_eval.py"
+        ],
+        "ledger_authority": "snippets/interaction_outcome_eval.py:execute_attempt",
+        "eval_authority": "evals/agent_system/interaction_outcome_cases.jsonl",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        ".github/workflows/public-boundary.yml"
+      ],
+      "state_boundaries": [
+        "AGENT_INSTRUCTIONS_PRIVATE_STATE_ROOT; ignored .private-state; live governance ledgers"
+      ],
+      "secret_boundaries": [
+        "Provider-native auth; configured machine-operations credential sources; names only"
+      ],
+      "vendor_harness_coupling": [
+        "Runtime skills/CLI wrappers are adapters; private activation and expired frontier can block full gate"
+      ],
+      "transition_recovery": "Recover source Git checkout and separately verified private-state backup; regenerate wrappers. Never restamp expired frontier without review.",
+      "commands": [
+        {
+          "id": "inventory-schema",
+          "argv": [
+            "{python}",
+            "snippets/workspace_reconstruction.py",
+            "validate",
+            "--schema-only"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "config/workspace_reconstruction.json",
+            "snippets/workspace_reconstruction.py"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 60
+        },
+        {
+          "id": "public-boundary",
+          "argv": [
+            "{python}",
+            "snippets/check_public_boundary.py"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "snippets/check_public_boundary.py"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "pytest",
+            "snippets",
+            "-q"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest"
+          ],
+          "source_paths": [
+            "snippets"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "generated",
+          "argv": [
+            "{python}",
+            "snippets/sync_agent_stubs.py",
+            "--check",
+            "--artifacts-only"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "snippets/sync_agent_stubs.py"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "complete-gate",
+          "argv": [
+            "sh",
+            "githooks/pre-push"
+          ],
+          "modes": [
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "githooks/pre-push"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "snippets"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "angel-memos",
+      "repo": "angel-memos",
+      "documentation": [
+        "AGENTS.md",
+        "README.md"
+      ],
+      "toolchain": [
+        "Python >=3.13; pyproject.toml constraints; uv.lock if present"
+      ],
+      "install": [
+        "{python} -m pip install -e .[dev] (or uv sync --extra dev; install is manual/network-capable)"
+      ],
+      "install_sources": [
+        "pyproject.toml",
+        "uv.lock"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "registered",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "src/angel_memos/llm.py"
+        ],
+        "purpose_authority": "src/angel_memos/llm.py:MODEL_ROUTES",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "src/angel_memos/llm.py"
+        ],
+        "ledger_authority": "src/angel_memos/llm.py:_append_ledger",
+        "eval_authority": "tests/test_claude.py",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "No scheduled job declared in AGENTS.md; external deployment schedules require operational census"
+      ],
+      "state_boundaries": [
+        "Private deals/output"
+      ],
+      "secret_boundaries": [
+        "Environment credential configuration; Google OAuth credentials.json/token.json; never inspect"
+      ],
+      "vendor_harness_coupling": [
+        "Google Docs/OAuth and PDF tooling"
+      ],
+      "transition_recovery": "Restore source and separately authorized private artifacts. Preserve existing uncommitted LLM migration work; provider replacement requires fake-provider checks and purpose evals.",
+      "commands": [
+        {
+          "id": "format",
+          "argv": [
+            "{python}",
+            "-m",
+            "ruff",
+            "format",
+            "--check",
+            "."
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "ruff"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "lint",
+          "argv": [
+            "{python}",
+            "-m",
+            "ruff",
+            "check",
+            "."
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "ruff"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "types",
+          "argv": [
+            "{python}",
+            "-m",
+            "pyright"
+          ],
+          "modes": [
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pyright"
+          ],
+          "source_paths": [
+            "pyrightconfig.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "strict-types",
+          "argv": [
+            "{python}",
+            "-m",
+            "basedpyright"
+          ],
+          "modes": [
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "basedpyright"
+          ],
+          "source_paths": [
+            "pyrightconfig.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "pytest",
+            "-q",
+            "-m",
+            "not integration"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest"
+          ],
+          "source_paths": [
+            "tests",
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "src",
+            "tests"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "blog-engine",
+      "repo": "blog-engine",
+      "documentation": [
+        "AGENTS.md",
+        "README.md"
+      ],
+      "toolchain": [
+        "Python >=3.13; pyproject.toml constraints; uv.lock if present"
+      ],
+      "install": [
+        "{python} -m pip install -e .[dev] (or uv sync --extra dev; install is manual/network-capable)"
+      ],
+      "install_sources": [
+        "pyproject.toml"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "not_applicable",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [],
+        "purpose_authority": "No application LLM boundary declared in project rulebook",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [],
+        "ledger_authority": "not_applicable",
+        "eval_authority": "not_applicable",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "No scheduled job declared in AGENTS.md; external deployment schedules require operational census"
+      ],
+      "state_boundaries": [
+        "Draft artifacts and deployment document IDs; no automatic publishing"
+      ],
+      "secret_boundaries": [
+        "Environment credential configuration; Google OAuth credentials.json/token.json; never inspect"
+      ],
+      "vendor_harness_coupling": [
+        "Google Docs/OAuth and WordPress REST draft transport"
+      ],
+      "transition_recovery": "Restore source and separately authorized private artifacts. Preserve existing uncommitted LLM migration work; provider replacement requires fake-provider checks and purpose evals.",
+      "commands": [
+        {
+          "id": "format",
+          "argv": [
+            "{python}",
+            "-m",
+            "ruff",
+            "format",
+            "--check",
+            "."
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "ruff"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "lint",
+          "argv": [
+            "{python}",
+            "-m",
+            "ruff",
+            "check",
+            "."
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "ruff"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "types",
+          "argv": [
+            "{python}",
+            "-m",
+            "pyright"
+          ],
+          "modes": [
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pyright"
+          ],
+          "source_paths": [
+            "pyrightconfig.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "strict-types",
+          "argv": [
+            "{python}",
+            "-m",
+            "basedpyright"
+          ],
+          "modes": [
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "basedpyright"
+          ],
+          "source_paths": [
+            "pyrightconfig.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "pytest",
+            "-q",
+            "-m",
+            "not integration"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest"
+          ],
+          "source_paths": [
+            "tests",
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "src",
+            "tests"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "bhanu-resume-system",
+      "repo": "bhanu-resume-system",
+      "documentation": [
+        "AGENTS.md",
+        "README.md",
+        "RESUME-CREATION-RULES.md"
+      ],
+      "toolchain": [
+        "Python >=3.11; pyproject.toml; unittest stdlib"
+      ],
+      "install": [
+        "{python} -m pip install -e ."
+      ],
+      "install_sources": [
+        "pyproject.toml"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        },
+        {
+          "canonical": [
+            "data/resume_catalog.json",
+            "data/approval_ledger.json"
+          ],
+          "generated": [
+            "generated"
+          ],
+          "regenerate": "scripts.compile_resume (requires authorized private inputs; never run as workspace check)"
+        }
+      ],
+      "llm": {
+        "status": "not_applicable",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [],
+        "purpose_authority": "No application LLM boundary declared in project rulebook",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [],
+        "ledger_authority": "not_applicable",
+        "eval_authority": "not_applicable",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "No autonomous schedule declared in AGENTS.md"
+      ],
+      "state_boundaries": [
+        "data/resume_catalog.json; data/approval_ledger.json; generated resume artifacts (private user state)"
+      ],
+      "secret_boundaries": [
+        "No provider secret needed by offline tests; private resume contents remain outside receipts"
+      ],
+      "vendor_harness_coupling": [
+        "DOCX/PDF render toolchain; exact approval ledger; HuntDesk contract"
+      ],
+      "transition_recovery": "Restore exact catalog and approval ledger together; never treat regenerated wording as approved.",
+      "commands": [
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-v"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "unittest"
+          ],
+          "source_paths": [
+            "tests"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "scripts",
+            "tests"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "date-suggester",
+      "repo": "date-suggester",
+      "documentation": [
+        "AGENTS.md",
+        "README.md"
+      ],
+      "toolchain": [
+        "Python project virtualenv; requirements.txt; no locked Python minor declared"
+      ],
+      "install": [
+        "{python} -m pip install -r requirements.txt; install pytest separately for development"
+      ],
+      "install_sources": [
+        "requirements.txt"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "registered",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "src/llm.py"
+        ],
+        "purpose_authority": "src/llm.py:PURPOSE_ROLES",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "src/llm.py"
+        ],
+        "ledger_authority": "data/llm_ledger.jsonl",
+        "eval_authority": "tests/test_llm.py",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "launchd/com.bhanu.date-suggester-weekly.plist",
+        "scripts/install-scheduled-task.ps1",
+        "src/weekly_schedule.py"
+      ],
+      "state_boundaries": [
+        "Configured calendar/location/trip/idea state; deployment state lives on configured canonical host"
+      ],
+      "secret_boundaries": [
+        "Google OAuth credentials and token; environment API configuration; names only"
+      ],
+      "vendor_harness_coupling": [
+        "Google Calendar/Maps/Gmail; membership CLI adapter"
+      ],
+      "transition_recovery": "Recover state through owner-approved backup; never generate dates, write calendars or email from verification.",
+      "commands": [
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "pytest",
+            "tests",
+            "-q"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest"
+          ],
+          "source_paths": [
+            "tests"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "src",
+            "tests"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "earnings-summary",
+      "repo": "earnings-summary",
+      "documentation": [
+        "AGENTS.md",
+        "README.md",
+        "reconstruction_manifest.json",
+        "directives/agent_host_operations.md"
+      ],
+      "toolchain": [
+        "Python >=3.11; pyproject.toml and requirements.txt; node/package stack not required for backend gate"
+      ],
+      "install": [
+        "{python} -m pip install -r requirements.txt; {python} -m pip install -e .[dev]"
+      ],
+      "install_sources": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "registered",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "src/llm/cli.py"
+        ],
+        "purpose_authority": "src/llm/cli.py:LLM_MODELS",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "src/llm/cli.py"
+        ],
+        "ledger_authority": "src/llm/ledger.py",
+        "eval_authority": "src/evals/coverage.py",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "directives/llm_quota_scheduling.md",
+        "cron"
+      ],
+      "state_boundaries": [
+        "Canonical Windows configured portfolio DB; no checkout-local data/portfolio.db; .tmp snapshots only with provenance"
+      ],
+      "secret_boundaries": [
+        ".env; credentials.json; token.json; environment source names only"
+      ],
+      "vendor_harness_coupling": [
+        "Provider adapters; local model/observation schemas and 11-subsystem reconstruction_manifest.json stay project-owned"
+      ],
+      "transition_recovery": "The earnings 11-subsystem inventory is NOT this 13-project population. Restore verified DB snapshot only into approved location; canonical host owns live state.",
+      "commands": [
+        {
+          "id": "fast",
+          "argv": [
+            "make",
+            "check-fast",
+            "PYTHON_BIN={python}"
+          ],
+          "modes": [
+            "fast"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest",
+            "ruff",
+            "pyright"
+          ],
+          "source_paths": [
+            "Makefile"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "full",
+          "argv": [
+            "make",
+            "check",
+            "PYTHON_BIN={python}",
+            "PYTEST_WORKERS=2"
+          ],
+          "modes": [
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest",
+            "ruff",
+            "pyright"
+          ],
+          "source_paths": [
+            "Makefile"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "src",
+            "execution"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "harness",
+      "repo": "harness",
+      "documentation": [
+        "AGENTS.md"
+      ],
+      "toolchain": [
+        "Python >=3.11 stdlib runtime; pytest test dependency; no lockfile declared"
+      ],
+      "install": [
+        "{python} -m pip install pytest (isolated test environment; no automatic uv install)"
+      ],
+      "install_sources": [
+        "AGENTS.md"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "registered",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "orchestrator.py"
+        ],
+        "purpose_authority": "models/registry.json",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "orchestrator.py"
+        ],
+        "ledger_authority": "engine/receipts.py:LedgerReceiptStore",
+        "eval_authority": "tests/test_harness.py",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "No autonomous scheduler declared; caller owns task dispatch"
+      ],
+      "state_boundaries": [
+        "Sandbox-owned ledgers/checkpoints/locks; adjacent .keys signing state"
+      ],
+      "secret_boundaries": [
+        "Environment/provider-native auth and ledger signing keys; names only"
+      ],
+      "vendor_harness_coupling": [
+        "Provider CLI adapters and model registry; typed egress and promotion contracts"
+      ],
+      "transition_recovery": "Run tests from parent directory. Never run demo or promote Git state as verification; restore signed ledgers and keys without exposing them.",
+      "commands": [
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "pytest",
+            "-q",
+            "harness/tests/test_harness.py"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": "@workspace",
+          "python_modules": [
+            "pytest"
+          ],
+          "source_paths": [
+            "tests/test_harness.py"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "engine",
+            "models",
+            "tools",
+            "providers",
+            "orchestrator.py",
+            "types.py"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "huntdesk",
+      "repo": "huntdesk",
+      "documentation": [
+        "AGENTS.md",
+        "README.md",
+        "DEFINITIONS.md"
+      ],
+      "toolchain": [
+        "Python >=3.11 package; type config3.13; pyproject.toml dependencies"
+      ],
+      "install": [
+        "{python} -m pip install -e .[dev]"
+      ],
+      "install_sources": [
+        "pyproject.toml"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "registered",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "huntdesk/llm.py"
+        ],
+        "purpose_authority": "huntdesk/llm.py:_PURPOSE_TIER",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "huntdesk/llm.py"
+        ],
+        "ledger_authority": "huntdesk/llm.py:_log_call",
+        "eval_authority": "huntdesk/evals.py",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "scripts; deployment scheduler owned by project README/AGENTS"
+      ],
+      "state_boundaries": [
+        "Configured canonical-host HuntDesk database, inbox and career journal; local synthetic fixtures only"
+      ],
+      "secret_boundaries": [
+        "OAuth and environment credentials; private career inputs not inspected"
+      ],
+      "vendor_harness_coupling": [
+        "ATS/EDGAR adapters; membership-backed LLM wrappers"
+      ],
+      "transition_recovery": "Recover canonical DB and ingestion cursors; keep private career material out of manifest and receipts.",
+      "commands": [
+        {
+          "id": "lint",
+          "argv": [
+            "{python}",
+            "-m",
+            "ruff",
+            "check",
+            "."
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "ruff"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "format",
+          "argv": [
+            "{python}",
+            "-m",
+            "ruff",
+            "format",
+            "--check",
+            "."
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "ruff"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "types",
+          "argv": [
+            "{python}",
+            "-m",
+            "pyright"
+          ],
+          "modes": [
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pyright"
+          ],
+          "source_paths": [
+            "pyrightconfig.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "pytest",
+            "-q"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest"
+          ],
+          "source_paths": [
+            "tests"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "huntdesk",
+            "tests"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "portfolio-tracker",
+      "repo": "portfolio-tracker",
+      "documentation": [
+        "AGENTS.md",
+        "README.md",
+        "frontend/package.json"
+      ],
+      "toolchain": [
+        "Python >=3.11 pyproject; frontend TypeScript/Vite via package-lock.json; Node version not pinned in package"
+      ],
+      "install": [
+        "{python} -m pip install -e .[dev]; cd frontend && npm ci"
+      ],
+      "install_sources": [
+        "pyproject.toml",
+        "frontend/package-lock.json"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "not_applicable",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [],
+        "purpose_authority": "No application LLM boundary declared in project rulebook",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [],
+        "ledger_authority": "not_applicable",
+        "eval_authority": "not_applicable",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "src/portfolio_tracker/jobs",
+        "AGENTS.md"
+      ],
+      "state_boundaries": [
+        "Configured canonical portfolio/broker database; private broker deliveries and receipts"
+      ],
+      "secret_boundaries": [
+        "Plaid/SnapTrade OAuth; database encryption and Gmail credentials; names only"
+      ],
+      "vendor_harness_coupling": [
+        "Plaid/SnapTrade SDKs, price feeds, scheduled jobs; frontend build toolchain"
+      ],
+      "transition_recovery": "Restore provenance-bearing DB and broker receipts; do not sync brokers, start API or execute jobs in verification.",
+      "commands": [
+        {
+          "id": "lint",
+          "argv": [
+            "{python}",
+            "-m",
+            "ruff",
+            "check",
+            "src"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "ruff"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "format",
+          "argv": [
+            "{python}",
+            "-m",
+            "ruff",
+            "format",
+            "--check",
+            "src"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "ruff"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "types",
+          "argv": [
+            "{python}",
+            "-m",
+            "pyright"
+          ],
+          "modes": [
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pyright"
+          ],
+          "source_paths": [
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "pytest",
+            "-q"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest"
+          ],
+          "source_paths": [
+            "tests"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "frontend-types",
+          "argv": [
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": "frontend",
+          "python_modules": [],
+          "source_paths": [
+            "frontend/package.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600,
+          "runtime_paths": [
+            "frontend/node_modules/typescript/bin/tsc"
+          ]
+        },
+        {
+          "id": "frontend-build",
+          "argv": [
+            "npm",
+            "run",
+            "build"
+          ],
+          "modes": [
+            "full",
+            "build"
+          ],
+          "cwd": "frontend",
+          "python_modules": [],
+          "source_paths": [
+            "frontend/package.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600,
+          "runtime_paths": [
+            "frontend/node_modules/typescript/bin/tsc",
+            "frontend/node_modules/vite/bin/vite.js"
+          ]
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "reading-companion-app",
+      "repo": "reading-companion-app",
+      "documentation": [
+        "AGENTS.md",
+        "core/README.md",
+        "core/AGENTS.md",
+        "clients/toolchain.md",
+        "clients/android-xr/README.md",
+        "clients/meta-rbd/dat-android/README.md",
+        "v0-web/README.md"
+      ],
+      "toolchain": [
+        "Node >=20; core/package-lock.json; TypeScript6; Android JDK17/Gradle8.9/system Android SDK per client README; Meta Gradle>=8.7"
+      ],
+      "install": [
+        "cd core && npm ci; manual Android SDK/JDK/Gradle install per clients/toolchain.md; v0-web npm install is manual"
+      ],
+      "install_sources": [
+        "core/package.json",
+        "core/package-lock.json",
+        "v0-web/package.json",
+        "clients/android-xr/build.gradle.kts",
+        "clients/meta-rbd/dat-android/build.gradle.kts"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "migration_required",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "core/src/server.ts",
+          "core/src/research/dispatcher.ts",
+          "core/src/voice/geminiLive.ts",
+          "core/src/voice/openaiRealtime.ts",
+          "core/src/triage.ts",
+          "core/src/content/sources/geminiReception.ts",
+          "v0-web/api/research.js",
+          "core/src/imagePipeline/ocr.ts",
+          "core/src/capture.ts"
+        ],
+        "purpose_authority": "core/src/research/dispatcher.ts; core/src/voice/index.ts; provider-native contracts require inventory tranche",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "core/src/voice/geminiLive.ts",
+          "core/src/voice/openaiRealtime.ts",
+          "core/src/content/sources/geminiReception.ts",
+          "core/src/imagePipeline/ocr.ts",
+          "core/src/capture.ts",
+          "core/src/research/dispatcher.ts",
+          "core/src/triage.ts",
+          "v0-web/api/research.js"
+        ],
+        "ledger_authority": "core/src/jobStore.ts; core/src/threadStore.ts; no uniform per-call ledger claimed",
+        "eval_authority": "core/package.json:test",
+        "residual_inventory": [
+          "Not registered in fleet llm_usage_index; research/realtime SDK contracts and budget enforcement are residual BHA56 scope"
+        ]
+      },
+      "scheduled_jobs": [
+        "No autonomous schedule; core starts only with explicit run authorization"
+      ],
+      "state_boundaries": [
+        "Configured session/thread/job stores; no raw camera/audio by default; device/browser local state"
+      ],
+      "secret_boundaries": [
+        "core/.env; GEMINI_API_KEY; OPENAI_API_KEY; names only"
+      ],
+      "vendor_harness_coupling": [
+        "Gemini research/vision/grounding and live voice; OpenAI realtime; Vercel; Android/Meta SDKs"
+      ],
+      "transition_recovery": "Keep Core semantics and file stores, replace provider-specific research/realtime adapters independently. Offline compilation is not device proof; no Vercel deploy or service startup.",
+      "commands": [
+        {
+          "id": "core-types",
+          "argv": [
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": "core",
+          "python_modules": [],
+          "source_paths": [
+            "core/package.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600,
+          "runtime_paths": [
+            "core/node_modules/typescript/bin/tsc"
+          ]
+        },
+        {
+          "id": "core-tests",
+          "argv": [
+            "npm",
+            "test",
+            "--",
+            "--maxWorkers=1"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": "core",
+          "python_modules": [],
+          "source_paths": [
+            "core/package.json"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600,
+          "runtime_paths": [
+            "core/node_modules/vitest/vitest.mjs"
+          ]
+        },
+        {
+          "id": "syntax-clients-web-app.js",
+          "argv": [
+            "node",
+            "--check",
+            "clients/web/app.js"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "clients/web/app.js"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "syntax-clients-web-media.js",
+          "argv": [
+            "node",
+            "--check",
+            "clients/web/media.js"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "clients/web/media.js"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "syntax-clients-web-net.js",
+          "argv": [
+            "node",
+            "--check",
+            "clients/web/net.js"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "clients/web/net.js"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "syntax-clients-meta-rbd-web-app-app.js",
+          "argv": [
+            "node",
+            "--check",
+            "clients/meta-rbd/web-app/app.js"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "clients/meta-rbd/web-app/app.js"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "syntax-v0-web-app.js",
+          "argv": [
+            "node",
+            "--check",
+            "v0-web/app.js"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "v0-web/app.js"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "syntax-v0-web-api-research.js",
+          "argv": [
+            "node",
+            "--check",
+            "v0-web/api/research.js"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "v0-web/api/research.js"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "syntax-v0-web-api-health.js",
+          "argv": [
+            "node",
+            "--check",
+            "v0-web/api/health.js"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [],
+          "source_paths": [
+            "v0-web/api/health.js"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "clients-android-xr",
+          "argv": [
+            "gradle",
+            "--offline",
+            "--no-daemon",
+            "assembleDebug",
+            "testDebugUnitTest"
+          ],
+          "modes": [
+            "full",
+            "build"
+          ],
+          "cwd": "clients/android-xr",
+          "python_modules": [],
+          "source_paths": [
+            "clients/android-xr/build.gradle.kts"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "clients-meta-rbd-dat-android",
+          "argv": [
+            "gradle",
+            "--offline",
+            "--no-daemon",
+            "assembleDebug",
+            "testDebugUnitTest"
+          ],
+          "modes": [
+            "full",
+            "build"
+          ],
+          "cwd": "clients/meta-rbd/dat-android",
+          "python_modules": [],
+          "source_paths": [
+            "clients/meta-rbd/dat-android/build.gradle.kts"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "repo-maintenance",
+      "repo": "repo-maintenance",
+      "documentation": [
+        "AGENTS.md"
+      ],
+      "toolchain": [
+        "Python >=3.11 stdlib; PowerShell for operational scripts (not executed)"
+      ],
+      "install": [
+        "No package install needed for stdlib memory-runner unit tests"
+      ],
+      "install_sources": [
+        "AGENTS.md"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "registered",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "memory_streamline.py"
+        ],
+        "purpose_authority": "memory_streamline.py:DEFAULT_MODELS",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "memory_streamline.py"
+        ],
+        "ledger_authority": "memory_streamline.py:_append_ledger",
+        "eval_authority": "test_memory_streamline.py",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "cron/backup_scratch.task.xml",
+        "weekly_git_cleanup.ps1",
+        "weekly_memory_streamline.ps1"
+      ],
+      "state_boundaries": [
+        "Configured backup/log/retention paths; maintenance cursor and model ledgers"
+      ],
+      "secret_boundaries": [
+        "Provider-native credentials and excluded secret file locations; names only"
+      ],
+      "vendor_harness_coupling": [
+        "PowerShell Windows scheduled tasks; CLI model adapters"
+      ],
+      "transition_recovery": "Never run DryRun from this checker: it writes logs, creates/prunes backups or refreshes Git metadata. Restore verification is a separately authorized operation.",
+      "commands": [
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "unittest",
+            "-v",
+            "test_memory_streamline.py"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "unittest"
+          ],
+          "source_paths": [
+            "test_memory_streamline.py"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "memory_streamline.py",
+            "test_memory_streamline.py"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "wealthplan",
+      "repo": "wealthplan",
+      "documentation": [
+        "AGENTS.md",
+        "README.md"
+      ],
+      "toolchain": [
+        "Python >=3.12 pyproject; requirements.txt; venv directory convention"
+      ],
+      "install": [
+        "{python} -m pip install -r requirements.txt; {python} -m pip install -e ."
+      ],
+      "install_sources": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "registered",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [
+          "src/wealthplan/llm_client.py"
+        ],
+        "purpose_authority": "src/wealthplan/llm_client.py:Purpose",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [
+          "src/wealthplan/llm_client.py"
+        ],
+        "ledger_authority": "src/wealthplan/llm_client.py:_log",
+        "eval_authority": "scripts/eval_scenarios.py:_grade",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "scripts/install_windows_server_task.ps1"
+      ],
+      "state_boundaries": [
+        "Private household inputs and saved plans; live tracker only via configured canonical authority"
+      ],
+      "secret_boundaries": [
+        "Provider auth and private household files; names only"
+      ],
+      "vendor_harness_coupling": [
+        "Streamlit and tracker read adapter; membership LLM boundary"
+      ],
+      "transition_recovery": "Restore household state separately; offline tests must not read live tracker or start Streamlit.",
+      "commands": [
+        {
+          "id": "tests",
+          "argv": [
+            "{python}",
+            "-m",
+            "pytest",
+            "-q",
+            "-m",
+            "not integration"
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "cwd": ".",
+          "python_modules": [
+            "pytest"
+          ],
+          "source_paths": [
+            "tests",
+            "pyproject.toml"
+          ],
+          "offline_safe": true,
+          "timeout_seconds": 600
+        },
+        {
+          "id": "compile",
+          "builtin": "python_syntax",
+          "paths": [
+            "src",
+            "tests"
+          ],
+          "modes": [
+            "build",
+            "full"
+          ],
+          "reason": "Compile source text without importing modules or writing bytecode"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    },
+    {
+      "id": "xr-glasses-dev-guide",
+      "repo": "xr-glasses-dev-guide",
+      "documentation": [
+        "AGENTS.md",
+        "README.md",
+        "11-resources.md"
+      ],
+      "toolchain": [
+        "Markdown documentation only; Python stdlib local-link checker supplied centrally"
+      ],
+      "install": [
+        "No install for documentation source checks"
+      ],
+      "install_sources": [
+        "AGENTS.md"
+      ],
+      "canonical_generated": [
+        {
+          "canonical": [
+            "AGENTS.md"
+          ],
+          "generated": [
+            "CLAUDE.md",
+            "GEMINI.md"
+          ],
+          "regenerate": "agent-instructions/snippets/sync_agent_stubs.py; project wrapper generation only; full sync requires explicit workspace wiring scope"
+        }
+      ],
+      "llm": {
+        "status": "not_applicable",
+        "usage_index": "config/llm_usage_index.json",
+        "entrypoints": [],
+        "purpose_authority": "No application LLM boundary declared in project rulebook",
+        "prompt_schema_versions": "Git versions of the locally owned entrypoint and model/prompt/schema files; no independent version claim unless source declares it",
+        "adapters": [],
+        "ledger_authority": "not_applicable",
+        "eval_authority": "not_applicable",
+        "residual_inventory": []
+      },
+      "scheduled_jobs": [
+        "No scheduled work declared"
+      ],
+      "state_boundaries": [
+        "Research markdown; no application state"
+      ],
+      "secret_boundaries": [
+        "No application credentials declared; do not inspect personal tooling credentials"
+      ],
+      "vendor_harness_coupling": [
+        "Device/SDK references are dated sources, not active adapters"
+      ],
+      "transition_recovery": "Recover Git chapters; re-verify material vendor claims before decisions. Local link checks do not refresh factual dates.",
+      "commands": [
+        {
+          "id": "local-links",
+          "builtin": "markdown_links",
+          "paths": [
+            "."
+          ],
+          "modes": [
+            "fast",
+            "full"
+          ],
+          "reason": "Local link/terminology structure only; dated vendor facts require separate primary-source review"
+        }
+      ],
+      "hook_ci_disposition": "Project-local hooks and hosted checks retain their named narrower coverage. This central offline contract adds a replacement-agent entrypoint; it does not silently replace or weaken those gates. See WORKSPACE_RECONSTRUCTION.md for bounded exceptions."
+    }
+  ]
+}

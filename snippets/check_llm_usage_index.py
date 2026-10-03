@@ -61,7 +61,7 @@ def _discover_projects(developer_root: Path, markers: tuple[str, ...]) -> set[st
         if not project.is_dir() or not (project / ".git").is_dir():
             continue
         for path in project.rglob("*"):
-            if any(part in _SKIP_PARTS for part in path.parts):
+            if any(part in _SKIP_PARTS for part in path.relative_to(project).parts):
                 continue
             if path.suffix.lower() not in {".py", ".ps1", ".ts"} or not path.is_file():
                 continue
@@ -97,7 +97,10 @@ def validate_index(
         raw = json.loads(index_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return ["config/llm_usage_index.json is unavailable or invalid"]
-    if not isinstance(raw, dict) or raw.get("$schema") != "internal://llm-usage-index/v1":
+    if (
+        not isinstance(raw, dict)
+        or raw.get("$schema") != "internal://llm-usage-index/v1"
+    ):
         return ["config/llm_usage_index.json has an unsupported schema"]
     if raw.get("routing_policy") != "config/llm_routing_policy.json":
         errors.append("the usage index must reference the canonical routing policy")
@@ -127,7 +130,9 @@ def validate_index(
     active_developer_root = developer_root or root.parent
     for entry in projects:
         if not isinstance(entry, dict) or set(entry) != required:
-            errors.append("every usage-index project entry must use the exact v1 fields")
+            errors.append(
+                "every usage-index project entry must use the exact v1 fields"
+            )
             continue
         name = entry["project"]
         if not isinstance(name, str) or not name:
@@ -152,17 +157,31 @@ def validate_index(
         judge_note = entry["judge_migration_note"]
         if "judge" in workload_classes:
             if judge_state not in _JUDGE_ROUTE_STATES:
-                errors.append(f"{name}: Judge workloads require a registered route state")
+                errors.append(
+                    f"{name}: Judge workloads require a registered route state"
+                )
             if entry["judge_route_authority"] is None:
-                errors.append(f"{name}: Judge workloads require a delegated route authority")
+                errors.append(
+                    f"{name}: Judge workloads require a delegated route authority"
+                )
             if entry["judge_independence_authority"] is None:
-                errors.append(f"{name}: Judge workloads require an independence authority")
-            if judge_state in {"project_explicit", "shared_subscription"} and judge_note is not None:
-                errors.append(f"{name}: current Judge routes cannot retain a migration note")
-            if judge_state in {"migration_hold", "migration_required"} and not isinstance(
-                judge_note, str
+                errors.append(
+                    f"{name}: Judge workloads require an independence authority"
+                )
+            if (
+                judge_state in {"project_explicit", "shared_subscription"}
+                and judge_note is not None
             ):
-                errors.append(f"{name}: incomplete Judge routing requires a migration note")
+                errors.append(
+                    f"{name}: current Judge routes cannot retain a migration note"
+                )
+            if judge_state in {
+                "migration_hold",
+                "migration_required",
+            } and not isinstance(judge_note, str):
+                errors.append(
+                    f"{name}: incomplete Judge routing requires a migration note"
+                )
         elif any(
             entry[field] is not None
             for field in (
@@ -172,12 +191,20 @@ def validate_index(
                 "judge_migration_note",
             )
         ):
-            errors.append(f"{name}: non-Judge entries cannot define Judge routing fields")
+            errors.append(
+                f"{name}: non-Judge entries cannot define Judge routing fields"
+            )
         note = entry["migration_note"]
         if route_state in {None, "fleet_default"} and note is not None:
-            errors.append(f"{name}: current or Judge-only entries cannot retain a migration note")
-        if route_state in {"migration_hold", "migration_required"} and not isinstance(note, str):
-            errors.append(f"{name}: incomplete application routing requires a migration note")
+            errors.append(
+                f"{name}: current or Judge-only entries cannot retain a migration note"
+            )
+        if route_state in {"migration_hold", "migration_required"} and not isinstance(
+            note, str
+        ):
+            errors.append(
+                f"{name}: incomplete application routing requires a migration note"
+            )
         if not check_projects:
             continue
 
@@ -187,7 +214,12 @@ def validate_index(
             continue
         instruction_section = entry["instruction_section"]
         rulebook = project_root / "AGENTS.md"
-        if not isinstance(instruction_section, str) or not rulebook.is_file() or instruction_section not in rulebook.read_text(encoding="utf-8", errors="replace"):
+        if (
+            not isinstance(instruction_section, str)
+            or not rulebook.is_file()
+            or instruction_section
+            not in rulebook.read_text(encoding="utf-8", errors="replace")
+        ):
             errors.append(f"{name}: delegated instruction section is missing")
         for field in (
             "entrypoint",
@@ -218,11 +250,15 @@ def validate_index(
                     errors.append(
                         f"{name}: fleet_default entry point does not consume the shared resolver"
                     )
-        if judge_state == "shared_subscription":
-            judge_path = _reference_path(project_root, entry["judge_route_authority"])
+        judge_reference = entry["judge_route_authority"]
+        if judge_state == "shared_subscription" and isinstance(judge_reference, str):
+            judge_path = _reference_path(project_root, judge_reference)
             if judge_path.is_file():
                 source = judge_path.read_text(encoding="utf-8", errors="replace")
-                if "WorkloadClass.JUDGE" not in source or "explicit_judge_route" not in source:
+                if (
+                    "WorkloadClass.JUDGE" not in source
+                    or "explicit_judge_route" not in source
+                ):
                     errors.append(
                         f"{name}: shared_subscription Judge route does not consume an explicit shared route"
                     )
@@ -234,7 +270,9 @@ def validate_index(
     if check_projects and active_developer_root.is_dir():
         missing = sorted(_discover_llm_projects(active_developer_root) - set(names))
         for name in missing:
-            errors.append(f"{name}: application LLM use is not present in the fleet usage index")
+            errors.append(
+                f"{name}: application LLM use is not present in the fleet usage index"
+            )
         indexed_judges = {
             entry["project"]
             for entry in projects
@@ -244,7 +282,9 @@ def validate_index(
             _discover_judge_projects(active_developer_root) - indexed_judges
         )
         for name in missing_judges:
-            errors.append(f"{name}: Judge LLM use is not registered as a Judge workload")
+            errors.append(
+                f"{name}: Judge LLM use is not registered as a Judge workload"
+            )
     return errors
 
 

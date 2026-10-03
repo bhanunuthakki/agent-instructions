@@ -4,6 +4,15 @@
 
 root=$(git rev-parse --show-toplevel) || exit 0
 cd "$root" || exit 1
+# Git for Windows reports C:/ paths while sh reports /c/ paths. Compare both
+# repository identities using the same physical shell representation.
+root=$(pwd -P) || exit 1
+
+# Repository checks create isolated Git fixtures. Do not pass the pushing
+# repository's Git context or command-line configuration into those fixtures.
+for task_git_var in $(git rev-parse --local-env-vars); do
+  unset "$task_git_var"
+done
 
 run() { printf '>> %s\n' "$*" >&2; "$@" || { printf 'PRE-PUSH FAILED at: %s\n' "$*" >&2; exit 1; }; }
 has()  { command -v "$1" >/dev/null 2>&1; }
@@ -17,8 +26,8 @@ fi
 # --- Global instruction-system gate (the AGENTS.md / procedures/ system stays in sync) ---
 # Runs only when pushing the instruction repository. Other repositories should not fail because
 # a separate checkout's generated runtime adapters or machine inventory drifted.
-hook_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-hook_repo=$(CDPATH= cd -- "$hook_dir/.." && pwd)
+hook_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+hook_repo=$(CDPATH= cd -- "$hook_dir/.." && pwd -P)
 instructions_home=${AGENT_INSTRUCTIONS_HOME:-$hook_repo}
 stubs="$instructions_home/snippets/sync_agent_stubs.py"
 if [ "$root" != "$hook_repo" ]; then
@@ -67,8 +76,10 @@ if [ "$root" = "$hook_repo" ]; then
     exit 1
   fi
   run "$python_bin" "$public_boundary"
+  run "$python_bin" "$instructions_home/snippets/workspace_reconstruction.py" validate --schema-only
   run "$python_bin" "$stubs" --check --artifacts-only
   run "$python_bin" -m pytest \
+    "$instructions_home/snippets/test_workspace_reconstruction.py" \
     "$instructions_home/snippets/test_guide_generation.py" \
     "$instructions_home/snippets/test_harden_state.py" \
     "$instructions_home/snippets/test_governance.py" \

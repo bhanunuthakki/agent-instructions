@@ -217,8 +217,8 @@ def test_global_links_resolve_from_each_runtime_and_validate_recursive_closure(
     for text in artifacts.values():
         assert "LOCAL ONLY" not in text
         assert "@AGENTS" not in text and "@./AGENTS" not in text
-        assert f"<{procedures / 'INDEX.md'}>" in text
-        assert f"<{machine}>" in text
+        assert f"<{(procedures / 'INDEX.md').as_posix()}>" in text
+        assert f"<{machine.as_posix()}>" in text
     assert sync.detect_global_reference_drift(artifacts) == []
     detail.write_text("[Missing nested reference](missing.md)\n")
     assert any("missing.md" in problem for problem in sync.detect_global_reference_drift(artifacts))

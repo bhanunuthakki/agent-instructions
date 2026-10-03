@@ -4,6 +4,7 @@
 /*
 !/.gitignore
 !/README.md
+!/WORKSPACE_RECONSTRUCTION.md
 !/AGENTS.md
 !/GLOBAL.md
 !/CLAUDE.md
@@ -36,6 +37,7 @@ snippets/mcp_registry.json
 !/config/judge_rollout.json
 !/config/llm_routing_policy.json
 !/config/llm_usage_index.json
+!/config/workspace_reconstruction.json
 !/config/judge_policies/
 /config/judge_policies/*
 !/config/judge_policies/1.0.0.json
