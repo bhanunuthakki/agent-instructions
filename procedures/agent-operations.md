@@ -36,7 +36,7 @@ Use the least expensive currently evaluated model for each bounded worker role. 
 - Do not leak the intended answer into an audit or skill evaluation. Give the worker the raw artifact and acceptance criteria.
 - A worker returns findings, changed paths, and validation evidence. The root reconciles conflicts and verifies the integrated result.
 - Improve a weak brief or split the task before escalating capability. Resume an interrupted worker when its context is still valid.
-- Treat an auto-reconnecting browser or remote-control session as an owned mutable resource even when it appears idle. A handoff names the current owner, in-flight action, last proof, resources held or released, and receiving owner; the applicable browser or remote-control workflow owns release mechanics.
+- Treat an auto-reconnecting browser or remote-control session as an owned mutable resource even when it appears idle. A handoff names the current owner, in-flight action, last proof, resources held or released, and receiving owner. The current owner releases the session through the applicable browser or remote-control workflow and verifies release. The receiving owner takes control only after that verified release.
 
 ## Shared checkout
 

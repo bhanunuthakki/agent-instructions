@@ -18,18 +18,18 @@ def test_global_contract_and_local_guide_have_distinct_owners() -> None:
     routes = _text("procedures/INDEX.md")
     machine = _text("procedures/machine-operations.md")
     assert "## Outcome and initiative" in global_rules
-    assert "Approved product intent governs required behavior" in global_rules
-    assert "do not switch branches" in global_rules
+    assert "Approved intent governs required behavior" in global_rules
+    assert "do not switch branches" in global_rules.lower()
     assert "never" in global_rules.lower() and "credentials" in global_rules
     assert "procedures/INDEX.md" in global_rules
     assert "procedures/machine-operations.md" in global_rules
     assert "## Orchestration and delegation" in global_rules
-    assert "At task start, after material user input" in global_rules
-    assert "Do not wait for the user to request delegation explicitly" in global_rules
-    assert "For every substantive task, load agent operations" in global_rules
-    assert "frontier-synthesizer-class agent at the root" in global_rules
-    assert "load it once alongside the primary workflow" in global_rules
-    assert "keep it active through later turns unless the user deactivates it" in global_rules
+    assert "At task start, after material input" in global_rules
+    assert "Delegate bounded independent work by default" in global_rules
+    assert "to assess delegation before choosing serial execution" in global_rules
+    assert "Keep a frontier-synthesizer at the root" in global_rules
+    assert "Load `chisle` once when a chat becomes code-based" in global_rules
+    assert "keep it active until the user deactivates it" in global_rules
     assert "source" in local and "sync_agent_stubs.py" in local
     assert "## Outcome and initiative" not in local
     assert "OPENROUTER_API_KEY" not in global_rules
@@ -43,8 +43,8 @@ def test_global_contract_and_local_guide_have_distinct_owners() -> None:
     assert "current listener, service, and scheduler configuration" in machine
     assert "without guessing a fallback or changing production" in machine
     assert "before execution" in routes
-    assert "owns the delegation check even when the result is serial execution" in routes
-    assert "a primary deliverable owner" in global_rules
+    assert "owns dispatch, capability, write ownership, and resource closure" in routes
+    assert "one primary deliverable owner" in global_rules
     assert "proposed, implemented, validated, committed, merged, deployed" in global_rules
 
 

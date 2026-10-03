@@ -1,10 +1,10 @@
 # Agent-instructions — project rulebook
 
-This repository owns the shared agent contract, reusable procedures, runtime adapters, and their verification. The generated global contract already applies; this file adds only repository-local guidance.
+This repository owns the shared contract, procedures, runtime adapters, and their verification. GLOBAL already applies; this file adds local guidance.
 
 ## Purpose and improvement latitude
 
-Make agents useful, decisive, and economical to work with while keeping consequential authority, truth, privacy, and recovery boundaries dependable. Improve instruction ownership, discovery, and actual task outcomes. Remove redundant process or make a contract executable when that resolves a demonstrated problem. A substantial restructuring is appropriate within an authorized instruction task when it improves these outcomes; fewer words alone do not prove better behavior.
+Make agents useful, decisive, and economical while preserving authority, truth, privacy, and recovery. Improve ownership, discovery, and task outcomes. Remove redundant process or restructure within an authorized instruction task when it resolves a demonstrated problem; fewer words alone do not prove better behavior.
 
 ## Source and state ownership
 
@@ -17,11 +17,11 @@ Make agents useful, decisive, and economical to work with while keeping conseque
 
 ## Work and validation
 
-Inspect the current diff and preserve unrelated work. Use `context-engineering` for instruction changes and `code-change` when changing generators or validators. Track where each removed safety or authority rule survives; do not turn preservation into verbatim prose tests.
+Use `context-engineering` for instructions and `code-change` for generators or validators. Record where removed safety and authority rules survive; do not test preservation through verbatim prose.
 
 Check current generated state before editing: `python3 snippets/sync_agent_stubs.py --check --artifacts-only`. Preserve any genuine generated-only addition in its canonical owner before regeneration.
 
-During iteration, run the tests for changed generators, loaders, or contracts with a Python interpreter that has the repository test dependencies. `requirements-test.lock` owns test dependency pins; use an existing compatible environment or install those pins in an isolated test environment. Do not claim tests ran when the selected interpreter lacks pytest. The complete repository gate is `PYTHON_BIN=<verified-python> sh githooks/pre-push`; it composes the public-boundary check, generated-artifact check, deterministic suites, and applicable private governance checks without pushing.
+Test changed generators, loaders, and contracts with a verified Python interpreter and `requirements-test.lock` dependencies. Use a compatible existing environment or an isolated one; missing pytest is unavailable evidence. The complete repository gate is `PYTHON_BIN=<verified-python> sh githooks/pre-push`; it composes the public-boundary check, generated-artifact check, deterministic suites, and applicable private governance checks without pushing.
 
 For canonical changes, regenerate with `python3 snippets/sync_agent_stubs.py --artifacts-only`, then run `python3 snippets/sync_agent_stubs.py --check` and `git diff --check`. A changed skill/catalog inventory also needs `AGENTS_GUIDE.md` regeneration via `snippets.sync_agent_stubs.materialize_guide(False)`; this updates only the derived guide. Use full sync only when project wrapper or hook wiring changes are in scope. The generator has `--check`, `--artifacts-only`, and `--dry-run`; it has no conventional `--help` mode.
 

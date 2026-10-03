@@ -54,7 +54,7 @@
     },
     {
       "project": "earnings-summary",
-      "instruction_section": "## Agent delegation and review — repo scope note",
+      "instruction_section": "## Application LLM authority",
       "entrypoint": "src/llm/cli.py",
       "purpose_registry": "src/llm/cli.py:LLM_MODELS",
       "ledger_authority": "src/llm/ledger.py",

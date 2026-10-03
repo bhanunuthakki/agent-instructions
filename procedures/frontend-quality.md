@@ -49,6 +49,20 @@ For a material change to a runnable surface:
 
 Scope observation to affected states and surfaces. Unavailable hardware or rendering bounds the verification claim; it does not prevent useful independent work already authorized. Never claim a surface passed without its evidence.
 
+## Usability and performance
+
+Performance evidence must cover the user's task, not only a server response or a rendered shell. For affected paths:
+
+- Establish a measured baseline for time to a usable interface, required data readiness, and response to the primary action. Use representative record volumes and supported devices/access routes. Separate network, server, and browser work before selecting a fix.
+- Set budgets from the task, project contract, and observed user needs. Use applicable platform metrics such as loading, interaction responsiveness, and layout stability as supporting evidence; do not impose one universal timeout or transfer public-website thresholds uncritically to every application.
+- Make essential controls and navigation available early. Load independent regions progressively. Optional analytics, suggestions, metadata, and secondary dependencies must not gate unrelated primary work. Reserve space for arriving content and preserve focus, input, scroll, and prior valid results during refresh.
+- Give timely feedback for actions. Distinguish loading, empty, partial, stale, unavailable, and failed data. State freshness and limitations where they affect decisions. Provide a useful bounded retry or recovery action; do not leave indefinite spinners or present cached results as current.
+- Verify cold and warm loads, realistic slow or failed dependencies, repeated actions, and navigation away during loading where applicable. Check keyboard and assistive-technology feedback, cancellation, and late responses. Record sample count, conditions, and timings; use distributions when measurements support them rather than claiming a percentile from one run.
+
+Use [code-change](code-change.md) for request deadlines, bounded concurrency, cache semantics, and service diagnostics. Loading indicators cannot compensate for avoidable critical-path work. A performance claim requires before/after measurements and successful task completion; report unavailable live evidence separately from isolated test results.
+
+[Web Vitals](https://web.dev/articles/vitals) supplies primary browser guidance on loading, interaction responsiveness, and layout stability. Check current definitions and distinguish controlled test measurements from real-user evidence; project task budgets remain locally owned.
+
 ## Composition as decision rules
 
 - **Hierarchy:** let the task and reading order determine emphasis. A secondary label, subtitle, or explanation must add information. Distinct typography can carry a semantic role or the chosen identity; an arbitrary font-count rule does not define quality.

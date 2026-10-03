@@ -569,6 +569,9 @@ def test_projects_section_excludes_hidden_and_temp_dirs() -> None:
     if not s.SCRATCH.is_dir():
         return
     for child in s.SCRATCH.iterdir():
+        # The instruction root is deliberately included, even in a linked worktree.
+        if child.resolve() == s.ROOT_REPO.resolve():
+            continue
         if child.is_dir() and (
             child.name.startswith(".") or child.name.startswith(s.SKIP_PREFIXES)
             or child.name in s.SKIP_PROJECT_NAMES
@@ -814,7 +817,7 @@ def test_frontier_orchestration_and_judging_have_one_model_mapping_owner() -> No
         encoding="utf-8"
     )
 
-    assert "frontier-synthesizer-class agent at the root" in root
+    assert "Keep a frontier-synthesizer at the root" in root
     assert "purpose-qualified frontier-synthesizer" in root
     assert "least expensive evaluated worker" in root
     assert "Cost optimization applies to execution workers" in operations
@@ -1015,9 +1018,9 @@ def test_root_uses_one_clarification_economics_invariant() -> None:
     assert "## Effort calibration" not in root
     assert "quick reversible iteration" not in root
     assert "Ask early when" in root
-    assert "permission, or risk boundary" in root
-    assert "materially change the solution" in root
-    assert "state consequential assumptions and proceed" in root
+    assert "permission, risk, or scope boundary" in root
+    assert "materially change behavior" in root
+    assert "State consequential assumptions and proceed" in root
     assert "J0 is the default when deterministic proof closes the task" in judging
     assert "confirm the expanded scope with the owner" in judging
     assert "expensive multi-model evaluation" in context

@@ -1,6 +1,6 @@
 # Procedure routing and composition
 
-This catalog is the fallback when native skill discovery is unavailable. `GLOBAL.md` owns cross-project invariants; this index owns workflow selection, and each linked procedure owns its decision flow. Read the selected body completely, then only its applicable references. A task may need several owners; one decision must not have competing owners.
+This catalog selects workflows when native skill discovery is unavailable. `GLOBAL.md` owns shared invariants; this index owns selection and composition; each procedure owns its decision flow. Read the selected body completely, then only applicable references.
 
 Compose workflows semantically, not by concatenating every instruction from every matching skill:
 
@@ -36,7 +36,7 @@ Ordinary answers and research need no artificial engineering workflow. Use appli
 
 | Changed or uncertain boundary | Additional owner |
 |---|---|
-| Any substantive task, at its start and each discovery, implementation, verification, or recovery transition | [agent-operations](agent-operations.md) owns the delegation check even when the result is serial execution; the root retains synthesis and final judgment |
+| Delegation assessment required by GLOBAL; bounded workers, coordination, or scheduling | [agent-operations](agent-operations.md) owns dispatch, capability, write ownership, and resource closure |
 | Material user behavior in a build task | [product-feature](product-feature.md) owns outcome/acceptance; code-change owns implementation |
 | Durable state, identity, migration, lineage, or recovery | [data-foundation](data-foundation.md) |
 | Visible code change or isolated mockup | [frontend-quality](frontend-quality.md) owns interaction and rendered evidence, including when mockup-review owns the deliverable |
@@ -51,6 +51,6 @@ Ordinary answers and research need no artificial engineering workflow. Use appli
 | Deliberate temporary compromise of a normal implementation requirement | [iteration-shortcut](iteration-shortcut.md); ordinary isolated experiments are not automatically shortcuts |
 | OpenRouter, Linear, configured credential source, or cross-machine operation | [machine-operations](machine-operations.md), before execution |
 
-## Share one contract and evidence record
+## Apply the selected route
 
-The primary owner carries the requested outcome and authorized actions. This record may remain implicit for straightforward work; it does not require a file or user-facing form. Additional owners contribute their boundary constraints and acceptance evidence to that same contract. The global contract owns collaboration, questions, and completion; procedures do not restart discovery or generate separate handoffs. Load a reference or specialist only when an actual decision or risk needs it. A qualified existing LLM route does not require a fresh model comparison; a small fix does not require product discovery; a new persisted identity does require data semantics. A documented project restriction remains binding until changed through its named authority.
+GLOBAL owns the shared task understanding, collaboration, authority, and completion. The primary owner supplies the deliverable; additional owners contribute only their applicable constraints and evidence. Do not restart discovery or create separate handoffs. Load references or specialists for actual decisions or risks: reuse a qualified LLM route without a new comparison, skip product discovery for a small fix, and resolve semantics for a new persisted identity. Project restrictions remain binding until changed through their named authority.
