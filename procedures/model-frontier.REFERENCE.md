@@ -31,6 +31,7 @@ Blended sort key: `(6 * input + 1 * output) / 7` (input weighted 6:1 over output
 - The current Sonnet 5.5 rate is $2/$10. Earlier Sonnet 5 and Opus 5 rows were replaced in this discovery table; existing pins and their qualification history remain unchanged.
 - OpenRouter rates reflect pass-through provider pricing. OpenRouter adds a standard ~5% credit deposit fee.
 - Named models remain candidates until their intended role has a dated representative receipt. Prompt guidance is version- and effort-specific; see `context-engineering.REFERENCE.md`. New intelligence claims do not remove local authority or evidence controls.
+- Historical GPT-5.6 Luna, Terra, and Sol rows also recorded a >272K full-request premium of 2× input and 1.5× output. These older rates and limits were not re-verified in this refresh; verify them before a current cost comparison.
 - GPT-6.1 Sol and GPT-6 Astra charge a long-context premium above 272K input tokens (2× input and 1.5× output for the full request). Their blended figures use the standard-context rate. Subscription-backed Codex calls still record these public API-equivalent prices so cross-provider comparisons remain meaningful; they do not represent an incremental membership bill.
 
 ## Frontier orchestration and Judge tier — 2026-10-02

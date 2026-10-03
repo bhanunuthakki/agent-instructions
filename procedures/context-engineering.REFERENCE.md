@@ -1,6 +1,18 @@
 # Context-engineering source register
 
-Source register with access dates per entry. Current collaboration guidance checked 2026-09-06; older entries below retain their historical scope.
+Source register with access dates per entry. Requested-model guidance checked 2026-10-02; older entries below retain their historical scope.
+
+## Current model applicability — 2026-10-02
+
+This update covers the requested models. Older entries below are historical evidence, not current qualification. Retain outcome, authority, privacy, and evidence boundaries across models; correct observed runtime behavior at its narrowest owner.
+
+- **Astra 6:** [Rethinking skills and prompts](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra), accessed 2026-10-02, recommends precise skill triggers, selective document loading, less procedural scaffolding, and explicit completion. Review accumulated ask-first language for unnecessary pauses, while retaining actual external-action approval. Provider advice is not proof that deleting a local boundary is safe.
+- **Sol 6.1:** [Model specifications](https://developers.openai.com/api/docs/models/gpt-6.1-sol), accessed 2026-10-02, describe a lower-cost complex-work candidate and recommend task comparison with Astra. Start with the shared contract; no local evidence yet establishes that Astra-specific prompting adjustments transfer to Sol 6.1.
+- **Opus 5.5:** [Prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5), accessed 2026-10-02, says existing Opus 5 prompts are a reasonable starting point. Calibrate effort separately; the default is `medium`. Diagnose quiet progress through display handling before adding repeated narration rules. Keep completion and safety requirements; tune only an observed problem.
+- **Sonnet 5.5:** [Prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5-5), accessed 2026-10-02, describes early check-ins at lower effort, possible skipped verification at `low`, and extra review or scope at higher effort. Keep explicit finish/check/stop criteria and repository gates. Do not apply Astra/Opus verification pruning blindly to Sonnet.
+- **Fable:** [Current overview](https://platform.claude.com/docs/en/models/fable-5-1/overview), accessed 2026-10-02, still lists Fable 5.1. No official Fable 5.5 was found; version-specific guidance for it remains unavailable. Preserve the 5.1 guidance below without relabeling it.
+
+Recommended assessment direction: consolidate repeated process in GLOBAL and INDEX; keep local sources of truth, exact commands, approval and host boundaries. These are source-backed hypotheses for a reversible rewrite, not measured cross-model gains. Compare assembled contexts, including host instructions, before adopting changes; hold outcome and boundary cases fixed across exact model/runtime/effort tuples.
 
 ## Current model applicability — 2026-09-06
 
