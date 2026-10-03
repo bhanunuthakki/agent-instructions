@@ -91,7 +91,9 @@ def test_mac_bootstrap_uses_the_clone_and_home_directories() -> None:
     )
 
     assert 'ROOT_REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)' in bootstrap
-    assert 'PROJECT_ROOT=${BHANU_DEVELOPER_ROOT:-"$(dirname "$ROOT_REPO")"}' in bootstrap
+    assert (
+        'PROJECT_ROOT=${BHANU_DEVELOPER_ROOT:-"$(dirname "$ROOT_REPO")"}' in bootstrap
+    )
     assert 'for PROJECT_DIR in "$PROJECT_ROOT"/*' in bootstrap
     assert "project_agent_contract.py" in bootstrap
     assert "--check --artifacts-only" in bootstrap
@@ -123,9 +125,12 @@ def test_shared_hooks_expose_required_composed_capabilities() -> None:
 
 def test_shared_hook_is_the_only_owner_of_global_instruction_gate() -> None:
     shared = (s.HOOKS_DIR / "pre-push").read_text(encoding="utf-8")
-    assert shared.splitlines().count(
-        '  run "$python_bin" "$stubs" --check --artifacts-only'
-    ) == 1
+    assert (
+        shared.splitlines().count(
+            '  run "$python_bin" "$stubs" --check --artifacts-only'
+        )
+        == 1
+    )
     assert '--check-project-portability "$root"' in shared
     earnings_hook = s.SCRATCH / "earnings-summary" / ".githooks" / "pre-push"
     if earnings_hook.exists():
@@ -206,7 +211,9 @@ def test_pre_commit_scans_staged_credential_renames(tmp_path: Path) -> None:
         cwd=tmp_path,
         check=True,
     )
-    subprocess.run(["git", "mv", "settings.txt", "token.json"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "mv", "settings.txt", "token.json"], cwd=tmp_path, check=True
+    )
 
     completed = subprocess.run(
         ["sh", str(s.HOOKS_DIR / "pre-commit")],
@@ -225,7 +232,9 @@ def test_pre_commit_allows_canonical_secret_procedure(tmp_path: Path) -> None:
     procedure = tmp_path / "procedures" / "scaffold-secrets.md"
     procedure.parent.mkdir()
     procedure.write_text("# Secret configuration procedure\n", encoding="utf-8")
-    subprocess.run(["git", "add", procedure.relative_to(tmp_path)], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "add", procedure.relative_to(tmp_path)], cwd=tmp_path, check=True
+    )
 
     completed = subprocess.run(
         ["sh", str(s.HOOKS_DIR / "pre-commit")],
@@ -272,13 +281,19 @@ def test_instruction_push_gate_honors_python_override(
     fake_bin.mkdir()
     fake_git = fake_bin / "git"
     fake_git.write_text(
-        '#!/bin/sh\nprintf \'%s\\n\' "$EXPECTED_ROOT"\n', encoding="utf-8"
+        '#!/bin/sh\nif [ "$2" = "--local-env-vars" ]; then\n'
+        "  printf '%s\\n' GIT_DIR GIT_WORK_TREE GIT_CONFIG_PARAMETERS\n"
+        "else\n  printf '%s\\n' \"$EXPECTED_ROOT\"\nfi\n",
+        encoding="utf-8",
     )
     fake_git.chmod(0o755)
     call_log = tmp_path / "python-calls.log"
     fake_python = tmp_path / "chosen-python"
     fake_python.write_text(
-        '#!/bin/sh\nprintf \'%s\\n\' "$*" >> "$PYTHON_LOG"\n', encoding="utf-8"
+        "#!/bin/sh\n"
+        '[ -z "${GIT_DIR+x}${GIT_WORK_TREE+x}${GIT_CONFIG_PARAMETERS+x}" ] || exit 55\n'
+        'printf \'%s\\n\' "$*" >> "$PYTHON_LOG"\n',
+        encoding="utf-8",
     )
     fake_python.chmod(0o755)
     instruction_home = tmp_path / "instruction-home"
@@ -291,11 +306,14 @@ def test_instruction_push_gate_honors_python_override(
     )
     env = {
         **os.environ,
-        "PATH": f"{fake_bin}:{os.environ['PATH']}",
+        "PATH": os.pathsep.join((str(fake_bin), os.environ["PATH"])),
         "EXPECTED_ROOT": str(s.ROOT_REPO),
         "AGENT_INSTRUCTIONS_HOME": str(instruction_home),
         "PYTHON_BIN": str(fake_python),
         "PYTHON_LOG": str(call_log),
+        "GIT_DIR": str(tmp_path / "other-repository"),
+        "GIT_WORK_TREE": str(tmp_path / "other-worktree"),
+        "GIT_CONFIG_PARAMETERS": "'core.bare=true'",
     }
 
     completed = subprocess.run(
@@ -320,12 +338,15 @@ def test_instruction_push_gate_rejects_invalid_python_override(tmp_path: Path) -
     fake_bin.mkdir()
     fake_git = fake_bin / "git"
     fake_git.write_text(
-        '#!/bin/sh\nprintf \'%s\\n\' "$EXPECTED_ROOT"\n', encoding="utf-8"
+        '#!/bin/sh\nif [ "$2" = "--local-env-vars" ]; then\n'
+        "  printf '%s\\n' GIT_DIR GIT_WORK_TREE GIT_CONFIG_PARAMETERS\n"
+        "else\n  printf '%s\\n' \"$EXPECTED_ROOT\"\nfi\n",
+        encoding="utf-8",
     )
     fake_git.chmod(0o755)
     env = {
         **os.environ,
-        "PATH": f"{fake_bin}:{os.environ['PATH']}",
+        "PATH": os.pathsep.join((str(fake_bin), os.environ["PATH"])),
         "EXPECTED_ROOT": str(s.ROOT_REPO),
         "PYTHON_BIN": str(tmp_path / "missing-python"),
     }
@@ -351,10 +372,13 @@ def test_command_artifacts_share_one_canonical_source() -> None:
         codex_name = "harden" if command == "harden" else f"source-command-{command}"
         if command == "harden":
             assert claude[s.COMMANDS_DIR / "harden.md"] == s.harden_command_adapter()
-            assert codex[s.CODEX_SKILLS_DIR / codex_name / "SKILL.md"] == (
-                s.build_harden_package_artifacts(s.CODEX_SKILLS_DIR / "harden")[
-                    s.CODEX_SKILLS_DIR / "harden" / "SKILL.md"
-                ]
+            assert (
+                codex[s.CODEX_SKILLS_DIR / codex_name / "SKILL.md"]
+                == (
+                    s.build_harden_package_artifacts(s.CODEX_SKILLS_DIR / "harden")[
+                        s.CODEX_SKILLS_DIR / "harden" / "SKILL.md"
+                    ]
+                )
             )
         else:
             assert claude[s.COMMANDS_DIR / f"{command}.md"] == expected
@@ -573,7 +597,8 @@ def test_projects_section_excludes_hidden_and_temp_dirs() -> None:
         if child.resolve() == s.ROOT_REPO.resolve():
             continue
         if child.is_dir() and (
-            child.name.startswith(".") or child.name.startswith(s.SKIP_PREFIXES)
+            child.name.startswith(".")
+            or child.name.startswith(s.SKIP_PREFIXES)
             or child.name in s.SKIP_PROJECT_NAMES
             or s.is_linked_git_worktree(child)
         ):
@@ -711,9 +736,7 @@ def test_artifacts_only_check_still_validates_tracked_human_guide() -> None:
     assert s.includes_guide_validation(
         ["sync_agent_stubs.py", "--check", "--artifacts-only"]
     )
-    assert not s.includes_guide_validation(
-        ["sync_agent_stubs.py", "--artifacts-only"]
-    )
+    assert not s.includes_guide_validation(["sync_agent_stubs.py", "--artifacts-only"])
 
 
 def test_generated_project_wrappers_are_import_only() -> None:
@@ -780,9 +803,7 @@ def test_claude_artifacts_cover_skills_command_and_fleet() -> None:
 
 
 def test_agent_routing_uses_capability_roles_not_provider_labels() -> None:
-    procedure = (s.PROCEDURES_DIR / "agent-operations.md").read_text(
-        encoding="utf-8"
-    )
+    procedure = (s.PROCEDURES_DIR / "agent-operations.md").read_text(encoding="utf-8")
     for role in (
         "mechanical-worker",
         "implementation-worker",
@@ -809,9 +830,7 @@ def test_agent_routing_uses_capability_roles_not_provider_labels() -> None:
 
 def test_frontier_orchestration_and_judging_have_one_model_mapping_owner() -> None:
     root = s.GLOBAL_MD.read_text(encoding="utf-8")
-    operations = (s.PROCEDURES_DIR / "agent-operations.md").read_text(
-        encoding="utf-8"
-    )
+    operations = (s.PROCEDURES_DIR / "agent-operations.md").read_text(encoding="utf-8")
     judging = (s.PROCEDURES_DIR / "judging.md").read_text(encoding="utf-8")
     frontier = (s.PROCEDURES_DIR / "model-frontier.REFERENCE.md").read_text(
         encoding="utf-8"
@@ -899,7 +918,9 @@ def test_codex_skill_artifacts_are_identity_copies_of_procedures() -> None:
         assert arts[target] == ref.read_text(encoding="utf-8", errors="replace")
 
 
-def test_antigravity_skill_artifacts_are_identity_copies_except_self_contained_harden() -> None:
+def test_antigravity_skill_artifacts_are_identity_copies_except_self_contained_harden() -> (
+    None
+):
     arts = s.build_antigravity_skill_artifacts()
     for name in [*s.OUR_SKILLS, *s.CODEX_ONLY_SKILLS]:
         src = s.PROCEDURES_DIR / f"{name}.md"
@@ -916,13 +937,13 @@ def test_antigravity_skill_artifacts_are_identity_copies_except_self_contained_h
     if ref.exists():
         target = s.ANTIGRAVITY_SKILLS_DIR / "context-engineering" / "REFERENCE.md"
         assert arts[target] == ref.read_text(encoding="utf-8", errors="replace")
-    assert s.build_antigravity_skill_config() == (
-        '{\n'
-        '  "entries": [\n'
-        f'    {{\n      "path": "{s.ANTIGRAVITY_SKILLS_DIR}"\n    }}\n'
-        '  ]\n'
-        '}\n'
+    assert (
+        s.build_antigravity_skill_config()
+        == json.dumps({"entries": [{"path": str(s.ANTIGRAVITY_SKILLS_DIR)}]}, indent=2)
+        + "\n"
     )
+
+
 def test_progressive_disclosure_skills_are_generated_for_both_runtimes() -> None:
     names = {
         "agent-operations",
@@ -959,12 +980,18 @@ def test_frontend_quality_has_one_canonical_route_and_no_stale_global_owner() ->
     assert "design-conformance-audit" not in s.OUR_SKILLS
 
 
-def test_frontend_quality_routes_expression_posture_through_progressive_disclosure() -> None:
+def test_frontend_quality_routes_expression_posture_through_progressive_disclosure() -> (
+    None
+):
     procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
     creative = s.PROCEDURES_DIR / "frontend-quality.CREATIVE.md"
     mockup = (s.PROCEDURES_DIR / "mockup-review.md").read_text(encoding="utf-8")
-    scaffold = (s.PROCEDURES_DIR / "scaffold-design-system.md").read_text(encoding="utf-8")
-    ux_design = (s.PROCEDURES_DIR / "agents" / "ux-design.md").read_text(encoding="utf-8")
+    scaffold = (s.PROCEDURES_DIR / "scaffold-design-system.md").read_text(
+        encoding="utf-8"
+    )
+    ux_design = (s.PROCEDURES_DIR / "agents" / "ux-design.md").read_text(
+        encoding="utf-8"
+    )
 
     assert creative.exists()
     for posture in ("`conform`", "`evolve`", "`explore`"):
@@ -991,7 +1018,9 @@ def test_frontend_quality_routes_expression_posture_through_progressive_disclosu
 def test_frontend_primitive_contract_is_portable_and_project_owned() -> None:
     procedure = (s.PROCEDURES_DIR / "frontend-quality.md").read_text(encoding="utf-8")
     primitives_path = s.PROCEDURES_DIR / "frontend-quality.PRIMITIVES.md"
-    scaffold = (s.PROCEDURES_DIR / "scaffold-design-system.md").read_text(encoding="utf-8")
+    scaffold = (s.PROCEDURES_DIR / "scaffold-design-system.md").read_text(
+        encoding="utf-8"
+    )
 
     assert primitives_path.exists()
     primitives = primitives_path.read_text(encoding="utf-8")
@@ -1036,7 +1065,9 @@ def test_frontend_workflows_route_to_the_canonical_quality_owner() -> None:
         "procedures/agents/ux-design.md",
         "procedures/agents/frontend-web.md",
     ):
-        assert "frontend-quality" in (s.ROOT_REPO / relative).read_text(encoding="utf-8"), relative
+        assert "frontend-quality" in (s.ROOT_REPO / relative).read_text(
+            encoding="utf-8"
+        ), relative
     stale = [
         path
         for path in s.PROCEDURES_DIR.rglob("*.md")
@@ -1051,13 +1082,27 @@ def test_frontend_quality_shadow_cases_cover_restraint_and_trajectories() -> Non
     assert payload["mode"] == "shadow"
     assert "unproven" in payload["coverage_claim"]
     assert {case["id"] for case in payload["restraint_pairs"]} == {
-        "container-economy", "semantic-rail", "type-economy", "structural-list", "subtitle-value"
+        "container-economy",
+        "semantic-rail",
+        "type-economy",
+        "structural-list",
+        "subtitle-value",
     }
     assert {case["id"] for case in payload["task_trajectories"]} == {
-        "material-existing-redesign", "small-visual-adjustment", "greenfield-scaffold", "nonvisual-frontend-behavior", "unrunnable-preview"
+        "material-existing-redesign",
+        "small-visual-adjustment",
+        "greenfield-scaffold",
+        "nonvisual-frontend-behavior",
+        "unrunnable-preview",
     }
     for case in payload["restraint_pairs"]:
-        assert set(case) == {"id", "surface", "variant_a", "variant_b", "expected_rubric"}
+        assert set(case) == {
+            "id",
+            "surface",
+            "variant_a",
+            "variant_b",
+            "expected_rubric",
+        }
         assert case["expected_rubric"]["preferred_variant"] in {"a", "b"}
     for case in payload["task_trajectories"]:
         assert set(case) == {"id", "prompt", "expected_rubric"}
@@ -1081,18 +1126,42 @@ def test_frontend_quality_shadow_runner_has_a_schema_checked_dry_run(
         "reduction_pass": "removed a box",
         "verification_gap": "none",
         "verdict": "PASS",
-        "findings": [], "contract_flags": ["baseline-render"], "type": "task_trajectory",
+        "findings": [],
+        "contract_flags": ["baseline-render"],
+        "type": "task_trajectory",
     }
     assert runner.validate_response(valid, {"id": "case", "prompt": "x"}) == valid
     advisory = {**valid, "verdict": "ADVISORY"}
     assert runner.validate_response(advisory, {"id": "case", "prompt": "x"}) == advisory
     with pytest.raises(ValueError, match="case case: invalid verdict"):
-        runner.validate_response({**valid, "verdict": "UNKNOWN"}, {"id": "case", "prompt": "x"})
+        runner.validate_response(
+            {**valid, "verdict": "UNKNOWN"}, {"id": "case", "prompt": "x"}
+        )
     with pytest.raises(ValueError, match="response schema"):
         runner.validate_response({"case_id": "case"}, {"id": "case", "prompt": "x"})
-    pair = {"id": "pair", "surface": "test", "variant_a": "a", "variant_b": "b", "expected_rubric": {"preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["decorative-accent"]}}
-    pair_response = {"case_id": "pair", "type": "restraint_pair", "preferred_variant": "a", "variant_a_flags": [], "variant_b_flags": ["decorative-accent"], "reason": "less clutter"}
-    assert runner.score_case(pair, runner.validate_response(pair_response, pair))["status"] == "MATCH"
+    pair = {
+        "id": "pair",
+        "surface": "test",
+        "variant_a": "a",
+        "variant_b": "b",
+        "expected_rubric": {
+            "preferred_variant": "a",
+            "variant_a_flags": [],
+            "variant_b_flags": ["decorative-accent"],
+        },
+    }
+    pair_response = {
+        "case_id": "pair",
+        "type": "restraint_pair",
+        "preferred_variant": "a",
+        "variant_a_flags": [],
+        "variant_b_flags": ["decorative-accent"],
+        "reason": "less clutter",
+    }
+    assert (
+        runner.score_case(pair, runner.validate_response(pair_response, pair))["status"]
+        == "MATCH"
+    )
     pair_prompt = runner.prompt_for(pair)
     trajectory_prompt = runner.prompt_for({"id": "case", "prompt": "x"})
     assert "expected_rubric" not in pair_prompt
@@ -1103,16 +1172,22 @@ def test_frontend_quality_shadow_runner_has_a_schema_checked_dry_run(
     assert runner.MATERIALITY_DEFINITION in trajectory_prompt
     assert "baseline-render" in trajectory_prompt
     with pytest.raises(ValueError, match="case pair: invalid pair flag"):
-        runner.validate_response({**pair_response, "variant_b_flags": ["unknown"]}, pair)
+        runner.validate_response(
+            {**pair_response, "variant_b_flags": ["unknown"]}, pair
+        )
     with pytest.raises(ValueError, match="case case: invalid trajectory contract flag"):
-        runner.validate_response({**valid, "contract_flags": ["unknown"]}, {"id": "case", "prompt": "x"})
+        runner.validate_response(
+            {**valid, "contract_flags": ["unknown"]}, {"id": "case", "prompt": "x"}
+        )
     assert runner.receipt_target("run-one") != runner.receipt_target("run-two")
     monkeypatch.setattr(sys, "argv", ["run_shadow_eval.py", "--limit", "1"])
     runner.main()
     assert json.loads(capsys.readouterr().out)["selected"] == ["container-economy"]
 
 
-def test_frontend_creative_eval_builds_blind_rendered_comparisons(tmp_path: Path) -> None:
+def test_frontend_creative_eval_builds_blind_rendered_comparisons(
+    tmp_path: Path,
+) -> None:
     runner_path = s.ROOT_REPO / "evals" / "frontend_quality" / "run_creative_eval.py"
     spec = spec_from_file_location("frontend_quality_creative", runner_path)
     assert spec and spec.loader
@@ -1120,16 +1195,30 @@ def test_frontend_creative_eval_builds_blind_rendered_comparisons(tmp_path: Path
     spec.loader.exec_module(runner)
 
     cases = runner.load_cases()
-    assert {case["posture"] for case in cases["cases"]} == {"conform", "evolve", "explore"}
+    assert {case["posture"] for case in cases["cases"]} == {
+        "conform",
+        "evolve",
+        "explore",
+    }
 
     def png_pixel(red: int, green: int, blue: int) -> bytes:
         def chunk(kind: bytes, payload: bytes) -> bytes:
             checksum = zlib.crc32(kind + payload) & 0xFFFFFFFF
-            return struct.pack(">I", len(payload)) + kind + payload + struct.pack(">I", checksum)
+            return (
+                struct.pack(">I", len(payload))
+                + kind
+                + payload
+                + struct.pack(">I", checksum)
+            )
 
         header = struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0)
         pixels = zlib.compress(bytes((0, red, green, blue, 255)))
-        return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) + chunk(b"IDAT", pixels) + chunk(b"IEND", b"")
+        return (
+            b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", header)
+            + chunk(b"IDAT", pixels)
+            + chunk(b"IEND", b"")
+        )
 
     def evidence() -> dict[str, object]:
         return {
@@ -1165,12 +1254,20 @@ def test_frontend_creative_eval_builds_blind_rendered_comparisons(tmp_path: Path
                 "family_reference_images": [str(reference)],
                 "baseline": {
                     "instruction_revision": "baseline-revision",
-                    "images": [{"state": "populated", "viewport": "1x1", "path": str(baseline)}],
+                    "images": [
+                        {"state": "populated", "viewport": "1x1", "path": str(baseline)}
+                    ],
                     "deterministic_evidence": evidence(),
                 },
                 "candidate": {
                     "instruction_revision": "candidate-revision",
-                    "images": [{"state": "populated", "viewport": "1x1", "path": str(candidate)}],
+                    "images": [
+                        {
+                            "state": "populated",
+                            "viewport": "1x1",
+                            "path": str(candidate),
+                        }
+                    ],
                     "deterministic_evidence": evidence(),
                 },
             }
@@ -1181,14 +1278,17 @@ def test_frontend_creative_eval_builds_blind_rendered_comparisons(tmp_path: Path
     assert set(comparison["images"]) == {"a", "b"}
     assert "assignment" not in comparison
     assert all(
-        "baseline" not in Path(image["path"]).name and "candidate" not in Path(image["path"]).name
+        "baseline" not in Path(image["path"]).name
+        and "candidate" not in Path(image["path"]).name
         for images in comparison["images"].values()
         for image in images
     )
     assert comparison["dimensions"] == cases["dimensions"]
 
     assignment = runner._assignment("blind-run", case_id)
-    candidate_slot = next(slot for slot, treatment in assignment.items() if treatment == "candidate")
+    candidate_slot = next(
+        slot for slot, treatment in assignment.items() if treatment == "candidate"
+    )
     response = {
         "case_id": comparison["case_id"],
         "preferred": "a",
@@ -1213,7 +1313,9 @@ def test_frontend_creative_eval_builds_blind_rendered_comparisons(tmp_path: Path
     failed_evidence_manifest["comparisons"][0]["candidate"]["deterministic_evidence"][
         "accessibility"
     ]["status"] = "fail"
-    failed_evidence = runner.score_responses(failed_evidence_manifest, [response], cases)
+    failed_evidence = runner.score_responses(
+        failed_evidence_manifest, [response], cases
+    )
     assert failed_evidence["results"][0]["candidate_preference"] == "blocked"
     assert "accessibility:fail" in failed_evidence["results"][0]["candidate_blockers"]
 
@@ -1223,11 +1325,15 @@ def test_frontend_creative_eval_builds_blind_rendered_comparisons(tmp_path: Path
         runner.validate_manifest(missing_reference_manifest, cases)
 
     mismatched_viewport_manifest = json.loads(json.dumps(manifest))
-    mismatched_viewport_manifest["comparisons"][0]["shared_conditions"]["capture_matrix"][0][
+    mismatched_viewport_manifest["comparisons"][0]["shared_conditions"][
+        "capture_matrix"
+    ][0]["viewport"] = "2x1"
+    mismatched_viewport_manifest["comparisons"][0]["baseline"]["images"][0][
         "viewport"
     ] = "2x1"
-    mismatched_viewport_manifest["comparisons"][0]["baseline"]["images"][0]["viewport"] = "2x1"
-    mismatched_viewport_manifest["comparisons"][0]["candidate"]["images"][0]["viewport"] = "2x1"
+    mismatched_viewport_manifest["comparisons"][0]["candidate"]["images"][0][
+        "viewport"
+    ] = "2x1"
     with pytest.raises(ValueError, match="dimensions do not match"):
         runner.validate_manifest(mismatched_viewport_manifest, cases)
 
@@ -1263,7 +1369,9 @@ def test_retired_generated_skill_is_exactly_detected_and_pruned(
     for name, root in roots.items():
         monkeypatch.setattr(s, name, root)
     retired = roots["SKILLS_DIR"] / "design-conformance-audit" / "SKILL.md"
-    legacy_retired = roots["LEGACY_CODEX_SKILLS_DIR"] / "design-conformance-audit" / "SKILL.md"
+    legacy_retired = (
+        roots["LEGACY_CODEX_SKILLS_DIR"] / "design-conformance-audit" / "SKILL.md"
+    )
     unrelated = roots["SKILLS_DIR"] / "personal-skill" / "SKILL.md"
     retired.parent.mkdir(parents=True)
     legacy_retired.parent.mkdir(parents=True)
@@ -1317,7 +1425,9 @@ def test_scaffolds_are_profile_and_stack_detected_not_framework_templates() -> N
     auth = (s.PROCEDURES_DIR / "scaffold-auth.md").read_text(encoding="utf-8")
     deploy = (s.PROCEDURES_DIR / "scaffold-deploy.md").read_text(encoding="utf-8")
     secrets = (s.PROCEDURES_DIR / "scaffold-secrets.md").read_text(encoding="utf-8")
-    tenant = (s.PROCEDURES_DIR / "scaffold-tenant-schema.md").read_text(encoding="utf-8")
+    tenant = (s.PROCEDURES_DIR / "scaffold-tenant-schema.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "Do not inject a universal framework" in auth
     assert "FastAPI" not in auth and "PostgreSQL" not in auth
@@ -1329,7 +1439,9 @@ def test_scaffolds_are_profile_and_stack_detected_not_framework_templates() -> N
     assert "`run_id` is lineage, not a universal business key" in tenant
 
 
-def test_harden_is_self_contained_in_each_runtime_and_claude_command_stays_thin() -> None:
+def test_harden_is_self_contained_in_each_runtime_and_claude_command_stays_thin() -> (
+    None
+):
     codex_target = s.CODEX_SKILLS_DIR / "harden" / "SKILL.md"
     assert codex_target in s.build_codex_skill_artifacts()
     assert s.SKILLS_DIR / "harden" / "SKILL.md" in s.build_claude_artifacts()
