@@ -505,7 +505,8 @@ def build_claude_artifacts() -> dict[Path, str]:
     inverse of the old build_procedures() — procedures/ is now the source, ~/.claude/* the output."""
     out: dict[Path, str] = {}
 
-    # Skills: procedures/<name>.md -> skills/<name>/SKILL.md ; siblings procedures/<name>.<sib> -> skills/<name>/<sib>
+    # Skills: procedures/<name>.md -> skills/<name>/SKILL.md. Keep each sibling's
+    # canonical filename so references remain unambiguous and no alias is duplicated.
     for name in OUR_SKILLS:
         proc = PROCEDURES_DIR / f"{name}.md"
         if not proc.exists():
@@ -514,11 +515,7 @@ def build_claude_artifacts() -> dict[Path, str]:
             encoding="utf-8", errors="replace"
         )
         for sib in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
-            sib_name = sib.name[
-                len(name) + 1 :
-            ]  # strip the "<name>." prefix -> REFERENCE.md
             content = sib.read_text(encoding="utf-8", errors="replace")
-            out[SKILLS_DIR / name / sib_name] = content
             out[SKILLS_DIR / name / sib.name] = content
 
     # Commands: one canonical source per command, shared byte-for-byte with Codex.
@@ -551,9 +548,7 @@ def build_codex_skill_artifacts() -> dict[Path, str]:
             encoding="utf-8", errors="replace"
         )
         for sibling in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
-            sibling_name = sibling.name[len(name) + 1 :]
             content = sibling.read_text(encoding="utf-8", errors="replace")
-            out[CODEX_SKILLS_DIR / name / sibling_name] = content
             out[CODEX_SKILLS_DIR / name / sibling.name] = content
     for command, source in COMMAND_SOURCES.items():
         if not source.exists():
@@ -577,9 +572,7 @@ def build_antigravity_skill_artifacts() -> dict[Path, str]:
             encoding="utf-8", errors="replace"
         )
         for sibling in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
-            sibling_name = sibling.name[len(name) + 1 :]
             content = sibling.read_text(encoding="utf-8", errors="replace")
-            out[ANTIGRAVITY_SKILLS_DIR / name / sibling_name] = content
             out[ANTIGRAVITY_SKILLS_DIR / name / sibling.name] = content
     out.update(build_harden_package_artifacts(ANTIGRAVITY_SKILLS_DIR / "harden"))
     return out
@@ -699,15 +692,10 @@ def build_global_rulebook_artifacts() -> dict[Path, str]:
         + relocate_markdown_links(_without_local_import(claude), CLAUDE_MD.parent)
         + "\n",
     }
-    fallback = (
-        "\nCanonical procedure root for manual fallback: "
-        f"`{PROCEDURES_DIR}`. The catalog links above resolve to this checkout; "
-        "load only the procedures needed for the current task.\n"
-    )
     out[GEMINI_GLOBAL_RULES] = (
         banner + agents + "\n\n"
         + relocate_markdown_links(_without_local_import(gemini), GEMINI_MD.parent)
-        + fallback
+        + "\n"
     )
     return out
 
@@ -759,6 +747,7 @@ def materialize_claude_artifacts(dry: bool) -> list[str]:
     ]
     return (
         actions
+        + materialize_obsolete_skill_siblings("claude", dry)
         + materialize_retired_skill_artifacts("claude", dry)
         + materialize_retired_agent_artifacts(dry)
     )
@@ -776,7 +765,12 @@ def materialize_codex_skill_artifacts(dry: bool) -> list[str]:
         if not dry:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
-    return actions + materialize_retired_skill_artifacts("codex", dry) + materialize_retired_skill_artifacts("legacy-codex", dry)
+    return (
+        actions
+        + materialize_obsolete_skill_siblings("codex", dry)
+        + materialize_retired_skill_artifacts("codex", dry)
+        + materialize_retired_skill_artifacts("legacy-codex", dry)
+    )
 
 
 def materialize_antigravity_skill_artifacts(dry: bool) -> list[str]:
@@ -806,7 +800,11 @@ def materialize_antigravity_skill_artifacts(dry: bool) -> list[str]:
         if not dry:
             ANTIGRAVITY_SKILLS_CONFIG.parent.mkdir(parents=True, exist_ok=True)
             ANTIGRAVITY_SKILLS_CONFIG.write_bytes(config)
-    return actions + materialize_retired_skill_artifacts("antigravity", dry)
+    return (
+        actions
+        + materialize_obsolete_skill_siblings("antigravity", dry)
+        + materialize_retired_skill_artifacts("antigravity", dry)
+    )
 
 
 def materialize_direct_harden_package(dry: bool) -> list[str]:
@@ -863,6 +861,45 @@ def materialize_retired_skill_artifacts(runtime: str, dry: bool) -> list[str]:
                 raise RuntimeError(f"retired generated target is not a file: {path}")
             path.unlink()
     return actions
+
+
+def obsolete_skill_sibling_paths(runtime: str) -> tuple[Path, ...]:
+    """Return exact former alias files that canonical sibling names replace."""
+    roots = {
+        "claude": SKILLS_DIR,
+        "codex": CODEX_SKILLS_DIR,
+        "antigravity": ANTIGRAVITY_SKILLS_DIR,
+    }
+    if runtime not in roots:
+        raise ValueError(f"unknown generated-skill runtime: {runtime}")
+    names = [*OUR_SKILLS, *CODEX_ONLY_SKILLS] if runtime != "claude" else OUR_SKILLS
+    paths: list[Path] = []
+    for name in names:
+        for sibling in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
+            paths.append(roots[runtime] / name / sibling.name[len(name) + 1 :])
+    return tuple(paths)
+
+
+def materialize_obsolete_skill_siblings(runtime: str, dry: bool) -> list[str]:
+    """Prune only exact aliases previously emitted for canonical sibling files."""
+    actions: list[str] = []
+    for path in obsolete_skill_sibling_paths(runtime):
+        if not path.exists():
+            continue
+        actions.append(f"remove obsolete generated sibling {path}")
+        if not dry:
+            if not path.is_file():
+                raise RuntimeError(f"obsolete generated sibling is not a file: {path}")
+            path.unlink()
+    return actions
+
+
+def detect_obsolete_skill_sibling_drift(runtime: str) -> list[str]:
+    return [
+        f"{path}: obsolete generated sibling still present — run sync to prune exact target"
+        for path in obsolete_skill_sibling_paths(runtime)
+        if path.exists()
+    ]
 
 
 def detect_retired_skill_artifact_drift(runtime: str) -> list[str]:
@@ -933,6 +970,7 @@ def detect_artifact_drift() -> list[str]:
                 )
     return (
         drift
+        + detect_obsolete_skill_sibling_drift("claude")
         + detect_retired_skill_artifact_drift("claude")
         + detect_retired_agent_artifact_drift()
     )
@@ -953,7 +991,12 @@ def detect_codex_skill_drift() -> list[str]:
                 f"{rel_codex(path)}: diverged from its procedures/ source — "
                 "sync OVERWRITES it; edit the canonical procedure"
             )
-    return drift + detect_retired_skill_artifact_drift("codex") + detect_retired_skill_artifact_drift("legacy-codex")
+    return (
+        drift
+        + detect_obsolete_skill_sibling_drift("codex")
+        + detect_retired_skill_artifact_drift("codex")
+        + detect_retired_skill_artifact_drift("legacy-codex")
+    )
 
 
 def detect_antigravity_skill_drift() -> list[str]:
@@ -972,7 +1015,11 @@ def detect_antigravity_skill_drift() -> list[str]:
         drift.append(
             f"Antigravity skill configuration drift: {ANTIGRAVITY_SKILLS_CONFIG}"
         )
-    return drift + detect_retired_skill_artifact_drift("antigravity")
+    return (
+        drift
+        + detect_obsolete_skill_sibling_drift("antigravity")
+        + detect_retired_skill_artifact_drift("antigravity")
+    )
 
 
 def _rel_target(p: Path) -> str:

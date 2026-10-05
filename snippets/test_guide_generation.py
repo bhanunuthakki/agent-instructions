@@ -81,7 +81,10 @@ def test_global_runtime_rulebooks_are_generated_from_canonical_sources() -> None
     assert s.project_agent_contract.check_repo(s.ROOT_REPO).ok
     assert "Generated from" in artifacts[s.CLAUDE_GLOBAL_RULES]
     assert "Generated from" in artifacts[s.GEMINI_GLOBAL_RULES]
-    assert f"`{s.PROCEDURES_DIR}`" in artifacts[s.GEMINI_GLOBAL_RULES]
+    assert str((s.PROCEDURES_DIR / "INDEX.md").resolve()) in artifacts[
+        s.GEMINI_GLOBAL_RULES
+    ]
+    assert "manual fallback" not in artifacts[s.GEMINI_GLOBAL_RULES]
     assert s.detect_global_reference_drift(artifacts) == []
 
 
@@ -900,9 +903,10 @@ def test_claude_artifacts_are_identity_copies_of_procedures() -> None:
     if (
         ref.exists()
     ):  # sibling: flattened in procedures/, nested under the skill in ~/.claude
-        assert arts[s.SKILLS_DIR / "model-frontier" / "REFERENCE.md"] == ref.read_text(
+        assert arts[s.SKILLS_DIR / "model-frontier" / ref.name] == ref.read_text(
             encoding="utf-8", errors="replace"
         )
+        assert s.SKILLS_DIR / "model-frontier" / "REFERENCE.md" not in arts
 
 
 def test_codex_skill_artifacts_are_identity_copies_of_procedures() -> None:
@@ -914,8 +918,9 @@ def test_codex_skill_artifacts_are_identity_copies_of_procedures() -> None:
             assert arts[target] == src.read_text(encoding="utf-8", errors="replace")
     ref = s.PROCEDURES_DIR / "model-frontier.REFERENCE.md"
     if ref.exists():
-        target = s.CODEX_SKILLS_DIR / "model-frontier" / "REFERENCE.md"
+        target = s.CODEX_SKILLS_DIR / "model-frontier" / ref.name
         assert arts[target] == ref.read_text(encoding="utf-8", errors="replace")
+        assert s.CODEX_SKILLS_DIR / "model-frontier" / "REFERENCE.md" not in arts
 
 
 def test_antigravity_skill_artifacts_are_identity_copies_except_self_contained_harden() -> (
@@ -935,8 +940,9 @@ def test_antigravity_skill_artifacts_are_identity_copies_except_self_contained_h
             assert arts[target] == expected
     ref = s.PROCEDURES_DIR / "context-engineering.REFERENCE.md"
     if ref.exists():
-        target = s.ANTIGRAVITY_SKILLS_DIR / "context-engineering" / "REFERENCE.md"
+        target = s.ANTIGRAVITY_SKILLS_DIR / "context-engineering" / ref.name
         assert arts[target] == ref.read_text(encoding="utf-8", errors="replace")
+        assert s.ANTIGRAVITY_SKILLS_DIR / "context-engineering" / "REFERENCE.md" not in arts
     assert (
         s.build_antigravity_skill_config()
         == json.dumps({"entries": [{"path": str(s.ANTIGRAVITY_SKILLS_DIR)}]}, indent=2)
@@ -1410,6 +1416,27 @@ def test_retired_generated_agents_are_exactly_pruned(
     assert not s.detect_retired_agent_artifact_drift()
 
 
+def test_obsolete_generated_skill_sibling_is_exactly_pruned(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    root = tmp_path / "claude"
+    monkeypatch.setattr(s, "SKILLS_DIR", root)
+    obsolete = root / "model-frontier" / "REFERENCE.md"
+    canonical = root / "model-frontier" / "model-frontier.REFERENCE.md"
+    unrelated = root / "model-frontier" / "notes.md"
+    obsolete.parent.mkdir(parents=True)
+    obsolete.write_text("obsolete alias", encoding="utf-8")
+    canonical.write_text("canonical", encoding="utf-8")
+    unrelated.write_text("keep", encoding="utf-8")
+
+    assert str(obsolete) in s.detect_obsolete_skill_sibling_drift("claude")[0]
+    s.materialize_obsolete_skill_siblings("claude", dry=False)
+    assert not obsolete.exists()
+    assert canonical.read_text(encoding="utf-8") == "canonical"
+    assert unrelated.read_text(encoding="utf-8") == "keep"
+    assert not s.detect_obsolete_skill_sibling_drift("claude")
+
+
 def test_guide_omits_retired_discovery_and_legacy_scaffold_framework(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1464,8 +1491,14 @@ def test_llm_ops_details_are_progressively_disclosed() -> None:
         source = s.PROCEDURES_DIR / f"llm-ops.{name}"
         assert source.exists()
         assert f"[llm-ops.{name}](llm-ops.{name})" in main
-        assert s.SKILLS_DIR / "llm-ops" / name in s.build_claude_artifacts()
-        assert s.CODEX_SKILLS_DIR / "llm-ops" / name in s.build_codex_skill_artifacts()
+        canonical_name = f"llm-ops.{name}"
+        assert (
+            s.SKILLS_DIR / "llm-ops" / canonical_name in s.build_claude_artifacts()
+        )
+        assert (
+            s.CODEX_SKILLS_DIR / "llm-ops" / canonical_name
+            in s.build_codex_skill_artifacts()
+        )
 
 
 def test_prefixed_reference_links_resolve_in_generated_skills() -> None:

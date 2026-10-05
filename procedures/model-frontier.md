@@ -5,7 +5,7 @@ description: Pick a hosted or open-weight LLM/runtime candidate against a dated 
 
 # Model Frontier
 
-`REFERENCE.md` is the dated candidate table across the providers and runtimes actually evaluated. Read it before answering a price or routing question. A stale row is evidence to refresh, not authority.
+`model-frontier.REFERENCE.md` is the dated candidate table across the providers and runtimes actually evaluated. Read it before answering a price or routing question. A stale row is evidence to refresh, not authority.
 
 This procedure owns candidate economics. Shared call governance lives in `llm-ops`; evaluation depth lives in `llm-ops.EVALS.md`; independent task judging lives in `judging`. Do not use one purpose's receipt as evidence for another.
 
