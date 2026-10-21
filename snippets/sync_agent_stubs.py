@@ -92,6 +92,7 @@ OUR_SKILLS = [
     "code-change",
     "context-engineering",
     "data-foundation",
+    "storage-lifecycle",
     "frontend-quality",
     "external-integration",
     "external-practice",

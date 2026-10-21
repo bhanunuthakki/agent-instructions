@@ -1,5 +1,7 @@
 # Agent-system evaluations
 
+`storage_lifecycle_cases.jsonl` is a separate six-case advisory suite for proportionate personal-app storage and memory retention. It pairs authorized small-test cleanup with failure-evidence, unique-state, worktree-dependency, pending-backup, and memory-placement boundaries. Use the existing interaction runner with this explicit case file for isolated model trials; schema tests and an advisory review alone do not establish behavioral qualification. The main corpus and its historical qualification remain unchanged.
+
 `procedure_routing_cases.jsonl` checks whether a request selects the smallest owning procedure and
 whether the Chisle modifier activates, persists, opts out, and stays excluded from non-code work.
 
