@@ -1479,6 +1479,7 @@ def test_prefixed_reference_links_resolve_in_generated_skills() -> None:
             "llm-ops.TRANSPORTS.md",
         ],
         "judging": ["judging.EVALS.md", "judging.REFERENCE.md"],
+        "storage-lifecycle": ["storage-lifecycle.REFERENCE.md"],
     }
     claude = s.build_claude_artifacts()
     codex = s.build_codex_skill_artifacts()

@@ -39,6 +39,7 @@ Ordinary answers and research need no artificial engineering workflow. Use appli
 | Delegation assessment required by GLOBAL; bounded workers, coordination, or scheduling | [agent-operations](agent-operations.md) owns dispatch, capability, write ownership, and resource closure |
 | Material user behavior in a build task | [product-feature](product-feature.md) owns outcome/acceptance; code-change owns implementation |
 | Durable state, identity, migration, lineage, or recovery | [data-foundation](data-foundation.md) |
+| Large temporary artifacts, worktrees, storage budgets, backup/cleanup lifecycle or retained task storage | [storage-lifecycle](storage-lifecycle.md) |
 | Visible code change or isolated mockup | [frontend-quality](frontend-quality.md) owns interaction and rendered evidence, including when mockup-review owns the deliverable |
 | New UI foundation | [scaffold-design-system](scaffold-design-system.md), after the task and hierarchy are understood |
 | External capability consumed by the product | [external-integration](external-integration.md); tool-selector only if provider choice is unresolved |
