@@ -1,5 +1,7 @@
 # Agent-system evaluations
 
+Offline unit tests assemble canonical shared sources with explicitly synthetic sibling-project context in a disposable workspace. They test loader, prompt, scoring, and receipt mechanics; they do not qualify behavior against private application instructions. The full local gate separately includes the `machine` check that resolves every corpus against actual workspace instructions. Production evaluation still fails on missing or escaping instruction paths.
+
 `storage_lifecycle_cases.jsonl` is a separate ten-case advisory suite for proportionate personal-app storage and memory retention. It pairs authorized small-test cleanup with failure-evidence, unique-state, worktree-dependency, pending-backup, and memory-placement boundaries. It also covers choosing copy scope before allocation, minimum prior-snapshot coverage, identical backups serving distinct failure domains, and separating active peak leases from retained failure payload. Use the existing interaction runner with this explicit case file for isolated model trials; schema tests and an advisory review alone do not establish behavioral qualification. The main corpus and its historical qualification remain unchanged.
 
 `procedure_routing_cases.jsonl` checks whether a request selects the smallest owning procedure and

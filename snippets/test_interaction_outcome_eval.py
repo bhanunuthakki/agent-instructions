@@ -9,6 +9,79 @@ import interaction_outcome_eval as outcome
 import pytest
 
 
+_CORPUS_NAMES = (
+    "interaction_outcome_cases.jsonl",
+    "user_enablement_cases.jsonl",
+    "storage_lifecycle_cases.jsonl",
+)
+
+
+@pytest.fixture(scope="module")
+def outcome_workspace(tmp_path_factory):
+    """Keep unit tests portable without copying private sibling-project instructions."""
+    source_root = outcome.ROOT
+    workspace = tmp_path_factory.mktemp("outcome-workspace")
+    root = workspace / "agent-instructions"
+    source_paths = {"GLOBAL.md", "procedures/INDEX.md"}
+    for name in _CORPUS_NAMES:
+        relative = "evals/agent_system/" + name
+        source_paths.add(relative)
+        for line in (source_root / relative).read_text().splitlines():
+            for raw in json.loads(line)["instruction_paths"]:
+                target = (workspace / raw).resolve()
+                target.relative_to(workspace.resolve())
+                project, relative_path = raw.split("/", 1)
+                if project == "agent-instructions":
+                    source_paths.add(relative_path)
+                else:
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text("Synthetic project context for unit tests only.\n")
+    for relative in source_paths:
+        target = (root / relative).resolve()
+        target.relative_to(root.resolve())
+        source = (source_root / relative).resolve()
+        source.relative_to(source_root.resolve())
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(source.read_bytes())
+    return workspace, root
+
+
+@pytest.fixture(autouse=True)
+def isolated_instruction_context(request, monkeypatch):
+    if request.node.get_closest_marker("machine"):
+        return
+    workspace, root = request.getfixturevalue("outcome_workspace")
+    monkeypatch.setattr(outcome, "ROOT", root)
+    monkeypatch.setattr(outcome, "WORKSPACE_ROOT", workspace)
+    monkeypatch.setattr(
+        outcome, "DEFAULT_CASES", root / "evals/agent_system/interaction_outcome_cases.jsonl"
+    )
+
+
+@pytest.mark.machine
+def test_real_workspace_corpora_bind_actual_instruction_files() -> None:
+    # Unlike the unit fixtures, this verifies the installed projects used by real trials.
+    for name in _CORPUS_NAMES:
+        cases = outcome.load_cases(outcome.ROOT / "evals/agent_system" / name)
+        assert all(outcome.resolve_instruction_paths(case) for case in cases)
+
+
+@pytest.mark.parametrize(
+    ("instruction_path", "message"),
+    [("absent/AGENTS.md", "missing instruction file"),
+     ("../../outside.md", "instruction path escapes workspace")],
+)
+def test_instruction_resolution_rejects_missing_or_escaping_context(
+    instruction_path, message
+) -> None:
+    from dataclasses import replace
+
+    case = outcome.load_cases(outcome.DEFAULT_CASES)[0]
+    case = replace(case, instruction_paths=(instruction_path,))
+    with pytest.raises(outcome.OutcomeEvalError, match=message):
+        outcome.resolve_instruction_paths(case)
+
+
 def test_corpus_is_valid_unique_and_binds_instruction_context() -> None:
     cases = outcome.load_cases(outcome.DEFAULT_CASES)
     assert len(cases) == 41

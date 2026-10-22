@@ -587,19 +587,22 @@ def test_every_section_present_and_nonempty() -> None:
         assert body.strip(), f"section {key!r} is empty"
 
 
-def test_skills_section_lists_every_skill_on_disk() -> None:
+def test_skills_section_lists_every_canonical_skill() -> None:
     body = s.build_guide_sections()["skills"]
-    present = [n for n in s.OUR_SKILLS if (s.SKILLS_DIR / n / "SKILL.md").exists()]
-    assert present, "expected at least one skill on disk"
+    present = [n for n in s.OUR_SKILLS if (s.PROCEDURES_DIR / f"{n}.md").exists()]
+    assert present, "expected at least one canonical skill"
     for name in present:
         assert name in body
     assert str(len(present)) in body  # the count is rendered and truthful
 
 
-def test_agents_section_matches_disk_count_and_names() -> None:
+def test_agents_section_matches_canonical_count_and_names() -> None:
     body = s.build_guide_sections()["agents"]
-    stems = sorted(p.stem for p in s.AGENTS_DIR.glob("*.md"))
-    assert stems, "expected agent files on disk"
+    stems = sorted(
+        p.stem for p in s.PROCEDURES_AGENTS_DIR.glob("*.md")
+        if p.stem not in s.RETIRED_GENERATED_AGENTS
+    )
+    assert stems, "expected canonical agent files"
     assert str(len(stems)) in body
     for stem in stems:
         assert stem in body
