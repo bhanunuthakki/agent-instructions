@@ -15,6 +15,7 @@ from enum import StrEnum
 from pathlib import Path
 
 POLICY_PATH = Path(__file__).resolve().parents[1] / "config" / "llm_routing_policy.json"
+JUDGE_ROUTE_PATH = POLICY_PATH.with_name("judge_route.json")
 
 
 class RoutingPolicyError(RuntimeError):
@@ -29,6 +30,34 @@ class WorkloadClass(StrEnum):
 class SubscriptionBackend(StrEnum):
     CODEX = "codex"
     CLAUDE = "claude"
+
+
+@dataclass(frozen=True)
+class AdvisoryJudgeRoute:
+    backend: SubscriptionBackend
+    model: str
+    reasoning_effort: str
+
+
+def load_advisory_judge_route(path: Path = JUDGE_ROUTE_PATH) -> AdvisoryJudgeRoute:
+    """Load the advisory subscription binding; this cannot qualify a blocking seat."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        raise RoutingPolicyError("Advisory Judge route is unavailable or invalid.") from None
+    if not isinstance(raw, dict) or (
+        raw.get("$schema") != "internal://advisory-judge-route/v1"
+        or raw.get("schema_version") != 1
+        or raw.get("backend") != "codex"
+        or raw.get("transport") != "membership"
+        or raw.get("status") != "advisory_only"
+        or raw.get("qualification_receipt") is not None
+        or not isinstance(raw.get("model"), str)
+        or not raw["model"].startswith("gpt-")
+        or raw.get("reasoning_effort") not in {"low", "medium", "high", "xhigh", "max"}
+    ):
+        raise RoutingPolicyError("Unsupported advisory Judge binding; blocking qualification is separate.")
+    return AdvisoryJudgeRoute(SubscriptionBackend.CODEX, raw["model"], raw["reasoning_effort"])
 
 
 @dataclass(frozen=True)

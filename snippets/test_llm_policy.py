@@ -8,6 +8,18 @@ import pytest
 import llm_policy
 
 
+def test_advisory_judge_binding_does_not_claim_blocking_qualification(tmp_path):
+    route = llm_policy.load_advisory_judge_route()
+    assert route.backend is llm_policy.SubscriptionBackend.CODEX
+    assert route.model.startswith("gpt-")
+    path = tmp_path / "judge.json"
+    raw = json.loads(llm_policy.JUDGE_ROUTE_PATH.read_text())
+    raw["status"] = "qualified"
+    path.write_text(json.dumps(raw))
+    with pytest.raises(llm_policy.RoutingPolicyError):
+        llm_policy.load_advisory_judge_route(path)
+
+
 def test_application_route_is_codex_then_claude() -> None:
     assert llm_policy.subscription_route(environ={}) == (
         llm_policy.SubscriptionBackend.CODEX,

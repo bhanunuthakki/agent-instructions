@@ -13,6 +13,7 @@
 !/AGENT_SYSTEM_ADVERSARIAL_REVIEW_2026-07-21.md
 !/DEFINITIONS.md
 !/requirements-test.lock
+!/pytest.ini
 !/procedures/
 !/snippets/
 !/githooks/
@@ -34,6 +35,7 @@ snippets/mcp_registry.json
 /config/*
 !/config/judge_policy.json
 !/config/judge_registry.json
+!/config/judge_route.json
 !/config/judge_rollout.json
 !/config/llm_routing_policy.json
 !/config/llm_usage_index.json

@@ -8,7 +8,7 @@ Compose workflows semantically, not by concatenating every instruction from ever
 - When one routing skill deliberately calls another, the caller keeps authority over why and when the callee runs. The callee supplies only the requested mechanics and may not reopen the selected route or broaden the deliverable.
 - The most specific artifact or runtime owner governs its execution interface. The product or domain owner governs intended behavior and meaning. The closest project rulebook governs local commands and gates. `GLOBAL.md` governs communication, authority, and completion.
 - Resolve incompatible defaults through that ownership order instead of trying to satisfy both. Preserve explicit user and template requirements. If two candidate owners still claim the same decision, stop loading more skills and resolve the routing ambiguity first.
-- Modifiers such as Chisle can compress work across a code chat but never become a second deliverable owner. Formal specialist names such as `sec-authz` or `ux-design` are hardening rubrics, not ordinary skills; invoke them through `harden --audit <specialist>` only when a proportional audit is actually required.
+- Explicitly requested modifiers such as Chisle can compress work across a code chat but never become a second deliverable owner. Formal specialist names such as `sec-authz` or `ux-design` are hardening rubrics, not ordinary skills; invoke them through `harden --audit <specialist>` only when a proportional audit is actually required.
 
 ## Select the requested deliverable
 
@@ -25,7 +25,7 @@ Compose workflows semantically, not by concatenating every instruction from ever
 | Work through a strategic-finance, FP&A, BizOps, or operating case study in deliberate phases | [finance-case-study](finance-case-study.md) |
 | Explicit Judge/Critic/Evaluation Suite or required semantic review | [judging](judging.md) |
 | Maturity-gated audit or approved remediation | [harden](harden.md), with only the applicable specialist rubrics |
-| Run the delegation check for any substantive task, delegate work, coordinate resources, schedule LLM work, or assess task closure | [agent-operations](agent-operations.md) |
+| Delegate bounded work, coordinate resources, or schedule LLM work | [agent-operations](agent-operations.md) |
 | Synchronize Linear from an exact issue's branch/PR state | [linear-pr-sync](linear-pr-sync.md) |
 | Reconcile Linear backlog, duplicates, dependencies, or stale pipeline states | [linear-pipeline-hygiene](linear-pipeline-hygiene.md) |
 | Synchronize canonical instructions and runtime artifacts | [source-command-sync-agent-stubs](source-command-sync-agent-stubs.md) |
@@ -36,7 +36,7 @@ Ordinary answers and research need no artificial engineering workflow. Use appli
 
 | Changed or uncertain boundary | Additional owner |
 |---|---|
-| Delegation assessment required by GLOBAL; bounded workers, coordination, or scheduling | [agent-operations](agent-operations.md) owns dispatch, capability, write ownership, and resource closure |
+| Actual bounded workers, shared resources, coordination, or scheduling | [agent-operations](agent-operations.md) owns dispatch, capability, write ownership, and resource closure |
 | Material user behavior in a build task | [product-feature](product-feature.md) owns outcome/acceptance; code-change owns implementation |
 | Durable state, identity, migration, lineage, or recovery | [data-foundation](data-foundation.md) |
 | Large temporary artifacts, worktrees, storage budgets, backup/cleanup lifecycle or retained task storage | [storage-lifecycle](storage-lifecycle.md) |

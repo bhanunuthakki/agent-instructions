@@ -39,7 +39,7 @@ def test_corpus_is_valid_and_uses_known_procedures() -> None:
     catalog = routing.load_procedure_catalog(ROOT)
     cases = routing.load_cases(CASES_PATH, known_procedures=set(catalog))
 
-    assert len(cases) == 39
+    assert len(cases) == 41
     assert len({case.case_id for case in cases}) == len(cases)
     assert any(not case.required_procedures for case in cases)
     assert any(case.should_clarify for case in cases)
@@ -47,12 +47,12 @@ def test_corpus_is_valid_and_uses_known_procedures() -> None:
     assert {"agent-operations", "scaffold-secrets"} <= required
 
 
-def test_chisle_routes_automatically_persists_and_honors_boundaries() -> None:
+def test_chisle_routes_on_request_persists_and_honors_boundaries() -> None:
     catalog = routing.load_procedure_catalog(ROOT)
     cases = routing.load_cases(CASES_PATH, known_procedures=set(catalog))
     by_id = {case.case_id: case for case in cases}
 
-    assert "chisle" in by_id["code-chat-auto-chisle"].required_procedures
+    assert "chisle" in by_id["code-chat-explicit-chisle"].required_procedures
     assert "chisle" in by_id["code-chat-chisle-persists"].required_procedures
     assert "chisle" in by_id["code-chat-chisle-opt-out"].forbidden_procedures
     assert "chisle" in by_id["non-code-excludes-chisle"].forbidden_procedures

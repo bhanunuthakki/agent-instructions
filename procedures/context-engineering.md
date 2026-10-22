@@ -30,6 +30,7 @@ Read [context-engineering.REFERENCE.md](context-engineering.REFERENCE.md) when p
 - Put tool usage in the tool schema. Prefer expressive enums and return types to prose examples.
 - Put historical facts and user preferences in memory, not durable project rules.
 - Keep memory selective: stable preferences, durable decisions and rationale, hard-to-rederive constraints, and unresolved obligations. Keep task progress in its owning task record and repository facts in canonical sources. Update or supersede existing entries rather than appending repeated summaries. At closure, preserve useful evidence references and unique history under their owning policy; retire transient tool output, temporary paths, and completed-session detail. Keep the memory index short and load detail on demand. Disk retention and model-context retention are separate decisions.
+- When an incident pattern recurs, maintain one current lesson at its narrowest owning instruction or application policy, with the durable reason and an evidence pointer. Supersede stale guidance rather than adding another incident transcript or competing memory entry.
 - Use source code, tests, schemas, mockups, and rubrics as high-fidelity references when they express the requirement better than prose.
 
 ## Rewrite

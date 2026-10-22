@@ -392,10 +392,17 @@ def test_abnormal_exit_terminates_owned_descendant(
     from workspace_reconstruction import bounded_process
 
     pidfile = tmp_path / "child.pid"
+    fifo = tmp_path / "child-lifetime.fifo"
+    os.mkfifo(fifo)
+    read_fd = os.open(fifo, os.O_RDONLY | os.O_NONBLOCK)
+    child_program = (
+        "import os,time; from pathlib import Path; "
+        f"fd=os.open({str(fifo)!r},os.O_WRONLY); "
+        f"Path({str(pidfile)!r}).write_text(str(os.getpid())); time.sleep(60)"
+    )
     program = (
-        "import subprocess,sys,time; from pathlib import Path; "
-        "child=subprocess.Popen([sys.executable,'-c','import time; time.sleep(60)']); "
-        f"Path({str(pidfile)!r}).write_text(str(child.pid)); time.sleep({0.1 if interrupted else 60})"
+        "import subprocess,sys,time; "
+        f"child=subprocess.Popen([sys.executable,'-c',{child_program!r}]); time.sleep(60)"
     )
     communicate = subprocess.Popen.communicate
     first = True
@@ -421,11 +428,10 @@ def test_abnormal_exit_terminates_owned_descendant(
             env=dict(os.environ),
             timeout=1,
         )
-    child_pid = pidfile.read_text()
-    status = subprocess.run(
-        ["ps", "-o", "stat=", "-p", child_pid],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert not status.stdout.strip() or status.stdout.strip().startswith("Z")
+    assert pidfile.exists(), "The child must have opened the lifetime pipe before termination"
+    try:
+        # A live synthetic child holds the writer open, so this raises BlockingIOError.
+        # EOF proves that timeout/interruption closed its held process resource.
+        assert os.read(read_fd, 1) == b""
+    finally:
+        os.close(read_fd)
