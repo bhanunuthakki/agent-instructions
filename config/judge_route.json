@@ -1,0 +1,10 @@
+{
+  "$schema": "internal://advisory-judge-route/v1",
+  "schema_version": 1,
+  "backend": "codex",
+  "transport": "membership",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "status": "advisory_only",
+  "qualification_receipt": null
+}

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "canonical_source": "config/workspace_reconstruction.json",
   "assessment_url": "https://linear.app/bhanu-personal/document/assessment-provider-and-harness-reconstructability-ca616d14accf",
-  "population_authority": "AGENTS_GUIDE.md#projects-under-the-rulebook",
+  "population_authority": "config/workspace_reconstruction.json#projects; AGENTS_GUIDE.md is the generated population view",
   "population_note": "Current13 projects from canonical generated inventory; original August assessment counted11. No project is silently omitted to preserve the historical count.",
   "regeneration": "Canonical hand-maintained inventory; verify with python snippets/workspace_reconstruction.py validate --workspace-root <root>; do not generate over owner edits",
   "projects": [

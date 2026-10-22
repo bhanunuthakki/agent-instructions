@@ -21,8 +21,9 @@ def test_corpus_is_valid_unique_and_binds_instruction_context() -> None:
     )
 
 
-def test_default_judge_is_astra_and_candidate_remains_workhorse() -> None:
-    assert outcome.DEFAULT_JUDGE_MODEL == "gpt-6-astra"
+def test_default_judge_uses_typed_advisory_route_and_candidate_is_explicit() -> None:
+    from llm_policy import load_advisory_judge_route
+    assert outcome.DEFAULT_JUDGE_MODEL == load_advisory_judge_route().model
     assert outcome.DEFAULT_CANDIDATE_MODEL == "gpt-5.6-terra"
 
 
@@ -58,8 +59,8 @@ def test_storage_lifecycle_corpus_binds_reachable_context_and_hides_criteria() -
     cases = outcome.load_cases(
         outcome.ROOT / "evals/agent_system/storage_lifecycle_cases.jsonl"
     )
-    assert len(cases) == 6
-    assert len({case.case_id for case in cases}) == 6
+    assert len(cases) == 10
+    assert len({case.case_id for case in cases}) == 10
     for case in cases:
         paths = outcome.resolve_instruction_paths(case)
         assert all(path.is_file() for path in paths)

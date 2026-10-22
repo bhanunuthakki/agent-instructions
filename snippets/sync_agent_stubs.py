@@ -57,8 +57,8 @@ PRIVATE_STATE_ROOT = configured_path(
 )
 
 # CANONICAL DIRECTION: procedures/ is the hand-authored SOURCE OF TRUTH. This script GENERATES the
-# Claude and Codex skills, the /harden command, and the agent fleet FROM procedures/ — identity
-# copies with only the directory layout remapped, so the round-trip is lossless. Gemini, Cursor,
+# Claude and Codex skills, the /harden command, and the agent fleet FROM procedures/ — body-preserving
+# copies with packaged references retained and cross-skill links relocated, so the round-trip is lossless. Gemini, Cursor,
 # and local models can read procedures/ directly. Edit procedures/<name>.md — NEVER a generated
 # ~/.claude/* or ~/.agents/* copy (it is overwritten).
 CLAUDE_ROOT = configured_path("CLAUDE_CONFIG_HOME", USER_HOME / ".claude")
@@ -500,26 +500,35 @@ def harden_command_adapter() -> str:
     )
 
 
+def skill_source_text(source: Path, skill_name: str) -> str:
+    """Preserve body text and packaged references; relocate cross-skill links."""
+    text = source.read_text(encoding="utf-8", errors="replace")
+    packaged = {path.resolve() for path in PROCEDURES_DIR.glob(f"{skill_name}.*.md")}
+
+    def replace(match: re.Match[str]) -> str:
+        target = local_markdown_target(match.group(2))
+        if target is None or (source.parent / target[0]).resolve() in packaged:
+            return match.group(0)
+        return relocate_markdown_links(match.group(0), source.parent)
+
+    return MARKDOWN_LINK.sub(replace, text)
+
+
 def build_claude_artifacts() -> dict[Path, str]:
-    """Pure: every Claude artifact path -> the exact content it SHOULD have, taken VERBATIM from its
-    canonical procedures/ source (identity copy; only the directory layout is remapped). This is the
+    """Pure: every Claude artifact path -> the exact content it SHOULD have, taken from its
+    canonical procedures/ source, with cross-skill links relocated for the runtime layout. This is the
     inverse of the old build_procedures() — procedures/ is now the source, ~/.claude/* the output."""
     out: dict[Path, str] = {}
 
-    # Skills: procedures/<name>.md -> skills/<name>/SKILL.md ; siblings procedures/<name>.<sib> -> skills/<name>/<sib>
+    # Skills: procedures/<name>.md -> skills/<name>/SKILL.md. Keep each sibling's
+    # canonical filename so references remain unambiguous and no alias is duplicated.
     for name in OUR_SKILLS:
         proc = PROCEDURES_DIR / f"{name}.md"
         if not proc.exists():
             continue
-        out[SKILLS_DIR / name / "SKILL.md"] = proc.read_text(
-            encoding="utf-8", errors="replace"
-        )
+        out[SKILLS_DIR / name / "SKILL.md"] = skill_source_text(proc, name)
         for sib in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
-            sib_name = sib.name[
-                len(name) + 1 :
-            ]  # strip the "<name>." prefix -> REFERENCE.md
-            content = sib.read_text(encoding="utf-8", errors="replace")
-            out[SKILLS_DIR / name / sib_name] = content
+            content = skill_source_text(sib, name)
             out[SKILLS_DIR / name / sib.name] = content
 
     # Commands: one canonical source per command, shared byte-for-byte with Codex.
@@ -548,13 +557,9 @@ def build_codex_skill_artifacts() -> dict[Path, str]:
         proc = PROCEDURES_DIR / f"{name}.md"
         if not proc.exists():
             continue
-        out[CODEX_SKILLS_DIR / name / "SKILL.md"] = proc.read_text(
-            encoding="utf-8", errors="replace"
-        )
+        out[CODEX_SKILLS_DIR / name / "SKILL.md"] = skill_source_text(proc, name)
         for sibling in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
-            sibling_name = sibling.name[len(name) + 1 :]
-            content = sibling.read_text(encoding="utf-8", errors="replace")
-            out[CODEX_SKILLS_DIR / name / sibling_name] = content
+            content = skill_source_text(sibling, name)
             out[CODEX_SKILLS_DIR / name / sibling.name] = content
     for command, source in COMMAND_SOURCES.items():
         if not source.exists():
@@ -574,13 +579,9 @@ def build_antigravity_skill_artifacts() -> dict[Path, str]:
         proc = PROCEDURES_DIR / f"{name}.md"
         if not proc.exists():
             continue
-        out[ANTIGRAVITY_SKILLS_DIR / name / "SKILL.md"] = proc.read_text(
-            encoding="utf-8", errors="replace"
-        )
+        out[ANTIGRAVITY_SKILLS_DIR / name / "SKILL.md"] = skill_source_text(proc, name)
         for sibling in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
-            sibling_name = sibling.name[len(name) + 1 :]
-            content = sibling.read_text(encoding="utf-8", errors="replace")
-            out[ANTIGRAVITY_SKILLS_DIR / name / sibling_name] = content
+            content = skill_source_text(sibling, name)
             out[ANTIGRAVITY_SKILLS_DIR / name / sibling.name] = content
     out.update(build_harden_package_artifacts(ANTIGRAVITY_SKILLS_DIR / "harden"))
     return out
@@ -658,7 +659,9 @@ def detect_global_reference_drift(
     artifacts: dict[Path, str] | None = None,
 ) -> list[str]:
     """Walk generated root links and their Markdown descendants, including cycles."""
-    pending = list((artifacts if artifacts is not None else build_global_rulebook_artifacts()).items())
+    source_map = artifacts if artifacts is not None else build_global_rulebook_artifacts()
+    source_map = {path.resolve(): text for path, text in source_map.items()}
+    pending = list(source_map.items())
     visited: set[Path] = set()
     findings: list[str] = []
     while pending:
@@ -673,7 +676,10 @@ def detect_global_reference_drift(
                 continue
             raw_path, _fragment = target
             resolved = (path.parent / raw_path).resolve()
-            if not resolved.exists():
+            if resolved in source_map:
+                if resolved.suffix.casefold() == ".md":
+                    pending.append((resolved, source_map[resolved]))
+            elif not resolved.exists():
                 findings.append(f"{path}: unreachable global Markdown target {raw_path!r}")
             elif resolved.is_file() and resolved.suffix.casefold() == ".md":
                 pending.append((resolved, resolved.read_text(encoding="utf-8")))
@@ -700,15 +706,10 @@ def build_global_rulebook_artifacts() -> dict[Path, str]:
         + relocate_markdown_links(_without_local_import(claude), CLAUDE_MD.parent)
         + "\n",
     }
-    fallback = (
-        "\nCanonical procedure root for manual fallback: "
-        f"`{PROCEDURES_DIR}`. The catalog links above resolve to this checkout; "
-        "load only the procedures needed for the current task.\n"
-    )
     out[GEMINI_GLOBAL_RULES] = (
         banner + agents + "\n\n"
         + relocate_markdown_links(_without_local_import(gemini), GEMINI_MD.parent)
-        + fallback
+        + "\n"
     )
     return out
 
@@ -738,7 +739,7 @@ def detect_global_rulebook_drift() -> list[str]:
 def materialize_claude_artifacts(dry: bool) -> list[str]:
     """Write the Claude artifacts from procedures/ (overwrites — procedures/ is canonical). Compares
     and writes RAW BYTES with LF newlines, so a generated artifact is byte-identical to its LF
-    source. (Path.write_text would translate LF->CRLF on Windows, silently breaking the identity
+    rendered source. (Path.write_text would translate LF->CRLF on Windows, silently breaking the artifact
     copy — and _norm-based drift detection would never catch it.) Quiet on files already in sync."""
     arts = build_claude_artifacts()
     actions: list[str] = []
@@ -760,13 +761,14 @@ def materialize_claude_artifacts(dry: bool) -> list[str]:
     ]
     return (
         actions
+        + materialize_obsolete_skill_siblings("claude", dry)
         + materialize_retired_skill_artifacts("claude", dry)
         + materialize_retired_agent_artifacts(dry)
     )
 
 
 def materialize_codex_skill_artifacts(dry: bool) -> list[str]:
-    """Write byte-identical Codex skill copies from canonical procedures/."""
+    """Write source-preserving Codex skills with relocated cross-skill links."""
     actions: list[str] = []
     for path, content in build_codex_skill_artifacts().items():
         data = content.encode("utf-8")
@@ -777,7 +779,12 @@ def materialize_codex_skill_artifacts(dry: bool) -> list[str]:
         if not dry:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
-    return actions + materialize_retired_skill_artifacts("codex", dry) + materialize_retired_skill_artifacts("legacy-codex", dry)
+    return (
+        actions
+        + materialize_obsolete_skill_siblings("codex", dry)
+        + materialize_retired_skill_artifacts("codex", dry)
+        + materialize_retired_skill_artifacts("legacy-codex", dry)
+    )
 
 
 def materialize_antigravity_skill_artifacts(dry: bool) -> list[str]:
@@ -807,7 +814,11 @@ def materialize_antigravity_skill_artifacts(dry: bool) -> list[str]:
         if not dry:
             ANTIGRAVITY_SKILLS_CONFIG.parent.mkdir(parents=True, exist_ok=True)
             ANTIGRAVITY_SKILLS_CONFIG.write_bytes(config)
-    return actions + materialize_retired_skill_artifacts("antigravity", dry)
+    return (
+        actions
+        + materialize_obsolete_skill_siblings("antigravity", dry)
+        + materialize_retired_skill_artifacts("antigravity", dry)
+    )
 
 
 def materialize_direct_harden_package(dry: bool) -> list[str]:
@@ -864,6 +875,45 @@ def materialize_retired_skill_artifacts(runtime: str, dry: bool) -> list[str]:
                 raise RuntimeError(f"retired generated target is not a file: {path}")
             path.unlink()
     return actions
+
+
+def obsolete_skill_sibling_paths(runtime: str) -> tuple[Path, ...]:
+    """Return exact former alias files that canonical sibling names replace."""
+    roots = {
+        "claude": SKILLS_DIR,
+        "codex": CODEX_SKILLS_DIR,
+        "antigravity": ANTIGRAVITY_SKILLS_DIR,
+    }
+    if runtime not in roots:
+        raise ValueError(f"unknown generated-skill runtime: {runtime}")
+    names = [*OUR_SKILLS, *CODEX_ONLY_SKILLS] if runtime != "claude" else OUR_SKILLS
+    paths: list[Path] = []
+    for name in names:
+        for sibling in sorted(PROCEDURES_DIR.glob(f"{name}.*.md")):
+            paths.append(roots[runtime] / name / sibling.name[len(name) + 1 :])
+    return tuple(paths)
+
+
+def materialize_obsolete_skill_siblings(runtime: str, dry: bool) -> list[str]:
+    """Prune only exact aliases previously emitted for canonical sibling files."""
+    actions: list[str] = []
+    for path in obsolete_skill_sibling_paths(runtime):
+        if not path.exists():
+            continue
+        actions.append(f"remove obsolete generated sibling {path}")
+        if not dry:
+            if not path.is_file():
+                raise RuntimeError(f"obsolete generated sibling is not a file: {path}")
+            path.unlink()
+    return actions
+
+
+def detect_obsolete_skill_sibling_drift(runtime: str) -> list[str]:
+    return [
+        f"{path}: obsolete generated sibling still present — run sync to prune exact target"
+        for path in obsolete_skill_sibling_paths(runtime)
+        if path.exists()
+    ]
 
 
 def detect_retired_skill_artifact_drift(runtime: str) -> list[str]:
@@ -934,6 +984,7 @@ def detect_artifact_drift() -> list[str]:
                 )
     return (
         drift
+        + detect_obsolete_skill_sibling_drift("claude")
         + detect_retired_skill_artifact_drift("claude")
         + detect_retired_agent_artifact_drift()
     )
@@ -954,7 +1005,12 @@ def detect_codex_skill_drift() -> list[str]:
                 f"{rel_codex(path)}: diverged from its procedures/ source — "
                 "sync OVERWRITES it; edit the canonical procedure"
             )
-    return drift + detect_retired_skill_artifact_drift("codex") + detect_retired_skill_artifact_drift("legacy-codex")
+    return (
+        drift
+        + detect_obsolete_skill_sibling_drift("codex")
+        + detect_retired_skill_artifact_drift("codex")
+        + detect_retired_skill_artifact_drift("legacy-codex")
+    )
 
 
 def detect_antigravity_skill_drift() -> list[str]:
@@ -973,7 +1029,11 @@ def detect_antigravity_skill_drift() -> list[str]:
         drift.append(
             f"Antigravity skill configuration drift: {ANTIGRAVITY_SKILLS_CONFIG}"
         )
-    return drift + detect_retired_skill_artifact_drift("antigravity")
+    return (
+        drift
+        + detect_obsolete_skill_sibling_drift("antigravity")
+        + detect_retired_skill_artifact_drift("antigravity")
+    )
 
 
 def _rel_target(p: Path) -> str:
@@ -1165,7 +1225,8 @@ def semantic_documents() -> list[Path]:
 
 
 def detect_semantic_drift(
-    docs: list[Path] | None = None, *, root_doc: Path = GLOBAL_MD
+    docs: list[Path] | None = None, *, root_doc: Path = GLOBAL_MD,
+    require_current_frontier: bool = False,
 ) -> list[str]:
     """Catch meaning-level contradictions that byte identity cannot detect."""
     findings: list[str] = []
@@ -1239,7 +1300,7 @@ def detect_semantic_drift(
         match = re.search(r"Next review:\s*(\d{4}-\d{2}-\d{2})", text)
         if not match:
             findings.append(f"{frontier}: missing machine-checkable Next review date")
-        elif date.fromisoformat(match.group(1)) < date.today():
+        elif require_current_frontier and date.fromisoformat(match.group(1)) < date.today():
             findings.append(f"{frontier}: model frontier review is expired")
     return findings
 
@@ -1377,9 +1438,20 @@ def build_guide_sections() -> dict[str, str]:
             wired_rows.append((child.name, ", ".join(present)))
         else:
             unwired.append(child.name)
+    # Preserve the declared reconstruction population when a clone is absent on
+    # this host. Local discovery may add a project, but must not retire one.
+    population = ROOT_REPO / "config" / "workspace_reconstruction.json"
+    if population.is_file():
+        registered = json.loads(population.read_text(encoding="utf-8"))["projects"]
+        present_names = {child.name for child in guide_projects}
+        for record in registered:
+            name = record["id"]
+            if name not in present_names:
+                wired_rows.append((name, "Not installed on this host; registered for reconstruction"))
+        wired_rows.sort()
     projects = (
-        f"**{len(wired_rows)} projects** carry the rulebook — each layers its own `AGENTS.md` "
-        f"on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:\n\n"
+        f"**{len(wired_rows)} projects** in the declared and discovered population. Present "
+        f"rulebooks layer local `AGENTS.md` on the global core; absent clones remain explicit:\n\n"
         + _md_table(("Project", "Rulebook files present"), wired_rows)
     )
     if unwired:
@@ -1518,9 +1590,20 @@ def detect_instruction_portability_drift(
     for project in projects if projects is not None else project_dirs():
         for path in _canonical_instruction_paths(project):
             text = path.read_text(encoding="utf-8", errors="replace")
+            relative_path = path.relative_to(project)
+            is_memory = path.name.casefold() == "memory.md" or any(
+                part.casefold() == "memory" for part in relative_path.parts[:-1]
+            )
             for line_number, line in enumerate(text.splitlines(), 1):
                 match = PORTABILITY_PROVIDER_PATTERN.search(line)
                 if match is None:
+                    continue
+                if is_memory and not re.match(
+                    r"^\s*(?:[-*]\s+)?(?:always\b|never\b|must\b|shall\b|use\b|prefer\b|"
+                    r"route\b|default(?:[ _-](?:model|provider|runtime))?\s*[:=]|"
+                    r"(?:provider|model|runtime)[ _-](?:priority|route|default)\s*[:=])",
+                    line, re.IGNORECASE,
+                ):
                     continue
                 relative = path.relative_to(project).as_posix()
                 findings.append(
@@ -1713,6 +1796,11 @@ def main() -> None:
         detect_doc_path_drift()
     )  # always read-only — a prose fix needs human attention
     drift += detect_global_reference_drift()
+    drift += detect_global_reference_drift({
+        **build_claude_artifacts(), **build_codex_skill_artifacts(),
+        **build_antigravity_skill_artifacts(),
+        **build_harden_package_artifacts(DIRECT_HARDEN_PACKAGE_DIR),
+    })
     drift += detect_hook_capability_drift()
     drift += detect_command_orphans()
     drift += detect_llm_usage_index_drift(check_projects=machine_inventory)
@@ -1733,6 +1821,14 @@ def main() -> None:
             print(f"  ! {d}")
     else:
         print("\nno content drift detected.")
+    freshness = detect_semantic_drift(docs=[], require_current_frontier=True)
+    for warning in freshness:
+        if "review is expired" in warning:
+            if "--require-current-frontier" in sys.argv:
+                drift.append(warning)
+                print(f"  ! {warning}")
+            else:
+                print(f"[advisory] {warning}; refresh before using a current model selection")
     print("done.")
 
     if check and (drift or pending):

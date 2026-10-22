@@ -24,12 +24,10 @@ def test_global_contract_and_local_guide_have_distinct_owners() -> None:
     assert "procedures/INDEX.md" in global_rules
     assert "procedures/machine-operations.md" in global_rules
     assert "## Orchestration and delegation" in global_rules
-    assert "At task start, after material input" in global_rules
-    assert "Delegate bounded independent work by default" in global_rules
-    assert "to assess delegation before choosing serial execution" in global_rules
-    assert "Keep a frontier-synthesizer at the root" in global_rules
-    assert "Load `chisle` once when a chat becomes code-based" in global_rules
-    assert "keep it active until the user deactivates it" in global_rules
+    assert "when it saves useful time or adds needed independent evidence" in global_rules
+    assert "capable available root" in global_rules
+    assert "actual dispatch, shared resources, or coordinated work" in global_rules
+    assert "explicitly requested efficiency modifier" in global_rules
     assert "source" in local and "sync_agent_stubs.py" in local
     assert "## Outcome and initiative" not in local
     assert "OPENROUTER_API_KEY" not in global_rules
@@ -50,8 +48,8 @@ def test_global_contract_and_local_guide_have_distinct_owners() -> None:
 
 def test_operations_owns_resource_handoff_and_truthful_closure() -> None:
     operations = _text("procedures/agent-operations.md")
-    assert "Reassess delegation at task start, after material user input" in operations
-    assert "Delegate by default" in operations
+    assert "do not add a delegation ceremony to a serial task" in operations
+    assert "benefit exceeds setup and reconciliation" in operations
     assert "one to three parallel workers" in operations
     assert "Workers do not recursively fan out by default" in operations
     assert "makes the final acceptance judgment" in operations

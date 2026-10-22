@@ -16,6 +16,8 @@ You rarely touch any of this. It just shapes how the agent behaves.
 
 ## Evidence governance
 
+Ordinary personal work uses direct evidence and the applicable repository checks. The formal machinery below applies to an explicitly governed review or a named consequential release gate; routine code, configuration, and local deployment do not enroll a statistical audit fleet.
+
 - **Shared language:** root `DEFINITIONS.md` defines only cross-project control-plane terms. Projects may add terms but never override them.
 - **Review rigor:** J0 is deterministic; J1 uses one Judge; J2 uses one specialist plus a conditional independent second Judge; J3 is reserved for actual irreversible or external actions and requires owner approval only to PASS.
 - **Reliability loop:** an exclusive writer seals task identity before work and typed receipts separate routing from execution. Mandatory J3/exception controls are censused; ordinary prevalence estimates use sealed episodes and owner-ratified, per-stratum Statistical Sample Targets.
@@ -29,8 +31,8 @@ You rarely touch any of this. It just shapes how the agent behaves.
 
 | Skill | What it does |
 |---|---|
-| **agent-operations** | Reassess and run bounded delegation at the start and between phases of substantive work; coordinate subagents, shared worktrees, capability roles, or… |
-| **chisle** | Apply a persistent efficiency layer to code-based chats involving repository inspection, implementation, debugging, refactoring, review, testing, mai… |
+| **agent-operations** | Dispatch bounded workers or coordinate shared worktrees, resources, capability roles, and scheduled LLM work. |
+| **chisle** | Apply the requested persistent efficiency modifier to a code chat. |
 | **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
 | **data-foundation** | Design or change durable application state, schemas, data pipelines, or sources of truth with local-first simplicity, explicit lifecycle, recovery, a… |
@@ -112,15 +114,15 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**53 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 29 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**54 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 29 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`INDEX.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `chisle.md`, `code-change.FRONTEND.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `finance-case-study.exploration.md`, `finance-case-study.md`, `finance-case-study.pruning.md`, `finance-case-study.review-and-fluency.md`, `finance-case-study.workbook-standards.md`, `finance-case-study.writing-and-delivery.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `storage-lifecycle.REFERENCE.md`, `storage-lifecycle.md`, `tool-selector.md`
+`INDEX.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `chisle.md`, `code-change.FRONTEND.md`, `code-change.OPERATIONS.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `finance-case-study.exploration.md`, `finance-case-study.md`, `finance-case-study.pruning.md`, `finance-case-study.review-and-fluency.md`, `finance-case-study.workbook-standards.md`, `finance-case-study.writing-and-delivery.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `storage-lifecycle.REFERENCE.md`, `storage-lifecycle.md`, `tool-selector.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook
 
 <!-- BEGIN:projects -->
-**13 projects** carry the rulebook — each layers its own `AGENTS.md` on the global core, with thin `CLAUDE.md`/`GEMINI.md` wrappers:
+**13 projects** in the declared and discovered population. Present rulebooks layer local `AGENTS.md` on the global core; absent clones remain explicit:
 
 | Project | Rulebook files present |
 |---|---|
@@ -130,7 +132,7 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 | blog-engine | AGENTS.md, CLAUDE.md, GEMINI.md |
 | date-suggester | AGENTS.md, CLAUDE.md, GEMINI.md |
 | earnings-summary | AGENTS.md, CLAUDE.md, GEMINI.md |
-| harness | AGENTS.md, CLAUDE.md, GEMINI.md |
+| harness | Not installed on this host; registered for reconstruction |
 | huntdesk | AGENTS.md, CLAUDE.md, GEMINI.md |
 | portfolio-tracker | AGENTS.md, CLAUDE.md, GEMINI.md |
 | reading-companion-app | AGENTS.md, CLAUDE.md, GEMINI.md |

@@ -4,7 +4,43 @@ import json
 import re
 from pathlib import Path
 
+import pytest
 import sync_agent_stubs as sync
+
+
+@pytest.mark.parametrize("builder", [sync.build_claude_artifacts, sync.build_codex_skill_artifacts, sync.build_antigravity_skill_artifacts])
+def test_all_generated_markdown_links_resolve_in_their_runtime_layout(builder):
+    artifacts = builder()
+    paths = {path.resolve() for path in artifacts}
+    missing = []
+    for path, body in artifacts.items():
+        if path.suffix != ".md":
+            continue
+        for match in sync.MARKDOWN_LINK.finditer(body):
+            target = sync.local_markdown_target(match.group(2))
+            if target is None:
+                continue
+            resolved = (path.parent / target[0]).resolve()
+            if resolved not in paths and not resolved.exists():
+                missing.append((path.name, target[0]))
+    assert missing == []
+
+
+def test_memory_keeps_historical_providers_but_rejects_active_routing(tmp_path):
+    project = tmp_path / "project"
+    project.mkdir()
+    memory = project / "MEMORY.md"
+    memory.write_text("2026-10-01: The previous default was Claude; its prompt route failed.\n")
+    assert sync.detect_instruction_portability_drift([project]) == []
+    memory.write_text("Use Gemini for every audit.\n")
+    assert len(sync.detect_instruction_portability_drift([project])) == 1
+
+
+def test_virtual_reference_graph_does_not_depend_on_installed_stale_files(tmp_path):
+    root = tmp_path / "root.md"
+    child = tmp_path / "child.md"
+    artifacts = {root: "[child](child.md)", child: "[missing](missing.md)"}
+    assert any("missing.md" in finding for finding in sync.detect_global_reference_drift(artifacts))
 
 
 def relative_map(root: Path, artifacts: dict[Path, str]) -> dict[str, str]:
