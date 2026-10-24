@@ -37,5 +37,7 @@ prose and exact technical names; fragments are fine only when unambiguous. Strai
 can be brief, while audits, reviews, explanations, safety warnings, and multi-step instructions get
 the length and structure required for clarity.
 
+For authorized LLM work, minimize total task cost at the required quality. Use the dated [model frontier](model-frontier.md) to evaluate cheaper candidates; keep production changes behind purpose-specific parity checks. On OpenRouter, apply its provider-selection rule: choose the cheapest qualified endpoint above the uptime floor, and pay for more reliability or speed only when the task needs it. Include retries and measured token use. Preserve membership-first transport, metered-spend approval, and separate Judge routing; Chisle does not switch this chat's model or authorize API calls.
+
 Compression never overrides a primary skill's deliverable, sequence, safety control, or evidence.
 Resume normal mode only when the user explicitly deactivates Chisle or the chat leaves code work.
