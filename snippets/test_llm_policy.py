@@ -57,15 +57,16 @@ def test_usage_index_names_every_known_application_llm_project() -> None:
         "agent-instructions",
         "date-suggester",
         "earnings-summary",
-        "harness",
         "huntdesk",
         "repo-maintenance",
         "wealthplan",
     }
     earnings = next(entry for entry in index["projects"] if entry["project"] == "earnings-summary")
     assert earnings["judge_route_authority"]
-    harness = next(entry for entry in index["projects"] if entry["project"] == "harness")
-    assert harness["workload_classes"] == ["judge"]
-    assert harness["application_route"] is None
-    assert harness["judge_route_state"] == "project_explicit"
-    assert harness["judge_independence_authority"]
+    instructions = next(
+        entry for entry in index["projects"] if entry["project"] == "agent-instructions"
+    )
+    assert instructions["workload_classes"] == ["judge"]
+    assert instructions["application_route"] is None
+    assert instructions["judge_route_state"] == "project_explicit"
+    assert instructions["judge_independence_authority"]

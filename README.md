@@ -92,6 +92,6 @@ destination. Configure the same state root, run
 
 The [workspace reconstruction contract](WORKSPACE_RECONSTRUCTION.md) and canonical
 [`config/workspace_reconstruction.json`](config/workspace_reconstruction.json) inventory
-the current 13 projects, including their local checks, LLM seams and recovery boundaries.
+the active projects, including their local checks, LLM seams and recovery boundaries.
 Use the tool-neutral checker for replacement-agent verification; project subsystem
 manifests and old project counts are not substitutes for this workspace population.

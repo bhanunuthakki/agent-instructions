@@ -69,22 +69,6 @@
       "migration_note": null
     },
     {
-      "project": "harness",
-      "instruction_section": "## Authority map",
-      "entrypoint": "orchestrator.py",
-      "purpose_registry": "models/registry.json",
-      "ledger_authority": "engine/receipts.py:LedgerReceiptStore",
-      "budget_authority": null,
-      "eval_authority": "tests/test_harness.py",
-      "workload_classes": ["judge"],
-      "application_route": null,
-      "judge_route_state": "project_explicit",
-      "judge_route_authority": "models/router.py:resolve_model",
-      "judge_independence_authority": "models/router.py:validate_specialist_independence",
-      "judge_migration_note": null,
-      "migration_note": null
-    },
-    {
       "project": "huntdesk",
       "instruction_section": "## LLM-backed work (v2 briefs / discovery)",
       "entrypoint": "huntdesk/llm.py",

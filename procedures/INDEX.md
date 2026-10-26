@@ -18,6 +18,8 @@ Compose workflows semantically, not by concatenating every instruction from ever
 | Define a material product behavior before implementation | [product-feature](product-feature.md) |
 | Design or review a rendered interface | [frontend-quality](frontend-quality.md); [mockup-review](mockup-review.md) for a mockup-only deliverable |
 | Assess or rewrite instructions, skills, or context ownership | [context-engineering](context-engineering.md) |
+| End the session with `/cleanup` or clean up this session across services | [cleanup](cleanup.md) |
+| Research macro conditions with the owner's preferred source | [macro-research](macro-research.md) |
 | Explain a substantial agent-written change | [explain-change](explain-change.md) |
 | Explicit interview or unresolved consequential product choice | [grill-me](grill-me.md) |
 | Compare a consequential vendor or build/buy choice | [tool-selector](tool-selector.md) |

@@ -26,7 +26,7 @@ non-canonical or externally owned material.
 | Memory runner | `repo-maintenance` defaults to Codex, duplicates provider-priority configuration, and falls back to a legacy Claude/Gemini Windows memory path. | `repo-maintenance` | Resolve the fleet route and require an explicit memory root |
 | Application LLM migrations | `date-suggester` and `earnings-summary` are recorded as migration holds because active routing work is already uncommitted. | owning projects plus `llm_usage_index.json` | Preserve active work; validate through the fleet index before clearing |
 | Personal sync skill | `~/.codex/skills/gemini-instruction-artifact-sync` is a stale runtime-named adapter for a cross-runtime job already owned by `source-command-sync-agent-stubs`. | generated/personal runtime state | Retire after canonical sync proves the neutral skill is available |
-| Legacy adapter discovery | Active launchers and LLM adapters in Date Suggester, Earnings Summary, Harness, HuntDesk, and Wealthplan still locate shared tooling through the old `.gemini` runtime home. | owning project adapters | Resolve `AGENT_INSTRUCTIONS_HOME`, a sibling canonical checkout, or the script's own repository |
+| Legacy adapter discovery | Active launchers and LLM adapters in Date Suggester, Earnings Summary, HuntDesk, and Wealthplan still locate shared tooling through the old `.gemini` runtime home. | owning project adapters | Resolve `AGENT_INSTRUCTIONS_HOME`, a sibling canonical checkout, or the script's own repository |
 | Memories | No provider-specific text was found in first-party memory data. Matches under dependency packages are third-party implementation files, not project memory. | project memory owners | No content change |
 | Legitimate provider specificity | Runtime wrappers, provider transports, model-frontier/reference evidence, and built-in Codex product-management skills name their actual runtime or service. | adapter/reference/product owner | Keep isolated; do not promote into canonical policy |
 
@@ -79,7 +79,7 @@ application-route migration state. Historical worktrees and third-party caches r
   project-owned.
 - Provider-branded interactive UI was replaced with active-agent language in Angel Memos and Date
   Suggester. Their launch/call paths now resolve through the fleet-selected adapter.
-- Legacy runtime-home discovery was removed from Date Suggester, Earnings Summary, Harness,
+- Legacy runtime-home discovery was removed from Date Suggester, Earnings Summary,
   HuntDesk, and Wealthplan; adapters now use `AGENT_INSTRUCTIONS_HOME` or the sibling canonical
   checkout, and Date Suggester's Windows launcher derives its repository from the script location.
   Blog Engine's WordPress credential file default and existing credential moved from a

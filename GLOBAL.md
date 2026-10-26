@@ -63,3 +63,5 @@ Finish the authorized outcome and required delivery steps. Provide the inspectab
 Lead with the outcome. Distinguish proposed, implemented, validated, committed, merged, deployed, and live-verified; checks and advisory verdicts do not establish unconditional safety. Do not claim closure while a task-owned worker, monitor, resource, or required delivery step remains unresolved. Local-only work can be complete while uncommitted; say so. Stop when outcome and evidence are sufficient.
 
 After canonical instruction changes, regenerate runtime artifacts and verify reference closure before claiming delivery.
+
+For `/cleanup` or an end-of-session cleanup request, use [session cleanup](procedures/cleanup.md) across the services used in that session.
