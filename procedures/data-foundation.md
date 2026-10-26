@@ -26,7 +26,8 @@ Do not add a second persisted representation when a query or projection suffices
 
 - **Local single-user:** choose the simplest durable store that meets integrity, query, backup, and recovery needs. No `tenant_id` requirement.
 - **Hosted single-customer or distributed client:** add deployment, sync, identity, and recovery controls that the actual topology requires.
-- **Multi-user or multi-tenant:** invoke `scaffold-tenant-schema` and the tenant-boundary hardening gate before admitting another trust domain.
+- **Multi-user:** use identity and authorization appropriate to the actual users and shared resources; multiple users alone do not require tenancy.
+- **Multi-tenant:** invoke `scaffold-tenant-schema` only when the profile explicitly requires isolated customer tenants, with its required tenant-boundary evidence.
 
 ## Handoff
 

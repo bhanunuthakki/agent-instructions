@@ -1,17 +1,17 @@
 ---
 name: agent-operations
-description: Reassess and run bounded delegation at the start and between phases of substantive work; coordinate subagents, shared worktrees, capability roles, or scheduled LLM work. Use proactively for independently checkable investigation, implementation, verification, or recovery work, not only when the user explicitly requests delegation.
+description: Dispatch bounded workers or coordinate shared worktrees, resources, capability roles, and scheduled LLM work. Load for actual orchestration when its benefit exceeds coordination cost.
 ---
 
 # Agent Operations
 
-Use a frontier-synthesizer-class root agent as orchestrator and acceptance judge. It owns user intent, decomposition, architecture, synthesis, authority decisions, and final verification. Resolve the current frontier model through `model-frontier`; do not duplicate provider labels here. Delegate bounded workstreams whose outputs can be checked independently to the least expensive evaluated capability that fits; delegation changes execution ownership, not decision ownership. Formal Judge or Critic seats remain separately briefed, frontier-class, and governed by `judging`, including its purpose-qualification and independence requirements.
+The root agent owns user intent, decomposition, architecture, synthesis, authority decisions, and final verification. Use a capable available root; resolve a consequential model selection through `model-frontier`, without requiring a model switch for routine work. Delegate bounded workstreams whose outputs can be checked independently to the least expensive evaluated capability that fits; delegation changes execution ownership, not decision ownership. Formal Judge or Critic seats remain separately briefed, frontier-class, and governed by `judging`, including its purpose-qualification and independence requirements.
 
 ## Delegation check
 
-Reassess delegation at task start, after material user input, and at each new discovery, implementation, verification, or recovery phase. Dispatch early rather than finishing all discovery at the root first.
+For coordinated work, reconsider delegation when new evidence, user input, or a phase transition changes which streams are independent or economical. Dispatch useful independent work early; do not add a delegation ceremony to a serial task.
 
-- Delegate by default when at least one bounded evidence, implementation, or verification stream can progress independently while the root continues useful work. Use one to three parallel workers when multiple independent streams exist.
+- Delegate when a bounded evidence, implementation, or verification stream benefits from independent work while the root can make useful progress. Use one to three parallel workers when their benefit exceeds setup and reconciliation.
 - Good worker streams include repository or source inventories, independent primary-source checks, test or failure triage, isolated file or module changes with an exact acceptance check, rendered-behavior inspection, and adversarial review.
 - Keep work at the root when it is a trivial single action, tightly coupled to the root's next decision, blocked on a user answer that would materially change the decomposition, or likely to cost more in coordination than it saves.
 - Never parallelize overlapping writes or shared mutable resources. Give concurrent workers exclusive file, module, state, or resource ownership; serialize the rest.
@@ -50,7 +50,7 @@ During delegated or coordinated work: After two equivalent failures from the sam
 
 ## Scheduling and quota
 
-When work uses subscription-backed agents or recurring LLM calls, read [agent-operations.SCHEDULING.md](agent-operations.SCHEDULING.md) before dispatch or registration.
+For multi-agent bursts sharing a quota or recurring LLM jobs, read [agent-operations.SCHEDULING.md](agent-operations.SCHEDULING.md) before dispatch or registration. An ordinary single call does not require a scheduling review.
 
 ## Completion
 

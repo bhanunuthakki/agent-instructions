@@ -20,4 +20,6 @@ Ignore only the actual secret-bearing files discovered. Do not blanket-ignore da
 
 If a real secret is tracked or exposed, stop external use, identify the affected provider/scope without revealing the value, require rotation/revocation, remove it from current state through an approved safe path, and verify the replacement. Merely untracking or rewriting history does not neutralize a credential.
 
-Test missing/invalid configuration, redaction, scanner positives and placeholders, and startup behavior. Then run `harden --audit sec-appsec`; `sec-appsec` is a specialist rubric, not a sibling skill. Use `log-redaction` for networked code.
+Test missing/invalid configuration, redaction, scanner positives and placeholders, and startup behavior. When material risk, a named release gate, or an explicit audit request requires formal review, run `harden --audit sec-appsec`; `sec-appsec` is a specialist rubric, not a sibling skill. Use `log-redaction` for networked code.
+
+Otherwise, targeted deterministic checks complete this scaffold. An ordinary advisory review may supplement them; formal hardening qualification is required only when claiming a formal hardening result.

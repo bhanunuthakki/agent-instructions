@@ -15,6 +15,7 @@ import struct
 import subprocess
 import sys
 import zlib
+from datetime import date
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,7 +25,26 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent))
 import sync_agent_stubs as s  # noqa: E402
 
+def _body_without_link_targets(text: str) -> str:
+    # Text and link labels stay source-owned; the independent graph test checks relocated targets.
+    return s.MARKDOWN_LINK.sub(lambda match: match.group(1) + "TARGET" + match.group(3), text)
+
+
 MARKER_KEYS = ("skills", "commands", "agents", "procedures", "projects")
+
+
+def test_guide_keeps_registered_absent_projects_explicit(tmp_path, monkeypatch):
+    root = tmp_path / "instruction-source"
+    (root / "config").mkdir(parents=True)
+    (root / "AGENTS.md").write_text("# Local rules")
+    (root / "config" / "workspace_reconstruction.json").write_text(json.dumps({
+        "projects": [{"id": "registered-absent"}],
+    }))
+    monkeypatch.setattr(s, "ROOT_REPO", root)
+    monkeypatch.setattr(s, "project_dirs", lambda: [])
+    projects = s.build_guide_sections()["projects"]
+    assert "| instruction-source | AGENTS.md |" in projects
+    assert "| registered-absent | Not installed on this host" in projects
 
 
 def test_hook_probe_marks_project_as_safe_for_sandboxed_runtimes(
@@ -264,17 +284,9 @@ def test_instruction_push_gate_fails_closed_and_runs_the_full_suite() -> None:
         "pytest is unavailable",
     ):
         assert failure in pre_push
-    for test_file in (
-        "test_guide_generation.py",
-        "test_harden_state.py",
-        "test_governance.py",
-        "test_instruction_routing.py",
-        "test_procedure_routing_eval.py",
-        "test_project_agent_contract.py",
-        "test_interaction_outcome_eval.py",
-    ):
-        assert test_file in pre_push
-    assert 'run "$python_bin" -m pytest' in pre_push
+    assert 'run "$python_bin" -m pytest "$instructions_home/snippets" -q' in pre_push
+    assert 'test_harden_state.py' not in pre_push  # discovery cannot omit a newly added module
+
 
 
 def test_instruction_push_gate_honors_python_override(
@@ -333,7 +345,7 @@ def test_instruction_push_gate_honors_python_override(
     assert "-c import pytest" in calls
     assert "sync_agent_stubs.py --check --artifacts-only" in calls
     assert "-m pytest" in calls
-    assert "test_harden_state.py" in calls
+    assert f"-m pytest {instruction_home / 'snippets'} -q" in calls
 
 
 def test_instruction_push_gate_rejects_invalid_python_override(tmp_path: Path) -> None:
@@ -455,8 +467,8 @@ def test_frontier_expiry_is_checked_with_explicit_artifact_docs(
     doc.write_text("# Rules\n", encoding="utf-8")
     monkeypatch.setattr(s, "PROCEDURES_DIR", tmp_path)
 
-    findings = s.detect_semantic_drift([doc], root_doc=doc)
-
+    assert s.detect_semantic_drift([doc], root_doc=doc) == []
+    findings = s.detect_semantic_drift([doc], root_doc=doc, require_current_frontier=True)
     assert any("model frontier review is expired" in finding for finding in findings)
 
 
@@ -481,7 +493,12 @@ def test_model_frontier_review_date_matches_near_term_refresh_gate() -> None:
     frontier = (s.PROCEDURES_DIR / "model-frontier.REFERENCE.md").read_text(
         encoding="utf-8"
     )
-    assert "Next review: 2026-10-09" in frontier
+    import re
+
+    refreshed = re.search(r"Last refreshed: (\d{4}-\d{2}-\d{2})", frontier)
+    review = re.search(r"Next review: (\d{4}-\d{2}-\d{2})", frontier)
+    assert refreshed and review
+    assert (date.fromisoformat(review[1]) - date.fromisoformat(refreshed[1])).days == 7
 
 
 def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
@@ -498,6 +515,9 @@ def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
         )
 
     expected_current_prices = {
+        "claude-haiku-5-5": (0.10, 0.50),
+        "gpt-6-luna": (0.10, 0.50),
+        "gemini-4-argon": (2.00, 10.00),
         "claude-fable-5-1": (10.00, 50.00),
         "claude-sonnet-5-5": (2.00, 10.00),
         "claude-opus-5-5": (4.00, 20.00),
@@ -567,19 +587,22 @@ def test_every_section_present_and_nonempty() -> None:
         assert body.strip(), f"section {key!r} is empty"
 
 
-def test_skills_section_lists_every_skill_on_disk() -> None:
+def test_skills_section_lists_every_canonical_skill() -> None:
     body = s.build_guide_sections()["skills"]
-    present = [n for n in s.OUR_SKILLS if (s.SKILLS_DIR / n / "SKILL.md").exists()]
-    assert present, "expected at least one skill on disk"
+    present = [n for n in s.OUR_SKILLS if (s.PROCEDURES_DIR / f"{n}.md").exists()]
+    assert present, "expected at least one canonical skill"
     for name in present:
         assert name in body
     assert str(len(present)) in body  # the count is rendered and truthful
 
 
-def test_agents_section_matches_disk_count_and_names() -> None:
+def test_agents_section_matches_canonical_count_and_names() -> None:
     body = s.build_guide_sections()["agents"]
-    stems = sorted(p.stem for p in s.AGENTS_DIR.glob("*.md"))
-    assert stems, "expected agent files on disk"
+    stems = sorted(
+        p.stem for p in s.PROCEDURES_AGENTS_DIR.glob("*.md")
+        if p.stem not in s.RETIRED_GENERATED_AGENTS
+    )
+    assert stems, "expected canonical agent files"
     assert str(len(stems)) in body
     for stem in stems:
         assert stem in body
@@ -826,9 +849,10 @@ def test_agent_routing_uses_capability_roles_not_provider_labels() -> None:
     assert "capability receipt" in procedure
     assert "least expensive currently evaluated model" in procedure
     assert "Cost optimization applies to execution workers" in procedure
-    assert "Delegate by default" in procedure
-    assert "acceptance judge" in procedure
-    assert "after material user input" in procedure
+    assert "benefit exceeds coordination cost" in procedure or "benefit exceeds" in procedure
+    assert "do not add a delegation ceremony" in procedure
+    assert "final verification" in procedure
+    assert "user input" in procedure and "phase transition" in procedure
 
 
 def test_frontier_orchestration_and_judging_have_one_model_mapping_owner() -> None:
@@ -839,11 +863,12 @@ def test_frontier_orchestration_and_judging_have_one_model_mapping_owner() -> No
         encoding="utf-8"
     )
 
-    assert "Keep a frontier-synthesizer at the root" in root
+    assert "Use a capable available root" in root
     assert "purpose-qualified frontier-synthesizer" in root
-    assert "least expensive evaluated worker" in root
+    assert "Worker output is evidence" in root
     assert "Cost optimization applies to execution workers" in operations
-    assert "do not down-tier judgment to save execution cost" in judging
+    assert "do not down-tier blocking judgment to save execution cost" in judging
+    assert "config/judge_route.json" in judging
     assert "`gpt-6-astra` and `claude-fable-5-1`" in frontier
     for shared in (root, operations, judging):
         assert "gpt-6-astra" not in shared
@@ -883,16 +908,14 @@ def test_context_engineering_requires_dispositions_and_representative_routes() -
     assert "every relative reference is reachable" in procedure
 
 
-def test_claude_artifacts_are_identity_copies_of_procedures() -> None:
+def test_claude_artifacts_preserve_source_body_and_link_owners() -> None:
     """The inversion's core invariant: a generated Claude artifact is byte-for-byte its procedures/
     source (only the directory layout is remapped). This is what makes the round-trip lossless."""
     arts = s.build_claude_artifacts()
     for name in s.OUR_SKILLS:
         src = s.PROCEDURES_DIR / f"{name}.md"
         if src.exists():
-            assert arts[s.SKILLS_DIR / name / "SKILL.md"] == src.read_text(
-                encoding="utf-8", errors="replace"
-            )
+            assert _body_without_link_targets(arts[s.SKILLS_DIR / name / "SKILL.md"]) == _body_without_link_targets(src.read_text())
     for ag in s.PROCEDURES_AGENTS_DIR.glob("*.md"):
         if ag.stem in s.RETIRED_GENERATED_AGENTS:
             continue
@@ -909,13 +932,13 @@ def test_claude_artifacts_are_identity_copies_of_procedures() -> None:
         assert s.SKILLS_DIR / "model-frontier" / "REFERENCE.md" not in arts
 
 
-def test_codex_skill_artifacts_are_identity_copies_of_procedures() -> None:
+def test_codex_skill_artifacts_preserve_source_body_and_link_owners() -> None:
     arts = s.build_codex_skill_artifacts()
     for name in s.OUR_SKILLS:
         src = s.PROCEDURES_DIR / f"{name}.md"
         if src.exists():
             target = s.CODEX_SKILLS_DIR / name / "SKILL.md"
-            assert arts[target] == src.read_text(encoding="utf-8", errors="replace")
+            assert _body_without_link_targets(arts[target]) == _body_without_link_targets(src.read_text())
     ref = s.PROCEDURES_DIR / "model-frontier.REFERENCE.md"
     if ref.exists():
         target = s.CODEX_SKILLS_DIR / "model-frontier" / ref.name
@@ -923,7 +946,7 @@ def test_codex_skill_artifacts_are_identity_copies_of_procedures() -> None:
         assert s.CODEX_SKILLS_DIR / "model-frontier" / "REFERENCE.md" not in arts
 
 
-def test_antigravity_skill_artifacts_are_identity_copies_except_self_contained_harden() -> (
+def test_antigravity_skill_artifacts_preserve_source_except_harden_and_link_targets() -> (
     None
 ):
     arts = s.build_antigravity_skill_artifacts()
@@ -937,7 +960,7 @@ def test_antigravity_skill_artifacts_are_identity_copies_except_self_contained_h
                 )[target]
             else:
                 expected = src.read_text(encoding="utf-8", errors="replace")
-            assert arts[target] == expected
+            assert _body_without_link_targets(arts[target]) == _body_without_link_targets(expected)
     ref = s.PROCEDURES_DIR / "context-engineering.REFERENCE.md"
     if ref.exists():
         target = s.ANTIGRAVITY_SKILLS_DIR / "context-engineering" / ref.name
@@ -1512,6 +1535,7 @@ def test_prefixed_reference_links_resolve_in_generated_skills() -> None:
             "llm-ops.TRANSPORTS.md",
         ],
         "judging": ["judging.EVALS.md", "judging.REFERENCE.md"],
+        "storage-lifecycle": ["storage-lifecycle.REFERENCE.md"],
     }
     claude = s.build_claude_artifacts()
     codex = s.build_codex_skill_artifacts()
@@ -1523,6 +1547,7 @@ def test_prefixed_reference_links_resolve_in_generated_skills() -> None:
             assert s.ANTIGRAVITY_SKILLS_DIR / skill / name in antigravity
 
 
+@pytest.mark.machine
 def test_live_tree_has_no_artifact_or_doc_path_drift() -> None:
     """After a sync the generated Claude tree matches procedures/, and no rulebook doc names the
     hooks dir with a stale leading dot. These are the guards the pre-push --check relies on."""
@@ -1532,6 +1557,7 @@ def test_live_tree_has_no_artifact_or_doc_path_drift() -> None:
     assert s.detect_doc_path_drift() == []
 
 
+@pytest.mark.machine
 def test_generated_claude_files_use_lf_newlines() -> None:
     """Path.write_text CRLF-translates on Windows; the generator writes raw LF bytes so the Claude
     artifacts stay byte-identical to their LF procedures/ sources. Guard that regression."""

@@ -7,6 +7,8 @@ description: Audit product-owned API, MCP, webhook, or plugin contracts for sche
 
 **Role.** Design the API/MCP/webhook surface the product exposes as a stable, predictable product contract. Consuming external services belongs to `external-integration`.
 
+The central hardening matrix owns rung applicability and blocking status. L3 re-verifies the applicable API contract; these headings do not add a new blocking rung.
+
 ## Audit checklist
 
 ### Contract design (L1 `A`)
@@ -21,7 +23,7 @@ description: Audit product-owned API, MCP, webhook, or plugin contracts for sche
 ### Auth, limits, and scope
 - API authentication and scopes match the product; rate/usage limits are explicit at the applicable principal boundary; multi-tenant products coordinate proof with `tenant-boundaries`.
 
-### Versioning & compatibility (L3 `B`)
+### Versioning & compatibility (L3 re-verification)
 - Explicit versioning strategy; additive-by-default; documented deprecation policy with timelines; **no silent breaking changes**.
 
 ### Webhooks / events
@@ -30,7 +32,7 @@ description: Audit product-owned API, MCP, webhook, or plugin contracts for sche
 ### MCP specifics (if exposing MCP)
 - Precise tool/capability schemas and descriptions; least-privilege tool exposure; args validated.
 
-### Reference docs & SDKs (L3 `B`)
+### Reference docs & SDKs (L3 re-verification)
 - Accurate reference, ideally generated from the schema, with runnable examples and a changelog (coordinate `docs-support-readiness`).
 
 ## Out of scope

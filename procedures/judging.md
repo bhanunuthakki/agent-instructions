@@ -15,9 +15,14 @@ belong to `llm-ops`, even when that evaluation itself uses a governed Judge.
 ## Rigor budget
 
 J0 is the default when deterministic proof closes the task. Add semantic judgment only for an
-oracle gap, material risk, explicit owner request, or the release boundary defined below. Every
+oracle gap, material risk, explicit owner request, or the release boundary defined below. Every blocking
 Judge seat uses a separately briefed, purpose-qualified frontier-synthesizer resolved through the
-dated `model-frontier`; do not down-tier judgment to save execution cost. An unavailable or
+dated `model-frontier`; do not down-tier blocking judgment to save execution cost. Ad hoc advisory
+reviews may use an explicitly selected available model, but must not claim blocking qualification.
+The typed OpenAI subscription advisory binding lives in `config/judge_route.json`, loaded by
+`snippets/llm_policy.py`; it is candidate/advisory evidence, not a qualification receipt.
+Use the membership transport, never an unrequested metered API path. Explicit user selection overrides
+the advisory default without overriding qualification or independence. An unavailable or
 unqualified blocking seat yields `HOLD`/`ABSTAIN` or clearly advisory evidence. Before adding an
 otherwise unrequested second Judge, broad audit, or costly
 evaluation pass solely for extra confidence, confirm the expanded scope with the owner. Do not ask
@@ -71,7 +76,7 @@ coexist with unresolved risk.
 The root agent owns synthesis. Never leak the intended answer into a judge brief. Judges return
 typed evidence and findings; deterministic policy computes the final gate.
 Independence means a separately briefed Judge seat that receives the artifact, evidence, and rubric
-without the implementer's preferred verdict. A different provider or model family is optional unless
+without the implementer's preferred verdict. The interaction-outcome response suite additionally requires different candidate and Judge model names as a deliberate suite-level diversity control; this is stricter than the independent-context rule for an ad hoc review. A different provider or model family is optional unless
 the evaluation design, observed disagreement, risk, or owner explicitly requires that diversity.
 
 ## Receipt and failure contract

@@ -127,6 +127,8 @@ At a `B` or `R` cell, only `PASS` advances. `BLOCK` and `HOLD` stop advancement.
 
 `PASS` and `ADVISORY` require an empty `open_findings` list. Any unresolved finding uses `BLOCK` when it prevents the target, otherwise `HOLD` until it is dispositioned or moved to a non-finding future note.
 
+Formal audit completion is separate from ordinary build completion. A selected formal review must finish before claiming that audit complete; a partial advisory audit does not block unrelated ordinary work unless it exposes a real safety finding or a named release gate requires it.
+
 ## Run protocol
 
 1. Resolve `target_rung` and the profile JSON. Before spending a worker turn, run `python <harden-package>/runtime/harden_state.py preflight --repo <project> --package-root <harden-package> --runtime <runtime> --profile-json <profile-json> --rung <rung>`. Exit `4` is an evidenced product `BLOCK`, exit `3` is a harness/capability `HOLD`, exit `2` is an operator or package error, and only exit `0` authorizes specialist dispatch. Preflight may run only the exact local subprocesses closed in the applicable mandatory verifier; each command, arguments, timeout, output schema, and exit semantics must match its registered record.

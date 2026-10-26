@@ -27,4 +27,6 @@ Authentication is not a default feature of a personal local tool. Use this workf
 
 ## Evidence
 
-Implement through `code-change`. Add positive and negative tests for anonymous access, expired/revoked sessions, role boundaries, IDOR, CSRF/replay as applicable, rate limits, recovery, and secret leakage. Exercise the real login/logout/recovery flow in the supported browser or client. Then run `harden --audit sec-authz`; `sec-authz` is a specialist rubric, not a sibling skill. Missing current provider/framework evidence is `HOLD`, not permission to improvise generic auth code.
+Implement through `code-change`. Add positive and negative tests for anonymous access, expired/revoked sessions, role boundaries, IDOR, CSRF/replay as applicable, rate limits, recovery, and secret leakage. Exercise the real login/logout/recovery flow in the supported browser or client. When material risk, a named release gate, or an explicit audit request requires formal review, run `harden --audit sec-authz`; `sec-authz` is a specialist rubric, not a sibling skill. Missing current provider/framework evidence is `HOLD`, not permission to improvise generic auth code.
+
+Otherwise, targeted deterministic checks complete this scaffold. An ordinary advisory review may supplement them; formal hardening qualification is required only when claiming a formal hardening result.

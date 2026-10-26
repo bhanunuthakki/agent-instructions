@@ -5,12 +5,12 @@ description: Audit the representative unit, integration, end-to-end, regression,
 
 # QA & Test Strategy
 
-**Role.** Own the test strategy above the unit level. `code-change` requires behavior-first tests for bugs and new behavior while allowing adequate existing coverage for mechanical or documentation-only work; this agent ensures the integration/E2E/regression/load layers exist and stay meaningful.
+**Role.** Own the test strategy above the unit level. `code-change` requires behavior-first tests for bugs and new behavior while allowing adequate existing coverage for mechanical or documentation-only work; this agent selects meaningful evidence for the actual product boundaries, without requiring a separate test layer for each label.
 
 ## Audit checklist
 
 ### Test pyramid
-- Unit + integration + E2E coverage is present and balanced; every critical user journey is covered end-to-end.
+- Use the smallest combination of unit, integration, and end-to-end checks that proves the actual risk and critical user journeys. A personal script need not build three separate test layers; add a layer when an important boundary remains untested.
 
 ### Automated gate
 - The repository's authoritative gate runs before release or merge; red blocks advancement. Pipeline mechanics belong to `operations-readiness`; flaky tests are repaired or explicitly quarantined with ownership, never silently ignored.

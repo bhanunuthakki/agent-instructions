@@ -25,7 +25,7 @@ description: Audit purpose-based LLM routing, structured output, representative 
 - Timeouts, bounded retries/backoff, outage handling, and attributable degradation are tested. Missing capability or malformed judge/eval output yields `HOLD`; no silent failure or silent de-tier.
 
 ### Caching & prompt management
-- Response/prompt caching where valid (cost + latency), cache keys tenant-scoped; prompts versioned and evaluated before rollout; no secrets/PII in prompts (coordinate `sec-llm`).
+- Response/prompt caching where valid (cost + latency), cache keys scoped to the actual privacy principal (tenant scope only for multi-tenant products); prompts versioned and evaluated before rollout; no secrets or unnecessary PII in prompts; necessary authorized personal data follows the selected purpose and privacy boundary (coordinate `sec-llm`).
 
 ### Cost at scale
 - Budget alerts and cost/resource ceilings exist at the applicable principal boundary; token-flood protection is coordinated with `sec-appsec`.

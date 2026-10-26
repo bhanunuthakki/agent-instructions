@@ -2,6 +2,12 @@
 
 Source register with access dates per entry. Requested-model guidance checked 2026-10-05; older entries below retain their historical scope.
 
+## Approved applicability update — 2026-10-21
+
+The intended Google model is **Gemini 4 Argon**, confirmed by the user and [Google's exact model page](https://ai.google.dev/gemini-api/docs/models/gemini-4-argon), checked 2026-10-21. The [current Argon guide](https://ai.google.dev/gemini-api/docs/latest-model), checked the same day, recommends medium thinking as a starting point, workload evaluation across supported levels, and selecting the lowest level that meets the quality bar. Thinking and output share the response budget; lowering the output cap is not a substitute for effort control. Keep these settings in runtime adapters, not GLOBAL. The mutable latest-model URL now describes Argon, so the older Flash entry below retains only its dated scope.
+
+The Astra and Opus 5.5 primary prompting pages below were rechecked 2026-10-21. Retain selective loading and explicit completion for Astra; calibrate Opus effort and display/continuation handling in its actual runtime. The approved local changes reduce unconditional workflow loading while preserving authorization, privacy, recovery, repository gates, and explicit domain phase stops. Source review and deterministic checks do not establish cross-model behavioral parity or qualify a blocking Judge.
+
 ## Current model applicability — 2026-10-05
 
 This update covers the requested models. Older entries below are historical evidence, not current qualification. Retain outcome, authority, privacy, and evidence boundaries across models; correct observed runtime behavior at its narrowest owner.

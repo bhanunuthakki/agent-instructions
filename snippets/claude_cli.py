@@ -52,8 +52,10 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
+import tempfile
 import threading
 from collections.abc import Iterator
 
@@ -73,8 +75,6 @@ class ClaudeExecutionError(RuntimeError):
 def _verify_setup_once() -> None:
     """Lazy environment check on first call — fails loud rather than mis-billing."""
     global _setup_verified, _claude_cli_path
-    if _setup_verified:
-        return
     # Treat an empty-string value as unset. Claude Code's Bash tool leaks
     # ANTHROPIC_API_KEY='' into subshells even when the user has it unset, which
     # used to trip this guard as a false positive. Only a non-empty value would
@@ -86,6 +86,8 @@ def _verify_setup_once() -> None:
             "  PowerShell:  Remove-Item env:ANTHROPIC_API_KEY\n"
             "  Bash:        unset ANTHROPIC_API_KEY"
         )
+    if _setup_verified:
+        return
     resolved = shutil.which("claude")
     if resolved is None:
         raise RuntimeError(
@@ -97,45 +99,71 @@ def _verify_setup_once() -> None:
     _setup_verified = True
 
 
+def _call_arguments(model: str, allowed_tools: list[str] | None = None) -> list[str]:
+    tools = allowed_tools or []
+    if any(tool not in {"WebSearch", "WebFetch"} for tool in tools):
+        raise ValueError("Only explicit WebSearch and WebFetch tools are supported.")
+    _verify_setup_once()
+    assert _claude_cli_path is not None
+    return [
+        _claude_cli_path, "-p", "--model", model,
+        "--safe-mode", "--restricted", "--disable-slash-commands",
+        "--no-session-persistence", "--no-chrome",
+        "--permission-mode", "dontAsk",
+        "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}',
+        "--disallowedTools", "mcp__*",
+        "--settings", '{"disableAllHooks":true}',
+        "--tools", ",".join(tools),
+        *(["--allowedTools", ",".join(tools)] if tools else []),
+    ]
+
+
+def _stop_stream_process(proc: subprocess.Popen) -> None:
+    """Stop the owned CLI process group; the caller reaps the parent."""
+    try:
+        if os.name == "posix":
+            os.killpg(proc.pid, signal.SIGKILL)
+        elif proc.poll() is None:
+            subprocess.run(
+                ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                check=False, timeout=5,
+            )
+    except ProcessLookupError:
+        pass
+
+
 def call_claude(
     prompt: str,
     model: str = DEFAULT_MODEL,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     allowed_tools: list[str] | None = None,
 ) -> str:
+    """Answer through subscription auth with no project context or tools by default.
+
+    Opt into WebSearch/WebFetch only through allowed_tools. Calls use an empty
+    temporary working directory and disable discovered customizations, MCP and
+    session persistence. Managed administrator policy still applies; CLI controls
+    are not an operating-system sandbox. Prompts stay on stdin and raw failures
+    are not included in public exceptions.
     """
-    Single-shot LLM call via the Claude Code CLI. Returns the model's text response.
-
-    Prompts are passed via stdin to avoid the Windows CreateProcess command-line
-    length limit (32K). Output is decoded as UTF-8 with error replacement so bad
-    bytes from upstream sources (e.g., PDF extraction) don't crash the call.
-
-    allowed_tools: optional list of Claude Code tool names to enable for this headless
-      call (e.g. ["WebSearch", "WebFetch"]). In -p mode tools are otherwise unavailable,
-      so this is required for any call that must research the web. Passed as a single
-      space-separated --allowedTools argument.
-
-    Raises:
-      RuntimeError: setup is wrong (CLI not installed, or ANTHROPIC_API_KEY set).
-      ClaudeExecutionError: CLI completed without a usable response.
-      subprocess.CalledProcessError: CLI returned non-zero exit; stderr in .stderr.
-      subprocess.TimeoutExpired: prompt didn't finish within timeout_seconds.
-    """
-    _verify_setup_once()
-    assert _claude_cli_path is not None
-    argv = [_claude_cli_path, "-p", "--model", model]
-    if allowed_tools:
-        argv += ["--allowedTools", " ".join(allowed_tools)]
-    result = subprocess.run(
-        argv,
-        input=prompt,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=True,
-        timeout=timeout_seconds,
-    )
+    argv = _call_arguments(model, allowed_tools)
+    if timeout_seconds <= 0:
+        raise ValueError("timeout_seconds must be positive")
+    with tempfile.TemporaryDirectory(prefix="claude-answer-") as working:
+        timed_out = False
+        try:
+            result = subprocess.run(
+                argv, input=prompt, cwd=working, capture_output=True,
+                text=True, encoding="utf-8", errors="replace",
+                check=False, timeout=timeout_seconds,
+            )
+        except subprocess.TimeoutExpired:
+            timed_out = True
+        if timed_out:
+            raise subprocess.TimeoutExpired("claude membership call", timeout_seconds)
+        if result.returncode != 0:
+            raise ClaudeExecutionError("Claude membership call failed.")
     text = result.stdout.strip()
     if not text:
         raise ClaudeExecutionError("Claude membership call returned empty output.")
@@ -147,104 +175,74 @@ def call_claude_stream(
     model: str = DEFAULT_MODEL,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
 ) -> Iterator[str]:
+    """Stream answer text with a deadline covering input, reads, and process exit.
+
+    Closing the iterator stops and reaps the owned subprocess. No tool-enabled
+    streaming route is offered. Stderr is discarded rather than retained.
     """
-    Streaming variant of `call_claude`. Yields text chunks (deltas) as the
-    model produces them, suitable for piping into Server-Sent Events or
-    any other token-by-token UI.
+    argv = _call_arguments(model) + [
+        "--output-format", "stream-json", "--include-partial-messages", "--verbose",
+    ]
+    with tempfile.TemporaryDirectory(prefix="claude-stream-") as working:
+        yield from _stream_in_directory(argv, prompt, timeout_seconds, working)
 
-    Uses `claude -p --output-format stream-json --include-partial-messages
-    --verbose`, which emits one JSON event per line. We filter for
-    `stream_event` → `content_block_delta` → `text_delta` events; any
-    extended-thinking deltas are ignored (the user doesn't want to see
-    them in chat). The full assistant text is just the concatenation of
-    yielded chunks.
 
-    Stderr is drained on a background thread to avoid the child blocking
-    if the buffer fills (the CLI emits a few status lines + occasional
-    warnings). A non-zero exit code surfaces as RuntimeError with the
-    drained stderr attached.
-
-    Raises:
-      RuntimeError: setup is wrong (CLI not installed, or ANTHROPIC_API_KEY set).
-      ClaudeExecutionError: CLI exited non-zero without a usable response.
-      subprocess.TimeoutExpired: process didn't exit within timeout_seconds.
-    """
-    _verify_setup_once()
-    assert _claude_cli_path is not None
+def _stream_in_directory(
+    argv: list[str], prompt: str, timeout_seconds: int, working: str,
+) -> Iterator[str]:
+    if timeout_seconds <= 0:
+        raise ValueError("timeout_seconds must be positive")
     proc = subprocess.Popen(
-        [
-            _claude_cli_path,
-            "-p",
-            "--model", model,
-            "--output-format", "stream-json",
-            "--include-partial-messages",
-            "--verbose",
-        ],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        bufsize=1,  # line-buffered so we get JSON events as they arrive
+        argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL, text=True, encoding="utf-8", errors="replace",
+        bufsize=1, cwd=working, start_new_session=os.name == "posix",
     )
+    expired = threading.Event()
 
-    # Drain stderr on a background thread. Without this the child can
-    # deadlock if the pipe fills before we read it; with it we have the
-    # full stderr available for any error message.
-    stderr_buf: list[str] = []
+    def expire() -> None:
+        expired.set()
+        _stop_stream_process(proc)
 
-    def _drain_stderr() -> None:
-        assert proc.stderr is not None
-        for line in proc.stderr:
-            stderr_buf.append(line)
-
-    stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
-    stderr_thread.start()
-
+    timer = threading.Timer(timeout_seconds, expire)
+    timer.daemon = True
+    timer.start()
     try:
         assert proc.stdin is not None
         proc.stdin.write(prompt)
         proc.stdin.close()
-
         assert proc.stdout is not None
         for raw_line in proc.stdout:
-            line = raw_line.rstrip("\r\n")
-            if not line:
-                continue
             try:
-                ev = json.loads(line)
+                event = json.loads(raw_line)
             except json.JSONDecodeError:
-                # The CLI shouldn't emit non-JSON on stdout in stream-json
-                # mode, but if it ever does, skipping is safer than crashing.
                 continue
-            if ev.get("type") != "stream_event":
+            if not isinstance(event, dict) or event.get("type") != "stream_event":
                 continue
-            inner = ev.get("event") or {}
-            if inner.get("type") != "content_block_delta":
+            inner = event.get("event")
+            if not isinstance(inner, dict) or inner.get("type") != "content_block_delta":
                 continue
-            delta = inner.get("delta") or {}
-            # Skip thinking_delta — we don't surface extended thinking to the user.
-            if delta.get("type") != "text_delta":
-                continue
-            text = delta.get("text") or ""
-            if text:
-                yield text
-
-        rc = proc.wait(timeout=timeout_seconds)
-        stderr_thread.join(timeout=5)
+            delta = inner.get("delta")
+            if isinstance(delta, dict) and delta.get("type") == "text_delta":
+                text = delta.get("text")
+                if isinstance(text, str) and text:
+                    yield text
+        rc = proc.wait()
+        if expired.is_set():
+            raise subprocess.TimeoutExpired("claude membership stream", timeout_seconds)
         if rc != 0:
-            raise ClaudeExecutionError(
-                f"Claude membership streaming call failed with status {rc}."
-            )
-    except GeneratorExit:
-        # Consumer closed the generator early (e.g. client disconnected).
-        # Kill the subprocess so it doesn't run to completion in the background.
-        proc.kill()
-        raise
-    except BaseException:
-        proc.kill()
-        raise
+            raise ClaudeExecutionError(f"Claude membership streaming call failed with status {rc}.")
+    except OSError:
+        if expired.is_set():
+            raise subprocess.TimeoutExpired("claude membership stream", timeout_seconds) from None
+        raise ClaudeExecutionError("Claude membership stream failed.") from None
+    finally:
+        timer.cancel()
+        timer.join()
+        _stop_stream_process(proc)
+        proc.wait()
+        for pipe in (proc.stdin, proc.stdout):
+            if pipe is not None and not pipe.closed:
+                pipe.close()
 
 
 if __name__ == "__main__":
