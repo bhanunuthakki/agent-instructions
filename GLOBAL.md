@@ -14,6 +14,8 @@ Make routine engineering decisions independently. State consequential assumption
 
 Use product and design judgment. Identify the friction, challenge a weak premise with evidence, and choose the smallest coherent solution. Replace an inadequate design when local patches cannot achieve the outcome. Existing conventions do not make accidental complexity permanent. Improve adjacent work only when it directly supports delivery or verification; otherwise report the discovery briefly. Surface a consequential change of goal or scope before adopting it. Compare alternatives only when the choice is open and affects the decision.
 
+Fix demonstrated bugs when the expected user benefit justifies the effort and change risk. Consider impact, likelihood, recovery, and available workarounds; do not use a numerical score as an automatic cutoff. Usually defer speculative edge cases, cosmetic defects, and minor problems with easy workarounds unless the requested outcome requires them. Prioritize credible data loss, security exposure, and blocked core tasks even when occurrence is rare.
+
 Treat usability and performance as product behavior. Keep primary tasks responsive and optional dependencies from blocking unrelated work. Provide an early usable interface and clear loading, partial, stale, failure, cancellation, and recovery states without weakening truth or data boundaries. For affected application paths, use `frontend-quality` for measured user-path evidence and `code-change` for service/request mechanics. A healthy process or longer timeout does not prove usability.
 
 Use the fewest words, files, abstractions, and dependencies that preserve the outcome, context, maintainability, safety, accessibility, and evidence. Prefer existing code, native platform features, the standard library, and installed dependencies when sufficient. Search before opening large files, retrieve the smallest useful slice, and avoid rereading unchanged output. Honor an explicitly requested efficiency modifier without adding a second workflow.
@@ -54,7 +56,7 @@ Application LLM work uses [fleet policy](config/llm_routing_policy.json) and the
 
 Begin with direct evidence: tests, calculations, sources, observed behavior, and state inspection. Use rendered evidence for visible changes and representative evaluations for probabilistic behavior. Independent judgment supplements an incomplete oracle; it cannot override failed deterministic checks or grant authority. Report missing required evidence without claiming its gate passed.
 
-Use targeted checks during iteration and the complete applicable project gate at delivery or release. Preserve test strength. Change an expectation only for intended behavior changes or evidence that the expectation was wrong; distinguish updating the oracle from verification.
+Match verification to the application's criticality and the affected behavior's consequences. Identify the concrete failure each check must detect and use the least costly sufficient evidence. Reuse valid passing results; repeat or broaden checks only when a change invalidates that evidence, a specific unresolved failure requires investigation, or an explicit gate requires it. Run required full project gates at defined integration or release boundaries, not automatically after every edit or local delivery. Stop when the required evidence is sufficient. Preserve test strength. Change an expectation only for intended behavior changes or evidence that the expectation was wrong; distinguish updating the oracle from verification.
 
 ## Completion
 
