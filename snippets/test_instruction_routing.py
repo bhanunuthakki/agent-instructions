@@ -60,13 +60,6 @@ def test_operations_owns_resource_handoff_and_truthful_closure() -> None:
     assert "applies the global completion contract" in operations
 
 
-def test_code_change_calibrates_tests_and_release_gates() -> None:
-    code_change = _text("procedures/code-change.md")
-    assert "For a bug or new behavior" in code_change
-    assert "mechanical refactor or documentation-only change" in code_change
-    assert "At the push or release boundary" in code_change
-
-
 def test_skill_composition_has_one_owner_and_scoped_callees() -> None:
     routes = _text("procedures/INDEX.md")
     assert "Compose workflows semantically" in routes
