@@ -11,9 +11,9 @@ Implement the authorized outcome. Use the surrounding code for conventions and c
 
 1. Inspect the affected interface, nearby tests, repository commands, and current diff.
 2. Resolve the next behavior from the shared task understanding; expose an unresolved consequential choice through the global collaboration contract.
-3. For a bug or new behavior, add the smallest regression or behavior test that should fail without the change and confirm the failure is relevant. For a mechanical refactor or documentation-only change, use adequate existing coverage unless inspection reveals a real gap.
+3. Select verification under the global risk rule. Reuse adequate existing coverage. Add a regression or behavior test when it protects meaningful behavior at reasonable maintenance cost; confirm it detects the relevant failure. Text, styling, and simple reversible changes can use direct inspection and relevant existing checks without a new automated test.
 4. Implement the coherent solution, including adjacent improvements that directly remove the task’s friction or risk. Refactor where it improves information hiding, removes genuine duplication, or replaces an obsolete mechanism; keep unrelated improvements as proposals.
-5. Run targeted validation after each behavior. At the push or release boundary, finish with the repository’s applicable format, lint, typecheck, tests, and build checks in that order.
+5. Run the smallest checks that verify the affected behavior. For persistent data, calculations, or external actions, include relevant failure, recovery, or integration checks. Apply stronger boundary checks to security, payments, irreversible operations, and critical shared services. Run repository-required full gates at their defined integration or release boundaries; do not repeat valid checks without a specific reason.
 
 Do not weaken or disable a test merely to make it pass. When requested behavior changes or evidence shows the oracle is wrong, revise the affected expectation and preserve tests for the underlying invariant and nearby failure paths. Compare against existing expectations before regenerating goldens; review intended changes, then run comparison mode. Exact prose assertions are appropriate only when wording is the contract; prefer structural and semantic checks.
 
