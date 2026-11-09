@@ -1,6 +1,6 @@
 ---
 name: agent-operations
-description: Dispatch bounded workers or coordinate shared worktrees, resources, capability roles, and scheduled LLM work. Load for actual orchestration when its benefit exceeds coordination cost.
+description: Dispatch bounded workers or coordinate shared worktrees, resources, capability roles, /arena bakeoffs, /swarm fan-out, /show-me-your-work trails, and scheduled LLM work. Load for actual orchestration when its benefit exceeds coordination cost.
 ---
 
 # Agent Operations
@@ -35,7 +35,8 @@ Use the least expensive currently evaluated model for each bounded worker role. 
 - Use one to three concurrent workers at depth one unless the runtime or task proves a different limit useful. Workers do not recursively fan out by default.
 - Do not leak the intended answer into an audit or skill evaluation. Give the worker the raw artifact and acceptance criteria.
 - A worker returns findings, changed paths, and validation evidence. The root reconciles conflicts and verifies the integrated result.
-- Improve a weak brief or split the task before escalating capability. Resume an interrupted worker when its context is still valid.
+- Improve a weak brief or split the task before escalating capability. Resume an interrupted worker when its context is still valid and the work depends on its in-place checkout or running process; spawn a fresh worker with a consolidated brief for independent review, audit, verification, or a new fix round so prior assumptions do not leak.
+- For competing candidate bakeoffs (`/arena`), parallel slice/race waves (`/swarm`), or task-owned `decision.tsv` trails (`/show-me-your-work`), read [agent-operations.ARENA.md](agent-operations.ARENA.md). Keep concurrent workers within the one-to-three default unless the user explicitly opts into a wider fan-out.
 - Treat an auto-reconnecting browser or remote-control session as an owned mutable resource even when it appears idle. A handoff names the current owner, in-flight action, last proof, resources held or released, and receiving owner. The current owner releases the session through the applicable browser or remote-control workflow and verifies release. The receiving owner takes control only after that verified release.
 
 ## Shared checkout
@@ -54,6 +55,6 @@ For multi-agent bursts sharing a quota or recurring LLM jobs, read [agent-operat
 
 ## Completion
 
-For delegated or coordinated work, synthesize worker activity into the user-visible outcome rather than returning an activity log. During a long operation, also provide a concise periodic update when the user would otherwise lack current status.
+For delegated or coordinated work, synthesize worker activity into the user-visible outcome rather than returning an activity log. During a long operation, also provide a concise periodic update when the user would otherwise lack current status. When the user invokes `/ketchup`, summarize what changed for the user since their last message in under 100 words of plain language and list every open decision waiting on them with self-contained options, evidence, risk, and recommendation.
 
 When delegated work finishes, propagate the result promptly, cancel temporary task-owned monitors that are no longer part of the requested outcome, and release held resources. Preserve a user-requested persistent monitor until its own stop condition or explicit cancellation. The root checks worker results against repository state and success criteria, resolves conflicts with direct evidence, makes the final acceptance judgment, then applies the global completion contract.

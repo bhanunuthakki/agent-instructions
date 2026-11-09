@@ -234,3 +234,28 @@ def test_instruction_quality_rubric_is_complete_and_gated() -> None:
     assert len({item["id"] for item in rubric["dimensions"]}) == len(rubric["dimensions"])
     assert "regardless of total score" in rubric["blocking_rule"]
     assert "never rerun unchanged work" in rubric["iteration_rule"]
+
+
+def test_pstack_engineering_gates_preserve_host_authority_and_routing() -> None:
+    routes = _text("procedures/INDEX.md")
+    code_change = _text("procedures/code-change.md")
+    review = _text("procedures/code-change.REVIEW.md")
+    operations = _text("procedures/code-change.OPERATIONS.md")
+    typescript = _text("procedures/code-change.TYPESCRIPT.md")
+    archaeology = _text("procedures/code-archaeology.md")
+    verification = _text("procedures/verification-engineering.md")
+    arena = _text("procedures/agent-operations.ARENA.md")
+    context = _text("procedures/context-engineering.md")
+
+    assert "[code-archaeology](code-archaeology.md)" in routes
+    assert "[verification-engineering](verification-engineering.md)" in routes
+    assert "Preserve existing unrelated comments and public API docstrings" in code_change
+    assert "reported as **confirmed defects**" in review
+    assert "retained as **risks** with the missing proof named—never silently dropped" in review
+    assert "freeze a sensitive measurement harness" in operations
+    assert "Make illegal states unrepresentable" in typescript
+    assert "[machine-operations](machine-operations.md)" in archaeology
+    assert "7e026ff" in verification
+    assert "Blind cross-judge (advisory)" in arena
+    assert "Exceeding three concurrent workers requires explicit user opt-in" in arena
+    assert "Instruction or policy prose last" in context

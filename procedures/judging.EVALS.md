@@ -63,7 +63,7 @@ execution correctness, and completion time. Findings are `none`, `routing_miss`,
 Every Judge purpose and rubric must exist in the immutable Judge registry. Each purpose covers
 normal, empty, long-context, malformed, adversarial, degraded, and
 conflicting-evidence cases. Pairwise comparisons are blind to author/provider and run in both slot
-orders. Human agreement below the owner-ratified threshold halts that Judge purpose; adding more of
+orders. In isolated skill or instruction evaluations (`eval`), strip evaluation, rubric, benchmark, and candidate tokens from candidate directory names, file paths, and prompts so candidates receive an organic user request, and verify procedure or skill chain-following from actual file-read tool calls in the session transcript rather than candidate self-reports. Human agreement below the owner-ratified threshold halts that Judge purpose; adding more of
 the same uncalibrated Judge is not evidence.
 
 Coding facets: contract correctness, regression detection, scope preservation, architecture,
