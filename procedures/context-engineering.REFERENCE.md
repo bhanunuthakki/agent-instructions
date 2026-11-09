@@ -86,3 +86,19 @@ The shared user experience is purposeful progress and a self-contained result. C
 - Applies to: current Qwen-family and compatible open-weight agent runtimes using tool calling or MCP.
 - Conclusion: capable open-weight runtimes can use the same canonical outcome, schema, tool-interface, and progressive-disclosure contracts. Keep runtime adapters thin and validate structured output and tool behavior on representative repository tasks.
 - Evidence gap: tool-calling support, parameter count, or an upstream benchmark does not establish parity for implementation, blocking audit, or synthesis. Qualify each model/runtime pair through the same dated capability receipt used for hosted models; malformed output or a missing required capability yields `HOLD`.
+
+## Authored documentation and prose hygiene (`technical-writing` / `unslop`)
+
+`GLOBAL.md` mandates ASD-STE100 during build work. When authoring standalone documentation deliverables (READMEs, RFCs, architecture docs, user guides, or pull-request descriptions), layer these rules without relaxing factual precision:
+
+- **Pick one Diátaxis mode per document or section:**
+  - *Tutorial* (learning through action),
+  - *How-to* (completing a specific task),
+  - *Reference* (dry, exact facts and contracts), or
+  - *Explanation* (tradeoffs, rationale, and mental models).
+- **Use the codebase as the word list:** write the exact symbol, file, flag, or command name rather than a synonym or abstract metaphor.
+- **Cut AI-slop patterns (`unslop`) across all prose surfaces:**
+  - Remove superficial `-ing` participial tails ("highlighting...", "ensuring...", "fostering..."); state the concrete effect or delete.
+  - Replace vague attributions ("experts believe", "industry reports suggest") with named sources or delete.
+  - Replace AI filler vocabulary ("delve", "crucial", "pivotal", "tapestry", "interplay", "serves as", "boasts", "not just X, but Y") with plain verbs ("is", "has", "use", "do").
+  - Do not force ideas into artificial groups of three or pad conclusions with generic restatements.

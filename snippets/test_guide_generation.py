@@ -1526,8 +1526,16 @@ def test_llm_ops_details_are_progressively_disclosed() -> None:
 
 def test_prefixed_reference_links_resolve_in_generated_skills() -> None:
     references = {
-        "agent-operations": ["agent-operations.SCHEDULING.md"],
-        "code-change": ["code-change.FRONTEND.md", "code-change.REVIEW.md"],
+        "agent-operations": [
+            "agent-operations.ARENA.md",
+            "agent-operations.SCHEDULING.md",
+        ],
+        "code-change": [
+            "code-change.FRONTEND.md",
+            "code-change.OPERATIONS.md",
+            "code-change.REVIEW.md",
+            "code-change.TYPESCRIPT.md",
+        ],
         "context-engineering": ["context-engineering.REFERENCE.md"],
         "llm-ops": [
             "llm-ops.CONTRACTS.md",

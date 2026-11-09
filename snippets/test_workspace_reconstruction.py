@@ -210,8 +210,8 @@ def test_source_compile_does_not_import_or_execute(tmp_path: Path) -> None:
 def test_canonical_manifest_has_real_projects_and_nested_stacks() -> None:
     manifest = mapping(json.loads(MANIFEST.read_text()), "manifest")
     projects = records(manifest["projects"], "projects")
-    assert len(projects) == 13
-    assert len({p["id"] for p in projects}) == 13
+    assert len(projects) == 12
+    assert len({p["id"] for p in projects}) == 12
     reading = next(p for p in projects if p["id"] == "reading-companion-app")
     assert {"core", "clients/android-xr", "clients/meta-rbd/dat-android"} <= {
         c.get("cwd") for c in records(reading["commands"], "commands")

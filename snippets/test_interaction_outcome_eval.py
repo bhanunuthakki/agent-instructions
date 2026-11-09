@@ -132,8 +132,8 @@ def test_storage_lifecycle_corpus_binds_reachable_context_and_hides_criteria() -
     cases = outcome.load_cases(
         outcome.ROOT / "evals/agent_system/storage_lifecycle_cases.jsonl"
     )
-    assert len(cases) == 10
-    assert len({case.case_id for case in cases}) == 10
+    assert len(cases) == 14
+    assert len({case.case_id for case in cases}) == 14
     for case in cases:
         paths = outcome.resolve_instruction_paths(case)
         assert all(path.is_file() for path in paths)

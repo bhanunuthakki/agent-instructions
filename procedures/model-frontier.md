@@ -37,6 +37,12 @@ That heuristic is not a billing estimate or a universal workload model. For a re
 
 Exploration smoke tests can justify more exploration; they cannot authorize production promotion or qualify a blocking Judge.
 
+## OpenRouter provider selection
+
+For an authorized OpenRouter purpose, choose the lowest total request cost among qualified endpoints that meet the purpose's capabilities, privacy, context, quantization, latency, and reliability contract. For ordinary retryable work without a stricter contract, use **99% reported uptime over the last 30 minutes** as the initial eligibility floor. This is a local cost-selection default, not a provider service guarantee. Missing uptime is unknown; refresh or use an existing qualified route rather than treating it as passing. Check longer-window and local failure evidence when available. Once the floor and task requirements are met, do not pay more for higher uptime or speed without a task need. Include retries, reasoning/output tokens, caching, request fees, and applicable price tiers in the cost comparison.
+
+OpenRouter has no documented minimum-uptime request field. Read the model's current endpoints, filter eligibility, then use `provider.only` with eligible endpoint slugs, `sort: "price"`, and `require_parameters: true`. Slugs match prefixes: verify every matched variant and region passes, or narrow the slug and exclude ineligible matches. Keep provider fallbacks inside that eligible set; stop or use the existing qualified fallback when none remain. Recheck endpoint eligibility before dispatch. `sort: "price"` disables default load balancing; it does not enforce the uptime floor. Performance preferences are soft and can fall back below their targets. Where OpenRouter's price ordering differs from measured request cost, order the eligible endpoints by that cost. Preserve the purpose's budget and fleet transport authority; this rule grants no metered-call permission. Dated sources and screening candidates live in [model-frontier.REFERENCE.md](model-frontier.REFERENCE.md).
+
 ## Sources and refresh
 
 - Hosted candidate: current official provider model, capability, availability, and pricing documentation.

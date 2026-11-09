@@ -46,6 +46,7 @@ For a material change to a runnable surface:
 2. Choose the solution against the task and expression posture. Implement through the project's owners and primitives, extending them when justified.
 3. Re-render after material composition changes. Exercise affected populated, empty, loading, error, stale, focus, overflow, and recovery states where applicable, at supported widths. Inspect console errors and failed requests for browser work.
 4. Compare the result with the task hypothesis and perform the reduction pass below. Source inspection and a single final screenshot do not substitute for observed interaction evidence.
+5. **Visual parity migrations (`visual-parity`):** when matching an existing UI pixel-for-pixel or migrating a styling system without behavioral change, capture a screenshot baseline across states before editing, migrate shared primitives first, and verify each component by image diff against the frozen baseline. Do not modify the baseline harness or component structure merely to make a diff pass; stop and ask if the baseline itself appears defective.
 
 Scope observation to affected states and surfaces. Unavailable hardware or rendering bounds the verification claim; it does not prevent useful independent work already authorized. Never claim a surface passed without its evidence.
 

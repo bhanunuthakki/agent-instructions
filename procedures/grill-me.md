@@ -1,13 +1,13 @@
 ---
 name: grill-me
-description: Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision. Use for a lightweight initial clarification round when needed, or for a deeper interview when the user explicitly asks to be grilled or interviewed.
+description: Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision, or deepen a prompt via /sharpen. Use for a lightweight initial clarification round when needed, or for a deeper interview when the user explicitly asks to be grilled or interviewed.
 ---
 
 # Grill Me
 
 Resolve consequential unknowns using the global collaboration contract. Inspect supplied references, prior decisions, and recoverable repository facts before asking. Reuse the task's existing outcome and acceptance record.
 
-**Lightweight clarification:** use one focused round for an unresolved decision that materially changes the solution. **Deep interview:** use iterative discovery when the user asks for an interview or explicitly invokes `/grill-me`; do not turn a normal build into an interview by default.
+**Lightweight clarification:** use one focused round for an unresolved decision that materially changes the solution. **Deep interview:** use iterative discovery when the user asks for an interview or explicitly invokes `/grill-me`; do not turn a normal build into an interview by default. **Prompt deepening (`/sharpen`):** when the user invokes `/sharpen`, make the request deeper rather than broader by stating (1) what a top specialist would do unasked, (2) the rawest primary material they would start from, (3) the specific methods and tools they would use, and (4) what external check proves the result is right, then return the rewritten prompt with owner decisions left open.
 
 Start with the highest-cost-to-reverse unknown and resolve dependencies before leaf preferences. Distinguish choices the user needs to make from facts the agent can investigate, routine implementation decisions, and uncertainty best tested with a prototype. Translate technical options into their consequences for the product and its owner. Recommend a supported default; when evidence is insufficient, identify the smallest useful investigation instead of guessing.
 

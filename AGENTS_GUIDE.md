@@ -27,13 +27,15 @@ Ordinary personal work uses direct evidence and the applicable repository checks
 ## Skills — say the trigger, the agent does the thing
 
 <!-- BEGIN:skills -->
-**29 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
+**33 shared skills** — say the trigger, the agent runs the procedure. Codex also exposes `harden` as a native skill; Claude exposes the same procedure as `/harden`.
 
 | Skill | What it does |
 |---|---|
-| **agent-operations** | Dispatch bounded workers or coordinate shared worktrees, resources, capability roles, and scheduled LLM work. |
+| **agent-operations** | Dispatch bounded workers or coordinate shared worktrees, resources, capability roles, /arena bakeoffs, /swarm fan-out, /show-me-your-work trails, and… |
 | **chisle** | Apply the requested persistent efficiency modifier to a code chat. |
-| **code-change** | Implement, fix, refactor, or review code with the repository’s tests and conventions. |
+| **cleanup** | Clean up session resources and redundant history, retaining only what is needed for reconstruction. |
+| **code-archaeology** | Explain how an existing subsystem works (/how), why it was built that way across Git, issues, docs, logs, and analytics (/why), weave both into a pro… |
+| **code-change** | Implement, fix, refactor, prototype, or review code using Poteto’s engineering playbooks, repository tests, and conventions. |
 | **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
 | **data-foundation** | Design or change durable application state, schemas, data pipelines, or sources of truth with local-first simplicity, explicit lifecycle, recovery, a… |
 | **definitions** | Build, refresh, or enforce the project’s canonical domain vocabulary in DEFINITIONS.md. |
@@ -42,7 +44,7 @@ Ordinary personal work uses direct evidence and the applicable repository checks
 | **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
 | **finance-case-study** | Work progressively through strategic finance, FP&A, BizOps, or operating case studies from supplied data. |
 | **frontend-quality** | Design, modify, review, or scaffold a rendered interface around the user's task, with compositional restraint and proportional browser or renderer ev… |
-| **grill-me** | Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision. |
+| **grill-me** | Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision, or deepen a prompt via /sharpen. |
 | **iteration-shortcut** | Bound a deliberate temporary shortcut that accelerates learning without silently weakening retained truth, safety, or recovery. |
 | **judging** | Govern explicit Judge, Critic, evaluation-suite, or consequential incomplete-oracle review work through proportional evidence tiers, independence rul… |
 | **linear-pipeline-hygiene** | Audit and conservatively reconcile Linear pipelines across projects. |
@@ -50,6 +52,7 @@ Ordinary personal work uses direct evidence and the applicable repository checks
 | **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
 | **log-redaction** | Keep secrets out of logs, exception output, and network diagnostics. |
 | **machine-operations** | Resolve this machine's approved credential source and client before OpenRouter or Linear operations, or the live host authority before cross-machine… |
+| **macro-research** | Research macro conditions, inflation, jobs, growth, central banks, and forecasts using Econvitals first, with fresh evidence and selective official-s… |
 | **mockup-review** | Redesign or review an existing application page through an observed mockup, task hypothesis, and proportional implementation notes. |
 | **model-frontier** | Pick a hosted or open-weight LLM/runtime candidate against a dated cost and capability frontier instead of from memory. |
 | **product-feature** | Define or review a material product feature before implementation: user outcome, smallest coherent behavior, state and authority, non-goals, acceptan… |
@@ -60,6 +63,7 @@ Ordinary personal work uses direct evidence and the applicable repository checks
 | **scaffold-tenant-schema** | Establish tenant boundaries only after the product profile explicitly requires multiple isolated customer tenants. |
 | **storage-lifecycle** | Keep application and task storage bounded with simple cleanup and retention; protect unique data and use existing owners. |
 | **tool-selector** | Compare a consequential library, service, vendor, or build/buy choice against current evidence and the product's real constraints. |
+| **verification-engineering** | Generate or maintain a project-local live verification skill with a feature map (/create-verification-skill, /maintain-verification-skill) or a forma… |
 <!-- END:skills -->
 
 ## Commands — type these
@@ -114,15 +118,15 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 ## Procedures — the tool-neutral export
 
 <!-- BEGIN:procedures -->
-**54 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 29 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
+**61 files** in `procedures/` (+ **19 fleet criteria** in `procedures/agents/`) — the **canonical, tool-neutral source**. `sync_agent_stubs.py` generates 33 shared Claude and Codex skills, Codex's `harden` skill, Claude's `/harden` command, and the agent fleet FROM these, so every runtime reads the same markdown Claude runs:
 
-`INDEX.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `chisle.md`, `code-change.FRONTEND.md`, `code-change.OPERATIONS.md`, `code-change.REVIEW.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `finance-case-study.exploration.md`, `finance-case-study.md`, `finance-case-study.pruning.md`, `finance-case-study.review-and-fluency.md`, `finance-case-study.workbook-standards.md`, `finance-case-study.writing-and-delivery.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `storage-lifecycle.REFERENCE.md`, `storage-lifecycle.md`, `tool-selector.md`
+`INDEX.md`, `agent-operations.ARENA.md`, `agent-operations.SCHEDULING.md`, `agent-operations.md`, `chisle.md`, `cleanup.md`, `code-archaeology.md`, `code-change.FRONTEND.md`, `code-change.OPERATIONS.md`, `code-change.REVIEW.md`, `code-change.TYPESCRIPT.md`, `code-change.md`, `context-engineering.REFERENCE.md`, `context-engineering.md`, `data-foundation.md`, `definitions.md`, `explain-change.md`, `external-integration.md`, `external-practice.md`, `finance-case-study.exploration.md`, `finance-case-study.md`, `finance-case-study.pruning.md`, `finance-case-study.review-and-fluency.md`, `finance-case-study.workbook-standards.md`, `finance-case-study.writing-and-delivery.md`, `frontend-quality.CREATIVE.md`, `frontend-quality.PRIMITIVES.md`, `frontend-quality.PROFILES.md`, `frontend-quality.md`, `grill-me.md`, `harden.md`, `iteration-shortcut.md`, `judging.EVALS.md`, `judging.REFERENCE.md`, `judging.md`, `linear-pipeline-hygiene.md`, `linear-pr-sync.md`, `llm-ops.CONTRACTS.md`, `llm-ops.EVALS.md`, `llm-ops.FLEET.md`, `llm-ops.TRANSPORTS.md`, `llm-ops.md`, `log-redaction.md`, `machine-operations.md`, `macro-research.REFERENCE.md`, `macro-research.md`, `mockup-review.md`, `model-frontier.REFERENCE.md`, `model-frontier.md`, `product-feature.md`, `scaffold-auth.md`, `scaffold-deploy.md`, `scaffold-design-system.md`, `scaffold-secrets.md`, `scaffold-tenant-schema.md`, `source-command-refresh-frontier.md`, `source-command-sync-agent-stubs.md`, `storage-lifecycle.REFERENCE.md`, `storage-lifecycle.md`, `tool-selector.md`, `verification-engineering.md`
 <!-- END:procedures -->
 
 ## Projects under the rulebook
 
 <!-- BEGIN:projects -->
-**13 projects** in the declared and discovered population. Present rulebooks layer local `AGENTS.md` on the global core; absent clones remain explicit:
+**12 projects** in the declared and discovered population. Present rulebooks layer local `AGENTS.md` on the global core; absent clones remain explicit:
 
 | Project | Rulebook files present |
 |---|---|
@@ -132,7 +136,6 @@ Domain-expert auditors grade the product from decision (L0) through limited comm
 | blog-engine | AGENTS.md, CLAUDE.md, GEMINI.md |
 | date-suggester | AGENTS.md, CLAUDE.md, GEMINI.md |
 | earnings-summary | AGENTS.md, CLAUDE.md, GEMINI.md |
-| harness | Not installed on this host; registered for reconstruction |
 | huntdesk | AGENTS.md, CLAUDE.md, GEMINI.md |
 | portfolio-tracker | AGENTS.md, CLAUDE.md, GEMINI.md |
 | reading-companion-app | AGENTS.md, CLAUDE.md, GEMINI.md |

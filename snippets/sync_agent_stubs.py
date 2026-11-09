@@ -89,8 +89,10 @@ CLAUDE_MD = ROOT_REPO / "CLAUDE.md"
 OUR_SKILLS = [
     "agent-operations",
     "chisle",
+    "code-archaeology",
     "code-change",
     "context-engineering",
+    "cleanup",
     "data-foundation",
     "storage-lifecycle",
     "frontend-quality",
@@ -104,6 +106,7 @@ OUR_SKILLS = [
     "llm-ops",
     "model-frontier",
     "machine-operations",
+    "macro-research",
     "mockup-review",
     "product-feature",
     "log-redaction",
@@ -116,6 +119,7 @@ OUR_SKILLS = [
     "scaffold-secrets",
     "scaffold-deploy",
     "tool-selector",
+    "verification-engineering",
 ]
 CODEX_ONLY_SKILLS = ["harden"]
 # Exact, managed generated artifacts that are no longer globally discoverable. This is

@@ -14,18 +14,22 @@ Compose workflows semantically, not by concatenating every instruction from ever
 
 | Deliverable | Primary owner |
 |---|---|
-| Implement, fix, refactor, or review code | [code-change](code-change.md) |
+| Implement, fix, refactor, or review code (`/architect`, `/blast-radius`, `/interrogate`, `/tdd`, `/no-comments`) | [code-change](code-change.md) |
+| Understand how or why existing code works (`/how`, `/why`, `/teach`, `/recall`) | [code-archaeology](code-archaeology.md) |
+| Create or maintain a project-local live or formal verification skill (`/create-verification-skill`, `/statechart`) | [verification-engineering](verification-engineering.md) |
 | Define a material product behavior before implementation | [product-feature](product-feature.md) |
 | Design or review a rendered interface | [frontend-quality](frontend-quality.md); [mockup-review](mockup-review.md) for a mockup-only deliverable |
-| Assess or rewrite instructions, skills, or context ownership | [context-engineering](context-engineering.md) |
-| Explain a substantial agent-written change | [explain-change](explain-change.md) |
-| Explicit interview or unresolved consequential product choice | [grill-me](grill-me.md) |
+| Assess or rewrite instructions, skills, or context ownership (`/correct`, `/reflect`) | [context-engineering](context-engineering.md) |
+| End the session with `/cleanup` or clean up this session across services | [cleanup](cleanup.md) |
+| Research macro conditions with the owner's preferred source | [macro-research](macro-research.md) |
+| Explain a substantial agent-written change (`/ketchup`, `/bro`) | [explain-change](explain-change.md) |
+| Explicit interview, prompt sharpening, or unresolved consequential product choice (`/grill-me`, `/sharpen`) | [grill-me](grill-me.md) |
 | Compare a consequential vendor or build/buy choice | [tool-selector](tool-selector.md) |
 | Verify a drift-sensitive external fact or design choice | [external-practice](external-practice.md) |
 | Work through a strategic-finance, FP&A, BizOps, or operating case study in deliberate phases | [finance-case-study](finance-case-study.md) |
 | Explicit Judge/Critic/Evaluation Suite or required semantic review | [judging](judging.md) |
 | Maturity-gated audit or approved remediation | [harden](harden.md), with only the applicable specialist rubrics |
-| Delegate bounded work, coordinate resources, or schedule LLM work | [agent-operations](agent-operations.md) |
+| Delegate bounded work, run candidate arenas, coordinate resources, or schedule LLM work (`/arena`, `/swarm`, `/show-me-your-work`) | [agent-operations](agent-operations.md) |
 | Synchronize Linear from an exact issue's branch/PR state | [linear-pr-sync](linear-pr-sync.md) |
 | Reconcile Linear backlog, duplicates, dependencies, or stale pipeline states | [linear-pipeline-hygiene](linear-pipeline-hygiene.md) |
 | Synchronize canonical instructions and runtime artifacts | [source-command-sync-agent-stubs](source-command-sync-agent-stubs.md) |
@@ -50,6 +54,7 @@ Ordinary answers and research need no artificial engineering workflow. Use appli
 | Product now needs identity, tenancy, or deployment | [scaffold-auth](scaffold-auth.md), [scaffold-tenant-schema](scaffold-tenant-schema.md), or [scaffold-deploy](scaffold-deploy.md), respectively |
 | Durable domain meaning, public/persisted name, or vocabulary collision | [definitions](definitions.md); ordinary local identifiers do not trigger ratification |
 | Deliberate temporary compromise of a normal implementation requirement | [iteration-shortcut](iteration-shortcut.md); ordinary isolated experiments are not automatically shortcuts |
+| Missing scripted live-app verification harness or formal state-machine/concurrency check | [verification-engineering](verification-engineering.md) |
 | OpenRouter, Linear, configured credential source, or cross-machine operation | [machine-operations](machine-operations.md), before execution |
 
 ## Apply the selected route

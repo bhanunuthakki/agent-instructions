@@ -32,6 +32,7 @@ _JUDGE_MARKERS = (
 )
 _SKIP_PARTS = {
     ".git",
+    ".installed",  # Deployment copies belong to their source project's registration.
     ".next",
     ".tmp",
     ".venv",

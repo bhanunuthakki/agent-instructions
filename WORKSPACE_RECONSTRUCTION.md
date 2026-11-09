@@ -2,9 +2,8 @@
 
 `config/workspace_reconstruction.json` is the canonical, hand-maintained project
 population and offline command contract. It links the durable Linear assessment.
-The assessment counted11 projects in August; the current generated `AGENTS_GUIDE.md`
-project census contains13. The checker compares identities to that census and rejects
-omissions/duplicates instead of preserving a historical number by dropping projects.
+The manifest defines the active project population. The checker compares identities
+to the generated `AGENTS_GUIDE.md` census and rejects omissions and duplicates.
 Earnings Summary's own11-subsystem manifest remains a separate, linked product inventory.
 
 From this repository, with an ordinary Python3.11+ interpreter:
@@ -19,8 +18,8 @@ python snippets/workspace_reconstruction.py run --workspace-root <workspace> --m
 `BHANU_DEVELOPER_ROOT` supplies the default workspace root; absent that, the parent of
 this checkout is used. No personal home or Windows drive is hardcoded. Resolve Python
 from each project's `.venv`/`venv`, or pass repeatable `--python project=/path/to/python`.
-The explicit override is also the route for shared ordinary test runtimes, such as
-harness's parent-directory pytest command. The runner never installs dependencies.
+The explicit override is also the route for shared ordinary test runtimes.
+The runner never installs dependencies.
 Use each record's install/toolchain/lock metadata separately after reviewing network
 and state effects. Named secret/state locations are inventory only and are never opened.
 

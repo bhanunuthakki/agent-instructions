@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 import check_llm_usage_index
@@ -9,6 +10,32 @@ import pytest
 
 def test_canonical_usage_index_schema_is_valid() -> None:
     assert check_llm_usage_index.validate_index(check_projects=False) == []
+
+
+@pytest.mark.parametrize(
+    "marker,discover",
+    [
+        (
+            "from codex_cli import call_codex_with_usage",
+            check_llm_usage_index._discover_llm_projects,
+        ),
+        ("judge_model = 'synthetic'", check_llm_usage_index._discover_judge_projects),
+    ],
+)
+def test_discovery_excludes_installed_copies_but_keeps_project_source(
+    tmp_path: Path, marker: str, discover: Callable[[Path], set[str]]
+) -> None:
+    maintenance = tmp_path / "maintenance"
+    (maintenance / ".git").mkdir(parents=True)
+    installed = maintenance / ".installed" / "release" / "other-app"
+    installed.mkdir(parents=True)
+    (installed / "llm.py").write_text(marker + "\n", encoding="utf-8")
+
+    active = tmp_path / "active-app"
+    (active / ".git").mkdir(parents=True)
+    (active / "llm.py").write_text(marker + "\n", encoding="utf-8")
+
+    assert discover(tmp_path) == {"active-app"}
 
 
 @pytest.mark.parametrize(
