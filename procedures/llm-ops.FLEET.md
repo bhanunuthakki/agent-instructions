@@ -14,17 +14,20 @@ This split keeps provider priority centralized without moving product semantics 
 
 ## Ordinary application route
 
-The default membership route is:
+The fleet provider preference is **`gemini > claude`**:
 
-1. Codex
-2. Claude
+- **Driver:** `gemini-4-neon` (Gemini Developer API via `GEMINI_API_KEY`)
+- **Workhorse:** `gemini-4-hydrogen` (Gemini Developer API via `GEMINI_API_KEY`)
+- **External model family / fallback:** Claude (`claude`, or for subscription-only projects without a Gemini adapter yet)
 
-Application code imports `snippets/llm_policy.py`, calls `subscription_route()`, and maps the returned closed backend enum to transports qualified for its local purpose. Do not duplicate this tuple in service code or project instructions.
+**Codex / ChatGPT is removed as default and disabled for now** (`default_application_route: ["claude"]`, `allowed_subscription_backends: ["claude"]`, `disabled_backends: ["codex"]`). Applications with a Gemini adapter resolve `GEMINI_API_KEY` from the active project's `.env` first, then `/Applications/agent-instructions/.env` (per `machine-operations.md`), and use `claude` as the external model family when needed.
+
+Subscription-only code imports `snippets/llm_policy.py`, calls `subscription_route()`, and maps the returned closed backend enum (`("claude",)` by default) to transports qualified for its local purpose. Do not duplicate this tuple in service code or project instructions.
 
 Only these fleet variables alter ordinary subscription routing:
 
 - `AGENT_INSTRUCTIONS_HOME`: path to the canonical agent-instructions clone when the machine default cannot be used.
-- `LLM_PRIMARY_SUBSCRIPTION_BACKEND=codex|claude`: reversible primary-provider override.
+- `LLM_PRIMARY_SUBSCRIPTION_BACKEND=claude`: reversible primary-provider override (must belong to `allowed_subscription_backends`).
 - `LLM_SUBSCRIPTION_FALLBACK_DISABLED=true|false`: truncate the resolved route after the primary.
 
 Do not add a global model-ID override. Model and reasoning choices remain purpose-qualified, evaluation-backed project data. Do not add project-specific aliases for provider priority or fallback state.

@@ -1,6 +1,6 @@
 ---
 name: external-practice
-description: Verify a consequential, drift-sensitive implementation or design choice against current primary sources. Use for current model guidance, LLM evals, retrieval or embeddings, databases and migrations, auth or cryptography, payments, email, deployment, browser APIs, and material library or vendor choices.
+description: Verify drift-sensitive choices against current primary sources including models, LLM evals, retrieval, databases, auth, payments, email, deployment, browser APIs, and vendors.
 ---
 
 # External Practice Check

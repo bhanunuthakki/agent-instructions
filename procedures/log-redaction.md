@@ -1,6 +1,6 @@
 ---
 name: log-redaction
-description: Keep secrets out of logs, exception output, and network diagnostics. Use when writing code that calls an HTTP API, redacting secrets in logs, fixing a credential leak in logs/exceptions/tracebacks, or auditing a project for secret leaks. Triggers include "redact secrets", "credential leak in logs", "API key in exception", "leaked token in traceback", "audit for secret leaks".
+description: Keep secrets out of logs, exceptions, and network diagnostics. Use when calling HTTP APIs, redacting credentials, or auditing code for secret leaks.
 ---
 
 # Log Redaction

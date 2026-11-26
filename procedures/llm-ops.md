@@ -1,6 +1,6 @@
 ---
 name: llm-ops
-description: Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and latency logging, and representative evals. Use when adding or changing an LLM call, model router, prompt, judge, eval, fallback, or budget.
+description: Govern application LLM calls via one entry point, purpose-based routing, schema validation, attributable fallbacks, cost/latency logging, and representative evals.
 ---
 
 # LLM Ops

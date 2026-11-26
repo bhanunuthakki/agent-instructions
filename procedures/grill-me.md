@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision, or deepen a prompt via /sharpen. Use for a lightweight initial clarification round when needed, or for a deeper interview when the user explicitly asks to be grilled or interviewed.
+description: Resolve load-bearing product unknowns before building or deciding, or deepen a prompt via /sharpen. Covers brief clarification and explicit /grill-me interviews.
 ---
 
 # Grill Me

@@ -15,6 +15,10 @@ For a user-requested OpenRouter operation on this Mac, use `OPENROUTER_API_KEY` 
 
 For a user-requested Linear operation on this Mac, use `LINEAR_API_KEY` from `/Applications/agent-instructions/.env` when the active project has no narrower credential. Load only that variable at runtime; never print it, copy it into a project, or commit it. The canonical CLI client is `/Applications/agent-instructions/snippets/linear_cli.py`. If this configured source is unavailable, report the blocker rather than searching unrelated files. Follow the applicable Linear workflow for task scope and mutation authority.
 
+## Gemini API on this Mac
+
+For a Gemini Developer API operation on this Mac, resolve `GEMINI_API_KEY` from the active project's `.env` first, falling back to `/Applications/agent-instructions/.env` when the active project has no narrower credential. Load only that variable at runtime; never print it, copy it into a repository, or commit it. Credential availability does not authorize calls or spend beyond the task's budget and purpose contract. If neither configured source provides a valid key, report the configuration blocker without searching unrelated files.
+
 ## Host and scheduler resolution
 
 Use the live target's configured network identity. Loopback names the machine running the client, not the remote host. Read the affected project's listener, database, recovery, and scheduler owners before cross-machine work; no remembered hostname or sibling checkout becomes a fallback authority. Resolve services and state read-only first. Public listeners, production changes, and GUI/resource handoffs require their existing task authority.

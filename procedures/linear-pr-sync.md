@@ -1,6 +1,6 @@
 ---
 name: linear-pr-sync
-description: Synchronize an existing Linear issue with branch and pull-request progress. Use when starting issue work, opening or readying a PR, reporting a material blocker, merging or closing a PR, reconciling stale Linear states, or when asked to update Linear from Git or GitHub evidence.
+description: Sync a Linear issue with Git/GitHub branch and PR progress when starting work, opening or merging PRs, reporting blockers, or reconciling stale states.
 ---
 
 # Linear PR Sync

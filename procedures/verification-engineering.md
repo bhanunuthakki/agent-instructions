@@ -1,6 +1,6 @@
 ---
 name: verification-engineering
-description: Generate or maintain a project-local live verification skill with a feature map (/create-verification-skill, /maintain-verification-skill) or a formal verification / TLA+ statechart model (/create-formal-verification-skill, /maintain-formal-verification-skill, /statechart).
+description: Create or maintain a project-local live verification skill (/create-verification-skill, /maintain-verification-skill) or formal TLA+ statechart model (/statechart).
 ---
 
 # Verification Engineering

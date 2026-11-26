@@ -1,6 +1,6 @@
 ---
 name: code-change
-description: Implement, fix, refactor, prototype, or review code using Poteto’s engineering playbooks, repository tests, and conventions. Use for features, bug fixes (/tdd), refactors, throwaway prototypes, ambitious multi-part work (/figure-it-out), architectural sketches (/architect), blast-radius proof (/blast-radius), adversarial review (/interrogate), comment hygiene (/no-comments), performance/hillclimbing (/benchmark-checklist), or PR/stack shipping.
+description: Implement, fix, refactor, prototype, or review code using Poteto's playbooks and repo tests. Use for features, /tdd, /architect, /blast-radius, /interrogate, /no-comments, /figure-it-out, /benchmark-checklist, or PR shipping.
 ---
 
 # Code Change

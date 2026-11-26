@@ -35,26 +35,26 @@ Ordinary personal work uses direct evidence and the applicable repository checks
 | **chisle** | Apply the requested persistent efficiency modifier to a code chat. |
 | **cleanup** | Clean up session resources and redundant history, retaining only what is needed for reconstruction. |
 | **code-archaeology** | Explain how an existing subsystem works (/how), why it was built that way across Git, issues, docs, logs, and analytics (/why), weave both into a pro… |
-| **code-change** | Implement, fix, refactor, prototype, or review code using Poteto’s engineering playbooks, repository tests, and conventions. |
-| **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. |
+| **code-change** | Implement, fix, refactor, prototype, or review code using Poteto's playbooks and repo tests. |
+| **context-engineering** | Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, prompts, skills, tool schemas, or memory placement. |
 | **data-foundation** | Design or change durable application state, schemas, data pipelines, or sources of truth with local-first simplicity, explicit lifecycle, recovery, a… |
 | **definitions** | Build, refresh, or enforce the project’s canonical domain vocabulary in DEFINITIONS.md. |
-| **explain-change** | After an LLM writes or edits code, explain the outcome, impact, risk, and proof in plain language at a depth proportional to the change. |
+| **explain-change** | Explain an agent-made code change's outcome, impact, risk, and proof in plain language (/ketchup, /bro, "walk me through the diff", "is this safe"). |
 | **external-integration** | Add or audit an inbound external API, webhook, SDK, or MCP capability through a typed, least-privilege, observable adapter. |
-| **external-practice** | Verify a consequential, drift-sensitive implementation or design choice against current primary sources. |
-| **finance-case-study** | Work progressively through strategic finance, FP&A, BizOps, or operating case studies from supplied data. |
+| **external-practice** | Verify drift-sensitive choices against current primary sources including models, LLM evals, retrieval, databases, auth, payments, email, deployment,… |
+| **finance-case-study** | Work progressively through strategic finance, FP&A, BizOps, or operating case studies from supplied data, covering exploration, pruning, modeling, me… |
 | **frontend-quality** | Design, modify, review, or scaffold a rendered interface around the user's task, with compositional restraint and proportional browser or renderer ev… |
-| **grill-me** | Resolve load-bearing product unknowns before a feature, design, plan, or consequential decision, or deepen a prompt via /sharpen. |
+| **grill-me** | Resolve load-bearing product unknowns before building or deciding, or deepen a prompt via /sharpen. |
 | **iteration-shortcut** | Bound a deliberate temporary shortcut that accelerates learning without silently weakening retained truth, safety, or recovery. |
 | **judging** | Govern explicit Judge, Critic, evaluation-suite, or consequential incomplete-oracle review work through proportional evidence tiers, independence rul… |
-| **linear-pipeline-hygiene** | Audit and conservatively reconcile Linear pipelines across projects. |
-| **linear-pr-sync** | Synchronize an existing Linear issue with branch and pull-request progress. |
-| **llm-ops** | Govern an LLM-backed feature with one entry point, purpose-based model selection, schema-validated output, attributable fallbacks, per-call cost and… |
-| **log-redaction** | Keep secrets out of logs, exception output, and network diagnostics. |
+| **linear-pipeline-hygiene** | Audit and conservatively reconcile Linear backlogs and pipelines across projects, covering stale states, duplicates, dependencies, metadata, and peri… |
+| **linear-pr-sync** | Sync a Linear issue with Git/GitHub branch and PR progress when starting work, opening or merging PRs, reporting blockers, or reconciling stale state… |
+| **llm-ops** | Govern application LLM calls via one entry point, purpose-based routing, schema validation, attributable fallbacks, cost/latency logging, and represe… |
+| **log-redaction** | Keep secrets out of logs, exceptions, and network diagnostics. |
 | **machine-operations** | Resolve this machine's approved credential source and client before OpenRouter or Linear operations, or the live host authority before cross-machine… |
 | **macro-research** | Research macro conditions, inflation, jobs, growth, central banks, and forecasts using Econvitals first, with fresh evidence and selective official-s… |
 | **mockup-review** | Redesign or review an existing application page through an observed mockup, task hypothesis, and proportional implementation notes. |
-| **model-frontier** | Pick a hosted or open-weight LLM/runtime candidate against a dated cost and capability frontier instead of from memory. |
+| **model-frontier** | Select a hosted or open-weight LLM/runtime against the dated cost and capability frontier, covering cost comparisons, cheapest-at-parity routing, and… |
 | **product-feature** | Define or review a material product feature before implementation: user outcome, smallest coherent behavior, state and authority, non-goals, acceptan… |
 | **scaffold-auth** | Establish stack-appropriate authentication and authorization after the product profile requires external identity or multiple users. |
 | **scaffold-deploy** | Establish a reproducible, secure release and operation baseline for the selected local, private, hosted, or distributed profile. |
@@ -63,7 +63,7 @@ Ordinary personal work uses direct evidence and the applicable repository checks
 | **scaffold-tenant-schema** | Establish tenant boundaries only after the product profile explicitly requires multiple isolated customer tenants. |
 | **storage-lifecycle** | Keep application and task storage bounded with simple cleanup and retention; protect unique data and use existing owners. |
 | **tool-selector** | Compare a consequential library, service, vendor, or build/buy choice against current evidence and the product's real constraints. |
-| **verification-engineering** | Generate or maintain a project-local live verification skill with a feature map (/create-verification-skill, /maintain-verification-skill) or a forma… |
+| **verification-engineering** | Create or maintain a project-local live verification skill (/create-verification-skill, /maintain-verification-skill) or formal TLA+ statechart model… |
 <!-- END:skills -->
 
 ## Commands — type these

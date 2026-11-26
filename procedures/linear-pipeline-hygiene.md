@@ -1,6 +1,6 @@
 ---
 name: linear-pipeline-hygiene
-description: Audit and conservatively reconcile Linear pipelines across projects. Use for backlog or pipeline cleanup, stale or contradictory issue states, duplicate or dependency review, missing planning metadata, completed-work hygiene, or scheduled cross-project Linear sweeps.
+description: Audit and conservatively reconcile Linear backlogs and pipelines across projects, covering stale states, duplicates, dependencies, metadata, and periodic sweeps.
 ---
 
 # Linear Pipeline Hygiene
