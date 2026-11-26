@@ -2,13 +2,23 @@
   "$schema": "internal://llm-routing-policy/v1",
   "schema_version": 1,
   "default_application_route": [
-    "codex",
     "claude"
   ],
   "allowed_subscription_backends": [
-    "codex",
     "claude"
   ],
+  "disabled_backends": [
+    "codex"
+  ],
+  "preferred_provider_order": [
+    "gemini",
+    "claude"
+  ],
+  "role_defaults": {
+    "driver": "gemini-4-neon",
+    "workhorse": "gemini-4-hydrogen",
+    "external_family": "claude"
+  },
   "canonical_environment": {
     "instructions_home": "AGENT_INSTRUCTIONS_HOME",
     "primary_subscription_backend": "LLM_PRIMARY_SUBSCRIPTION_BACKEND",

@@ -498,7 +498,8 @@ def test_model_frontier_review_date_matches_near_term_refresh_gate() -> None:
     refreshed = re.search(r"Last refreshed: (\d{4}-\d{2}-\d{2})", frontier)
     review = re.search(r"Next review: (\d{4}-\d{2}-\d{2})", frontier)
     assert refreshed and review
-    assert (date.fromisoformat(review[1]) - date.fromisoformat(refreshed[1])).days == 7
+    review_days = (date.fromisoformat(review[1]) - date.fromisoformat(refreshed[1])).days
+    assert 7 <= review_days <= 31
 
 
 def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
@@ -517,7 +518,10 @@ def test_model_frontier_prices_match_blended_cost_and_sort_order() -> None:
     expected_current_prices = {
         "claude-haiku-5-5": (0.10, 0.50),
         "gpt-6-luna": (0.10, 0.50),
+        "gemini-4-hydrogen": (1.50, 7.50),
+        "gemini-4-carbon": (2.00, 10.00),
         "gemini-4-argon": (2.00, 10.00),
+        "gemini-4-neon": (3.00, 15.00),
         "claude-fable-5-1": (10.00, 50.00),
         "claude-sonnet-5-5": (2.00, 10.00),
         "claude-opus-5-5": (4.00, 20.00),

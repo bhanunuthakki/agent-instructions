@@ -48,16 +48,19 @@ def load_advisory_judge_route(path: Path = JUDGE_ROUTE_PATH) -> AdvisoryJudgeRou
     if not isinstance(raw, dict) or (
         raw.get("$schema") != "internal://advisory-judge-route/v1"
         or raw.get("schema_version") != 1
-        or raw.get("backend") != "codex"
+        or raw.get("backend") != "claude"
         or raw.get("transport") != "membership"
         or raw.get("status") != "advisory_only"
         or raw.get("qualification_receipt") is not None
         or not isinstance(raw.get("model"), str)
-        or not raw["model"].startswith("gpt-")
+        or not raw["model"].startswith("claude-")
         or raw.get("reasoning_effort") not in {"low", "medium", "high", "xhigh", "max"}
     ):
         raise RoutingPolicyError("Unsupported advisory Judge binding; blocking qualification is separate.")
-    return AdvisoryJudgeRoute(SubscriptionBackend.CODEX, raw["model"], raw["reasoning_effort"])
+    active_policy = load_policy()
+    if SubscriptionBackend.CLAUDE not in active_policy.allowed_subscription_backends:
+        raise RoutingPolicyError("Advisory Judge backend is not allowed by fleet policy.")
+    return AdvisoryJudgeRoute(SubscriptionBackend.CLAUDE, raw["model"], raw["reasoning_effort"])
 
 
 @dataclass(frozen=True)
@@ -67,6 +70,8 @@ class RoutingPolicy:
     instructions_home_env: str
     primary_backend_env: str
     fallback_disabled_env: str
+    preferred_provider_order: tuple[str, ...] = ("gemini", "claude")
+    disabled_backends: frozenset[str] = frozenset({"codex"})
 
 
 def _backend(value: object, *, field: str) -> SubscriptionBackend:
@@ -112,12 +117,39 @@ def load_policy(path: Path = POLICY_PATH) -> RoutingPolicy:
     )
     if not all(isinstance(value, str) and value for value in env_values):
         raise RoutingPolicyError("Canonical environment variable names must be non-empty strings.")
+    raw_preferred = raw.get("preferred_provider_order", ["gemini", "claude"])
+    raw_disabled = raw.get("disabled_backends", ["codex"])
+    if not isinstance(raw_preferred, list) or not all(isinstance(v, str) and v for v in raw_preferred):
+        raise RoutingPolicyError("preferred_provider_order must be a non-empty string list.")
+    if not isinstance(raw_disabled, list) or not all(isinstance(v, str) and v for v in raw_disabled):
+        raise RoutingPolicyError("disabled_backends must be a list of strings.")
     return RoutingPolicy(
         default_application_route=route,
         allowed_subscription_backends=allowed,
         instructions_home_env=str(env_values[0]),
         primary_backend_env=str(env_values[1]),
         fallback_disabled_env=str(env_values[2]),
+        preferred_provider_order=tuple(str(v) for v in raw_preferred),
+        disabled_backends=frozenset(str(v) for v in raw_disabled),
+    )
+
+
+def preferred_provider_order(policy: RoutingPolicy | None = None) -> tuple[str, ...]:
+    """Return the fleet-preferred provider order (for example, ('gemini', 'claude'))."""
+    return (policy or load_policy()).preferred_provider_order
+
+
+def is_subscription_fallback_disabled(
+    environ: Mapping[str, str] | None = None,
+    *,
+    policy: RoutingPolicy | None = None,
+) -> bool:
+    """Return whether provider-family fallback is explicitly disabled by env."""
+    active_policy = policy or load_policy()
+    active_env = os.environ if environ is None else environ
+    return _enabled(
+        active_env.get(active_policy.fallback_disabled_env),
+        variable=active_policy.fallback_disabled_env,
     )
 
 

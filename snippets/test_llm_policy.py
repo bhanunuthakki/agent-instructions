@@ -10,8 +10,8 @@ import llm_policy
 
 def test_advisory_judge_binding_does_not_claim_blocking_qualification(tmp_path):
     route = llm_policy.load_advisory_judge_route()
-    assert route.backend is llm_policy.SubscriptionBackend.CODEX
-    assert route.model.startswith("gpt-")
+    assert route.backend is llm_policy.SubscriptionBackend.CLAUDE
+    assert route.model.startswith("claude-")
     path = tmp_path / "judge.json"
     raw = json.loads(llm_policy.JUDGE_ROUTE_PATH.read_text())
     raw["status"] = "qualified"
@@ -20,26 +20,33 @@ def test_advisory_judge_binding_does_not_claim_blocking_qualification(tmp_path):
         llm_policy.load_advisory_judge_route(path)
 
 
-def test_application_route_is_codex_then_claude() -> None:
+def test_application_route_disables_codex_and_prefers_gemini_then_claude() -> None:
+    policy = llm_policy.load_policy()
+    assert llm_policy.preferred_provider_order(policy) == ("gemini", "claude")
+    assert "codex" in policy.disabled_backends
     assert llm_policy.subscription_route(environ={}) == (
-        llm_policy.SubscriptionBackend.CODEX,
         llm_policy.SubscriptionBackend.CLAUDE,
     )
 
 
-def test_canonical_primary_override_is_reversible() -> None:
-    assert llm_policy.subscription_route(
-        environ={"LLM_PRIMARY_SUBSCRIPTION_BACKEND": "claude"}
-    ) == (
-        llm_policy.SubscriptionBackend.CLAUDE,
-        llm_policy.SubscriptionBackend.CODEX,
-    )
+def test_disabled_codex_override_fails_closed() -> None:
+    with pytest.raises(llm_policy.RoutingPolicyError):
+        llm_policy.subscription_route(
+            environ={"LLM_PRIMARY_SUBSCRIPTION_BACKEND": "codex"}
+        )
 
 
 def test_canonical_fallback_switch_truncates_route() -> None:
+    assert llm_policy.is_subscription_fallback_disabled(environ={}) is False
+    assert (
+        llm_policy.is_subscription_fallback_disabled(
+            environ={"LLM_SUBSCRIPTION_FALLBACK_DISABLED": "true"}
+        )
+        is True
+    )
     assert llm_policy.subscription_route(
         environ={"LLM_SUBSCRIPTION_FALLBACK_DISABLED": "true"}
-    ) == (llm_policy.SubscriptionBackend.CODEX,)
+    ) == (llm_policy.SubscriptionBackend.CLAUDE,)
 
 
 def test_judge_route_must_be_explicit() -> None:
@@ -48,15 +55,18 @@ def test_judge_route_must_be_explicit() -> None:
 
     assert llm_policy.subscription_route(
         llm_policy.WorkloadClass.JUDGE,
-        explicit_judge_route=("claude", "codex"),
+        explicit_judge_route=("claude",),
         environ={
-            "LLM_PRIMARY_SUBSCRIPTION_BACKEND": "codex",
             "LLM_SUBSCRIPTION_FALLBACK_DISABLED": "true",
         },
-    ) == (
-        llm_policy.SubscriptionBackend.CLAUDE,
-        llm_policy.SubscriptionBackend.CODEX,
-    )
+    ) == (llm_policy.SubscriptionBackend.CLAUDE,)
+
+    with pytest.raises(llm_policy.RoutingPolicyError):
+        llm_policy.subscription_route(
+            llm_policy.WorkloadClass.JUDGE,
+            explicit_judge_route=("claude", "codex"),
+            environ={},
+        )
 
 
 def test_usage_index_names_every_known_application_llm_project() -> None:
