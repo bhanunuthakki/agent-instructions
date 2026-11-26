@@ -1,6 +1,6 @@
 ---
 name: model-frontier
-description: Pick a hosted or open-weight LLM/runtime candidate against a dated cost and capability frontier instead of from memory. Use for model cost comparisons, cheapest-at-parity routing, annual cost estimates, per-purpose model selection, or /refresh-frontier.
+description: Select a hosted or open-weight LLM/runtime against the dated cost and capability frontier, covering cost comparisons, cheapest-at-parity routing, and /refresh-frontier.
 ---
 
 # Model Frontier

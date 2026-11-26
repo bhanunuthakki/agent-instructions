@@ -1,6 +1,6 @@
 ---
 name: context-engineering
-description: Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, system prompts, skills, agent rubrics, tool descriptions, or memory placement for advanced models. Use for instruction hierarchy changes, prompt simplification, context bloat, conflicting rules, progressive-disclosure migrations, /correct recurring-mistake elimination, or /reflect transcript learning.
+description: Audit or rewrite AGENTS.md, CLAUDE.md, GEMINI.md, prompts, skills, tool schemas, or memory placement. Use for context bloat, rule conflicts, progressive disclosure, /correct, or /reflect.
 ---
 
 # Context Engineering
@@ -27,7 +27,7 @@ Read [context-engineering.REFERENCE.md](context-engineering.REFERENCE.md) when p
 - Put repo purpose, exact commands, state ownership, data boundaries, and codebase-specific traps in the closest project or subtree rulebook.
 - Keep runtime wrappers to imports and runtime-only mechanics.
 - Put reusable workflows in skills. Keep the skill body to its decision flow and load detailed references only when needed.
-- Put tool usage in the tool schema. Prefer expressive enums and return types to prose examples.
+- Put tool usage in the tool schema. Prefer expressive enums and return types to prose examples. Apply the same discipline to repo helper scripts and CLIs (strict flags, clear options, direct error messages), and redirect verbose command, test, or eval logs to a file instead of dumping large stdout blocks into context.
 - Put historical facts and user preferences in memory, not durable project rules.
 - Keep memory selective: stable preferences, durable decisions and rationale, hard-to-rederive constraints, and unresolved obligations. Keep task progress in its owning task record and repository facts in canonical sources. Update or supersede existing entries rather than appending repeated summaries. At closure, preserve useful evidence references and unique history under their owning policy; retire transient tool output, temporary paths, and completed-session detail. Keep the memory index short and load detail on demand. Disk retention and model-context retention are separate decisions.
 - When an incident pattern or agent mistake class recurs (`>= 2` occurrences across commits, reverts, reviews, or user corrections, or an explicit `/correct` pass), fix it at the highest enforcement tier that works before adding prose:
@@ -36,8 +36,8 @@ Read [context-engineering.REFERENCE.md](context-engineering.REFERENCE.md) when p
   3. **Lint or CI check:** add a deterministic check whose error message names the replacement symbol, file, or command, and prove it fails on a real past mistake.
   4. **Behavior test:** add or repair a test that fails when observable behavior breaks.
   5. **Instruction or policy prose last:** maintain one current lesson at its narrowest owning instruction or application policy only for judgment calls that code cannot enforce, paired with its enforcement check or evidence pointer. Supersede stale guidance rather than appending another incident transcript or competing memory entry, and drop a prose rule once structural enforcement prevents the mistake.
-- Use source code, tests, schemas, mockups, and rubrics as high-fidelity references when they express the requirement better than prose.
-- For `/reflect` after a non-trivial task, inspect only the active workspace's session transcript (never glob across unrelated projects), extract recurring process or domain lessons, and route them to concrete proposals or requested edits on the owning canonical procedure. For an explicit pause or session pickup (`pause-safely` / `session-pickup`), stop at a safe atomic boundary without unapproved external writes, record intent, verified state, and the exact resume action in the task record or a compact off-context note (never copy raw transcripts into durable memory), and on pickup reconstruct state from that trail and Git history without redoing completed work while still verifying inherited claims against the real artifact before closure.
+- Use source code, tests, schemas, mockups, reference screenshots, short recordings, and rubrics as high-fidelity references when they express the requirement better than prose. Visually inspect rendered outputs—including generated diagrams, charts, and video frames, not only web UIs—when layout or readability matters.
+- For `/reflect` after a non-trivial task, inspect only the active workspace's session transcript (never glob across unrelated projects), extract recurring process or domain lessons, and route them to concrete proposals or requested edits on the owning canonical procedure. For an explicit pause or session pickup (`pause-safely` / `session-pickup`), stop at a safe atomic boundary without unapproved external writes, record intent, verified state, and the exact resume action in the task record or a compact off-context note (never copy raw transcripts into durable memory), and on pickup reconstruct state from that trail and Git history without redoing completed work while still verifying inherited claims against the real artifact before closure. At major phase boundaries (for example, research to implementation or eval analysis to write-up), prefer a short handoff note (goal, verified decisions, exact file paths) into a fresh session—or fork the session when a second independent track branches off—rather than letting one long thread accumulate unrelated history.
 
 ## Rewrite
 

@@ -1,6 +1,6 @@
 ---
 name: explain-change
-description: After an LLM writes or edits code, explain the outcome, impact, risk, and proof in plain language at a depth proportional to the change. Use when the user says "explain this change", "what did you just change", "explain in plain language", "is this safe to keep", "what could break", "review what you wrote", "walk me through the diff", /ketchup, or /bro. This is comprehension + risk for a non-coder, NOT a bug-hunt (use /code-review for that).
+description: Explain an agent-made code change's outcome, impact, risk, and proof in plain language (/ketchup, /bro, "walk me through the diff", "is this safe"). Comprehension and risk for non-coders, not a bug hunt.
 ---
 
 # Explain Change

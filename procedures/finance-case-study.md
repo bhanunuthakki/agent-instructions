@@ -1,6 +1,6 @@
 ---
 name: finance-case-study
-description: Work progressively through strategic finance, FP&A, BizOps, or operating case studies from supplied data. Use for phased exploration, pruning, spreadsheet modeling, a later recommendation memo, external benchmarks, submission review, or interview fluency. Apply the owner's standards for plain language, canonical calculations, model hygiene, and selective depth without jumping ahead to a finished case.
+description: Work progressively through strategic finance, FP&A, BizOps, or operating case studies from supplied data, covering exploration, pruning, modeling, memos, benchmarks, review, and interview prep.
 ---
 
 # Finance Case Study
