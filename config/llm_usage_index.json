@@ -30,8 +30,8 @@
       "eval_authority": "tests/test_claude.py",
       "workload_classes": ["application", "judge"],
       "application_route": "fleet_default",
-      "judge_route_state": "shared_subscription",
-      "judge_route_authority": "src/angel_memos/llm.py:_subscription_backends",
+      "judge_route_state": "project_explicit",
+      "judge_route_authority": "src/angel_memos/llm.py:JUDGE_ROUTE",
       "judge_independence_authority": "src/angel_memos/scoring.py:judge_factor",
       "judge_migration_note": null,
       "migration_note": null

@@ -33,6 +33,7 @@ snippets/test_backup_mac_workspace.py
 snippets/mcp_registry.json
 .private-state/
 /config/*
+!/config/common_modules.json
 !/config/judge_policy.json
 !/config/judge_registry.json
 !/config/judge_route.json
