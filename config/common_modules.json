@@ -1,0 +1,78 @@
+{
+  "$schema": "internal://common-modules-map/v1",
+  "schema_version": 1,
+  "description": "Canonical reference map identifying which repository owns the best implementation for reusable cross-repo modules. Sync from the listed owner instead of building bespoke wiring.",
+  "modules": [
+    {
+      "capability": "llm_routing_and_transports",
+      "owner_repo": "earnings-summary",
+      "canonical_paths": [
+        "src/llm/cli.py",
+        "src/llm/gemini_backend.py",
+        "src/llm/fallback.py",
+        "src/llm/fleet_policy.py",
+        "src/llm/structured.py",
+        "src/llm/resolver.py",
+        "src/llm/model_ladder.py",
+        "src/llm/ledger.py"
+      ],
+      "governed_by": [
+        "agent-instructions/config/llm_routing_policy.json",
+        "agent-instructions/snippets/llm_policy.py"
+      ],
+      "summary": "Gemini Developer API primary transport (google-genai), Claude fallback, structured-output repair, capability validation, cost-ranked model ladder, and hashed call ledger."
+    },
+    {
+      "capability": "pdf_text_and_rendering",
+      "owner_repo": "earnings-summary",
+      "canonical_paths": [
+        "src/runtime/pdf_text.py",
+        "src/pipeline/pdf_render.py",
+        "src/pipeline/pdf_worker.py"
+      ],
+      "governed_by": [],
+      "summary": "PyMuPDF-backed (pymupdf) text extraction and bounded PNG rasterization; replaces ad-hoc pypdf, pypdfium2, and Pillow stacks."
+    },
+    {
+      "capability": "log_and_exception_redaction",
+      "owner_repo": "earnings-summary",
+      "canonical_paths": [
+        "src/log_redact.py"
+      ],
+      "governed_by": [
+        "agent-instructions/procedures/log-redaction.md"
+      ],
+      "summary": "Credential, token, auth-header, query-string, and path redaction for operational logs and exceptions."
+    },
+    {
+      "capability": "llm_eval_harness_and_judging",
+      "owner_repo": "earnings-summary",
+      "canonical_paths": [
+        "src/evals/harness.py",
+        "src/evals/judge.py",
+        "src/evals/rubric_judge.py",
+        "src/llm/backend_judge.py",
+        "src/llm/model_eval.py"
+      ],
+      "governed_by": [
+        "agent-instructions/procedures/llm-ops.EVALS.md",
+        "agent-instructions/procedures/judging.md"
+      ],
+      "summary": "Golden-set evaluation harness, rubric judging, pairwise cross-family backend comparison, and cheapest-at-parity downgrade sweeps."
+    },
+    {
+      "capability": "fleet_policy_and_cli_wrappers",
+      "owner_repo": "agent-instructions",
+      "canonical_paths": [
+        "snippets/llm_policy.py",
+        "snippets/claude_cli.py",
+        "snippets/check_llm_usage_index.py"
+      ],
+      "governed_by": [
+        "agent-instructions/config/llm_routing_policy.json",
+        "agent-instructions/config/llm_usage_index.json"
+      ],
+      "summary": "Central fleet provider-preference resolver, subscription CLI wrappers, and usage-index compliance validator."
+    }
+  ]
+}

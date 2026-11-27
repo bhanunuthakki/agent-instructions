@@ -52,7 +52,7 @@ Use established project interfaces and commands. Load the smallest owning workfl
 
 Use the local product profile required by the task. Add commercial infrastructure, authentication, tenancy, or public hosting only when required. Keep core semantics, schemas, prompts, and verification locally owned; put provider dependencies behind replaceable boundaries.
 
-Route application LLM work through [LLM ops](procedures/llm-ops.md) using [fleet policy](config/llm_routing_policy.json) and the [usage index](config/llm_usage_index.json), preserving separate Judge routing. Load [machine operations](procedures/machine-operations.md) before OpenRouter, Linear, credential-source, or cross-machine work.
+Route application LLM work through [LLM ops](procedures/llm-ops.md) using [fleet policy](config/llm_routing_policy.json) and the [usage index](config/llm_usage_index.json), preserving separate Judge routing. Reuse canonical implementations from the [common modules map](config/common_modules.json) before writing bespoke wiring. Load [machine operations](procedures/machine-operations.md) before OpenRouter, Linear, credential-source, or cross-machine work.
 
 Begin with direct evidence: tests, calculations, sources, observed behavior, and state inspection. Use rendered evidence for visible changes and representative evaluations for probabilistic behavior. Independent judgment supplements an incomplete oracle; it cannot override failed deterministic checks or grant authority. Report missing required evidence without claiming its gate passed.
 
